@@ -329,7 +329,7 @@ export async function analyzeVisualEngagement(payload: {
   session_id: string
   frame_data: string
 }) {
-  const { data } = await apiClient.post('/api/v1/engagement/analyze-visual', payload)
+  const { data } = await apiClient.post('/api/v1/engagement/visual', payload)
   return data
 }
 
@@ -369,8 +369,8 @@ export async function stopCamera() {
 }
 
 export async function getCameraSnapshot() {
-  const response = await apiClient.get('/api/v1/hardware/camera/snapshot', { responseType: 'blob' })
-  return response.data
+  const { data } = await apiClient.get('/api/v1/hardware/camera/snapshot')
+  return data
 }
 
 export async function getCameraStatus() {
@@ -474,13 +474,33 @@ export async function uploadKnowledgeDocument(file: File) {
   return data
 }
 
+export async function listKnowledgeDocuments() {
+  const { data } = await apiClient.get('/api/v1/knowledge/documents')
+  return data
+}
+
+export async function getKnowledgeStats() {
+  const { data } = await apiClient.get('/api/v1/knowledge/stats')
+  return data
+}
+
 export async function queryKnowledgeBase(payload: { query: string; subject?: string; top_k?: number }) {
   const { data } = await apiClient.post('/api/v1/knowledge/query', payload)
   return data
 }
 
+export async function deleteKnowledgeDocument(source_name: string) {
+  const { data } = await apiClient.delete(`/api/v1/knowledge/documents/${encodeURIComponent(source_name)}`)
+  return data
+}
+
 export async function deleteKnowledgeEntry(entry_id: number) {
   const { data } = await apiClient.delete(`/api/v1/knowledge/${entry_id}`)
+  return data
+}
+
+export async function getStudentInteractions(user_id: number) {
+  const { data } = await apiClient.get(`/api/v1/interactions/student/${user_id}`)
   return data
 }
 

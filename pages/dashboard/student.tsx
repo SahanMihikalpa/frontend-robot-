@@ -1,15 +1,6 @@
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getCurrentUser, getMasterySummary } from '../../lib/api'
-
-function metric(summary: any, keys: string[]) {
-  for (const key of keys) {
-    const value = summary?.[key]
-    if (typeof value === 'number') {
-      return value
-    }
-  }
-  return null
-}
 
 export default function StudentDashboard() {
   const [me, setMe] = useState<any>(null)
@@ -19,88 +10,112 @@ export default function StudentDashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const user = await getCurrentUser()
-        setMe(user)
-
-        if (user?.id) {
-          const mastery = await getMasterySummary(user.id)
-          setSummary(mastery)
+        const u = await getCurrentUser()
+        setMe(u)
+        if (u?.id) {
+          const s = await getMasterySummary(u.id)
+          setSummary(s)
         }
       } catch {
-        setError('Unable to load student dashboard data')
+        setError('Unable to load dashboard data')
       }
     }
-
     load()
   }, [])
 
-  const totalSkills = metric(summary, ['total_skills', 'skills_total'])
-  const masteredSkills = metric(summary, ['mastered_skills', 'skills_mastered'])
-  const avgMastery = metric(summary, ['avg_mastery', 'average_mastery', 'mastery_score'])
-  const skillRows = Array.isArray(summary?.skills) ? summary.skills : []
+  const masteredPct = Math.min(Number(summary?.mastered_pct || 0), 100)
+  const skillRows: any[] = Array.isArray(summary?.skills) ? summary.skills
+    : Array.isArray(summary?.skill_states) ? summary.skill_states : []
 
   return (
     <div className="grid">
       <section className="card stack">
-        <h2>Student Dashboard</h2>
-        <p className="muted">Your learning profile and mastery progress.</p>
-
-        {error && <p style={{ color: '#ffb4b4' }}>{error}</p>}
-
-        <div className="kpi-grid">
-          <article className="kpi-card">
-            <p className="kpi-label">Total skills</p>
-            <p className="kpi-value">{totalSkills ?? '-'}</p>
-          </article>
-          <article className="kpi-card">
-            <p className="kpi-label">Mastered skills</p>
-            <p className="kpi-value">{masteredSkills ?? '-'}</p>
-          </article>
-          <article className="kpi-card">
-            <p className="kpi-label">Average mastery</p>
-            <p className="kpi-value">{typeof avgMastery === 'number' ? `${Math.round(avgMastery * 100) / 100}` : '-'}</p>
-          </article>
+        <div className="section-title">
+          <div>
+            <h2>Student Dashboard</h2>
+            <p className="meta">Your learning profile and mastery progress.</p>
+          </div>
+          {me && <span className="badge">{me.full_name || me.username}</span>}
         </div>
 
-        <h4>Profile</h4>
-        {me ? (
-          <div className="list-item">
-            <p><strong>Name:</strong> {me.full_name || me.username || 'N/A'}</p>
-            <p><strong>Email:</strong> {me.email || 'N/A'}</p>
-            <p><strong>Role:</strong> {me.role || 'student'}</p>
-          </div>
-        ) : <p className="muted">No profile data available.</p>}
+        {error && <p className="feedback error">{error}</p>}
 
-        <h4>Skill Breakdown</h4>
-        {skillRows.length > 0 ? (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Skill</th>
-                  <th>Mastery</th>
-                </tr>
-              </thead>
-              <tbody>
-                {skillRows.slice(0, 8).map((row: any, idx: number) => (
-                  <tr key={row.skill_id || row.id || idx}>
-                    <td>{row.skill_name || row.name || `Skill ${idx + 1}`}</td>
-                    <td>{row.mastery ?? row.score ?? '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <p className="kpi-label">Total skills</p>
+            <p className="kpi-value">{summary?.total_skills ?? '—'}</p>
           </div>
-        ) : <p className="muted">No mastery summary yet.</p>}
+          <div className="kpi-card">
+            <p className="kpi-label">Mastered</p>
+            <p className="kpi-value" style={{ color: '#4ade80' }}>{summary?.mastered_count ?? '—'}</p>
+          </div>
+          <div className="kpi-card">
+            <p className="kpi-label">In ZPD</p>
+            <p className="kpi-value" style={{ color: '#7dd3fc' }}>{summary?.zpd_count ?? '—'}</p>
+          </div>
+        </div>
+
+        {/* Overall progress bar */}
+        <div>
+          <div className="row" style={{ marginBottom: 6 }}>
+            <strong>Overall mastery</strong>
+            <span className="meta">{masteredPct.toFixed(1)}%</span>
+          </div>
+          <div className="progress"><span style={{ width: `${masteredPct}%` }} /></div>
+        </div>
+
+        {/* Skill breakdown */}
+        {skillRows.length > 0 && (
+          <div className="stack">
+            <h4 style={{ margin: 0 }}>Skill breakdown</h4>
+            {skillRows.slice(0, 6).map((row: any, i: number) => {
+              const pct = Math.min(Math.round((row.mastery_probability ?? row.p_mastery ?? row.mastery ?? 0) * 100), 100)
+              return (
+                <div key={row.skill_id || i}>
+                  <div className="row" style={{ marginBottom: 4 }}>
+                    <p className="meta">{row.skill_name || row.name || `Skill ${i + 1}`}</p>
+                    <span style={{ fontSize: 12 }}>{pct}%</span>
+                  </div>
+                  <div className="progress"><span style={{ width: `${pct}%` }} /></div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </section>
 
       <aside className="card stack">
-        <h4>Next Actions</h4>
+        <h3 style={{ margin: 0 }}>Quick actions</h3>
         <div className="list">
-          <div className="list-item">Continue practice questions</div>
-          <div className="list-item">Review mastery map</div>
-          <div className="list-item">Use tutor for weak concepts</div>
+          <div className="list-item">
+            <Link href="/practice" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
+              Practice questions
+            </Link>
+          </div>
+          <div className="list-item">
+            <Link href="/mastery" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+              View mastery map
+            </Link>
+          </div>
+          <div className="list-item">
+            <Link href="/tutor" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+              Ask the tutor
+            </Link>
+          </div>
+          <div className="list-item">
+            <Link href="/history" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+              View history
+            </Link>
+          </div>
         </div>
+
+        {me && (
+          <div className="list-item">
+            <p className="meta">Account</p>
+            <strong>{me.full_name || me.username}</strong>
+            <p className="meta">{me.email}</p>
+          </div>
+        )}
       </aside>
     </div>
   )

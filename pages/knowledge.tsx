@@ -1,74 +1,215 @@
-import { useState } from 'react'
-import { uploadKnowledgeDocument, queryKnowledgeBase } from '../lib/api'
+import { useEffect, useState } from 'react'
+import {
+  uploadKnowledgeDocument, queryKnowledgeBase,
+  listKnowledgeDocuments, getKnowledgeStats, deleteKnowledgeDocument,
+} from '../lib/api'
 
 export default function KnowledgePage() {
   const [file, setFile] = useState<File | null>(null)
-  const [message, setMessage] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [uploadMsg, setUploadMsg] = useState('')
+  const [uploadOk, setUploadOk] = useState(false)
+
   const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
   const [results, setResults] = useState<any[]>([])
+
+  const [docs, setDocs] = useState<any[]>([])
+  const [stats, setStats] = useState<any>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [error, setError] = useState('')
+
+  async function loadDocs() {
+    try {
+      const [d, s] = await Promise.all([listKnowledgeDocuments(), getKnowledgeStats()])
+      setDocs(Array.isArray(d) ? d : d?.documents || [])
+      setStats(s)
+    } catch { /* ignore */ }
+  }
+
+  useEffect(() => { loadDocs() }, [])
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
-    setMessage('')
-    if (!file) return setMessage('Select a file')
+    if (!file) { setUploadMsg('Select a file first'); return }
+    setUploading(true)
+    setUploadMsg('')
+    setError('')
     try {
       await uploadKnowledgeDocument(file)
-      setMessage('Uploaded successfully')
+      setUploadMsg('Uploaded successfully')
+      setUploadOk(true)
       setFile(null)
+      await loadDocs()
     } catch (err: any) {
-      setMessage(err?.response?.data?.detail || 'Upload failed')
+      setUploadMsg(err?.response?.data?.detail || 'Upload failed')
+      setUploadOk(false)
+    } finally {
+      setUploading(false)
     }
   }
 
   async function handleQuery(e: React.FormEvent) {
     e.preventDefault()
-    setMessage('')
+    if (!query.trim()) return
+    setSearching(true)
+    setError('')
     try {
       const res = await queryKnowledgeBase({ query, top_k: 5 })
       setResults(res?.results || res || [])
     } catch (err: any) {
-      setMessage(err?.response?.data?.detail || 'Query failed')
+      setError(err?.response?.data?.detail || 'Query failed')
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return
+    try {
+      await deleteKnowledgeDocument(deleteTarget)
+      setDeleteTarget(null)
+      await loadDocs()
+    } catch {
+      setError('Delete failed')
+      setDeleteTarget(null)
     }
   }
 
   return (
-    <div className="grid-two">
+    <div className="grid-two" style={{ alignItems: 'start' }}>
       <section className="card stack">
-        <h2>Knowledge Base</h2>
-        <form onSubmit={handleUpload} className="stack">
-          <label>Upload document (pdf, txt)</label>
-          <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-          <div className="row">
-            <button className="btn" type="submit">Upload</button>
+        <div className="section-title">
+          <div>
+            <h2>Knowledge Base</h2>
+            <p className="meta">Upload curriculum documents and query with RAG.</p>
           </div>
-          {message && <p className="meta">{message}</p>}
+          {stats && (
+            <div className="row" style={{ gap: 8 }}>
+              <span className="badge">{stats.total_documents ?? docs.length} docs</span>
+              {stats.total_chunks != null && <span className="badge neutral">{stats.total_chunks} chunks</span>}
+            </div>
+          )}
+        </div>
+
+        {/* Upload */}
+        <form onSubmit={handleUpload} className="stack">
+          <h4 style={{ margin: 0 }}>Upload document</h4>
+          <div className="field">
+            <label>File (PDF or TXT)</label>
+            <input
+              type="file"
+              accept=".pdf,.txt,.md"
+              onChange={(e) => { setFile(e.target.files?.[0] || null); setUploadMsg('') }}
+            />
+          </div>
+          {file && <p className="meta">{file.name} · {(file.size / 1024).toFixed(1)} KB</p>}
+          <button type="submit" className="btn" disabled={uploading || !file}>
+            {uploading ? 'Uploading…' : 'Upload'}
+          </button>
+          {uploadMsg && <p className={`feedback ${uploadOk ? 'success' : 'error'}`}>{uploadMsg}</p>}
         </form>
 
+        {/* Documents list */}
+        <div className="stack">
+          <h4 style={{ margin: 0 }}>Uploaded documents</h4>
+          {docs.length === 0 ? (
+            <div className="empty-state" style={{ padding: '12px 0' }}>
+              <p className="meta">No documents uploaded yet.</p>
+            </div>
+          ) : (
+            <div className="list">
+              {docs.map((d: any, i: number) => {
+                const name = d.source_name || d.name || d.filename || `Document ${i + 1}`
+                return (
+                  <div key={i} className="list-item">
+                    <div className="row">
+                      <div>
+                        <strong style={{ fontSize: 13 }}>{name}</strong>
+                        {d.chunk_count != null && (
+                          <p className="meta" style={{ margin: 0 }}>{d.chunk_count} chunks</p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="btn small danger"
+                        onClick={() => setDeleteTarget(name)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Search */}
         <form onSubmit={handleQuery} className="stack">
-          <label>Query knowledge base</label>
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Ask something about content" />
-          <div className="row">
-            <button className="btn" type="submit">Search</button>
+          <h4 style={{ margin: 0 }}>Query knowledge base</h4>
+          <div className="field">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ask something about the curriculum…"
+            />
           </div>
+          <button type="submit" className="btn" disabled={searching || !query.trim()}>
+            {searching ? 'Searching…' : 'Search'}
+          </button>
         </form>
+
+        {error && <p className="feedback error">{error}</p>}
       </section>
 
       <aside className="card stack">
-        <h3>Results</h3>
+        <div className="section-title">
+          <h3>Search results</h3>
+          {results.length > 0 && <span className="badge">{results.length}</span>}
+        </div>
+
         {results.length === 0 ? (
-          <p className="meta">No results</p>
+          <div className="empty-state">
+            <p>No results yet.</p>
+            <p className="meta">Run a search to see matching chunks.</p>
+          </div>
         ) : (
           <div className="stack">
-            {results.map((r, i) => (
+            {results.map((r: any, i: number) => (
               <div key={i} className="result-item">
-                <strong>{r.title || r.id || `Result ${i + 1}`}</strong>
-                <p className="meta">{r.text || JSON.stringify(r)}</p>
-                <small className="muted">score: {r.score ?? 'n/a'}</small>
+                <div className="row">
+                  <strong style={{ fontSize: 13 }}>{r.source || r.title || r.id || `Result ${i + 1}`}</strong>
+                  {r.score != null && (
+                    <span className="badge neutral" style={{ fontSize: 11 }}>
+                      {(r.score * 100).toFixed(0)}%
+                    </span>
+                  )}
+                </div>
+                <p className="meta" style={{ marginTop: 6, lineHeight: 1.5 }}>
+                  {r.text || r.content || r.chunk || JSON.stringify(r)}
+                </p>
               </div>
             ))}
           </div>
         )}
       </aside>
+
+      {/* Delete confirmation */}
+      {deleteTarget && (
+        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
+            <h3>Delete document?</h3>
+            <p className="meta">"{deleteTarget}"</p>
+            <p className="meta">All chunks from this document will be removed. This cannot be undone.</p>
+            <div className="row">
+              <button type="button" className="btn danger" onClick={confirmDelete}>Yes, delete</button>
+              <button type="button" className="btn secondary" onClick={() => setDeleteTarget(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

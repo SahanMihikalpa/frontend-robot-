@@ -1,9 +1,11 @@
 import Nav from './Nav'
 import React from 'react'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import { getAuthTokenFromStorage, getStoredUser } from '../lib/session'
 
 const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const router = useRouter()
   const [name, setName] = useState('')
   const [role, setRole] = useState('')
 
@@ -17,13 +19,13 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     }
     setName(me.full_name || me.username || me.email || 'User')
     setRole(me.role || '')
-  }, [])
+  }, [router.pathname])
 
   return (
     <div>
       <header className="site-header">
         <div className="brand">
-          <div className="logo" />
+          <div className="logo">PR</div>
           <h1>Personalized Robot</h1>
         </div>
         <div className="header-right">

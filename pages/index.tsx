@@ -1,48 +1,97 @@
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { getAuthTokenFromStorage, getStoredUser, getRoleHome } from '../lib/session'
 
 export default function Home() {
+  const [authed, setAuthed] = useState(false)
+  const [dashboardHref, setDashboardHref] = useState('/login')
+
+  useEffect(() => {
+    const token = getAuthTokenFromStorage()
+    const me = getStoredUser()
+    if (token && me?.role) {
+      setAuthed(true)
+      setDashboardHref(getRoleHome(me.role))
+    }
+  }, [])
+
   return (
-    <div className="grid-two">
-      <section className="card stack">
-        <div className="hero">
-          <h2>Personalized Robot Learning Platform</h2>
-          <p className="muted">Adaptive learning with tutoring, mastery tracking, engagement sensing, and analytics in one workspace.</p>
-        </div>
-
-        <div style={{ marginTop: 18 }}>
-          <p>Get started</p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link href="/login" className="btn">Sign in</Link>
-            <Link href="/register" className="btn secondary">Create account</Link>
-            <Link href="/dashboard" className="btn secondary">Go to my dashboard</Link>
-          </div>
-        </div>
-
-        <div className="list" style={{ marginTop: 8 }}>
-          <div className="list-item">
-            <strong>Students</strong>
-            <p className="meta">Practice questions, get AI tutor help, and monitor mastery progress.</p>
-          </div>
-          <div className="list-item">
-            <strong>Teachers</strong>
-            <p className="meta">Track student performance, inspect skill analytics, and guide interventions.</p>
-          </div>
-          <div className="list-item">
-            <strong>Admins</strong>
-            <p className="meta">Manage hardware, voice pipeline, knowledge base, and system-level analytics.</p>
-          </div>
+    <div className="stack" style={{ gap: 32 }}>
+      {/* Hero */}
+      <section className="card" style={{ padding: '40px 32px', textAlign: 'center' }}>
+        <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 800, lineHeight: 1.2 }}>
+          <span style={{ color: '#7dd3fc' }}>Personalized</span> Robot Learning Platform
+        </h1>
+        <p className="meta" style={{ maxWidth: 520, margin: '0 auto 28px', fontSize: 16 }}>
+          Adaptive learning driven by BKT & DKT, with AI tutoring, visual engagement sensing, and real-time analytics.
+        </p>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          {authed ? (
+            <Link href={dashboardHref} className="btn">Go to my dashboard</Link>
+          ) : (
+            <>
+              <Link href="/login" className="btn">Sign in</Link>
+              <Link href="/register" className="btn secondary">Create account</Link>
+            </>
+          )}
         </div>
       </section>
 
-      <aside className="card stack">
-        <h4>How it works</h4>
-        <p className="meta">1. Open sign in and authenticate.</p>
-        <p className="meta">2. The app redirects you to the correct dashboard by role.</p>
-        <p className="meta">3. Navigation and page access are filtered by your permissions.</p>
+      {/* Role cards */}
+      <div className="grid-three">
+        <div className="card stack">
+          <div style={{ fontSize: 28 }}>🎓</div>
+          <h3 style={{ margin: 0 }}>Students</h3>
+          <p className="meta">Practice adaptive questions, track mastery across skills, and get AI tutor help any time.</p>
+          <ul className="meta" style={{ paddingLeft: 16, margin: 0 }}>
+            <li>BKT/DKT question selection</li>
+            <li>Mastery progress map</li>
+            <li>Chat tutor with RAG</li>
+            <li>Visual engagement tracking</li>
+          </ul>
+        </div>
+        <div className="card stack">
+          <div style={{ fontSize: 28 }}>📊</div>
+          <h3 style={{ margin: 0 }}>Teachers</h3>
+          <p className="meta">Monitor class performance, identify at-risk students, and manage the question bank.</p>
+          <ul className="meta" style={{ paddingLeft: 16, margin: 0 }}>
+            <li>Class analytics dashboard</li>
+            <li>Student performance details</li>
+            <li>Question CRUD</li>
+            <li>Knowledge base upload</li>
+          </ul>
+        </div>
+        <div className="card stack">
+          <div style={{ fontSize: 28 }}>⚙️</div>
+          <h3 style={{ margin: 0 }}>Admins</h3>
+          <p className="meta">Manage hardware, voice pipeline, knowledge documents, and platform-wide data.</p>
+          <ul className="meta" style={{ paddingLeft: 16, margin: 0 }}>
+            <li>Hardware status & camera</li>
+            <li>Voice pipeline control</li>
+            <li>Full analytics access</li>
+            <li>Knowledge base management</li>
+          </ul>
+        </div>
+      </div>
 
-        <h4>Deployment note</h4>
-        <p className="muted">Set <code>NEXT_PUBLIC_API_BASE_URL</code> to your backend URL before running in production.</p>
-      </aside>
+      {/* How it works */}
+      <section className="card stack">
+        <h3 style={{ margin: 0 }}>How it works</h3>
+        <div className="grid-three">
+          <div className="list-item">
+            <strong>1. Sign in</strong>
+            <p className="meta" style={{ marginTop: 6 }}>Authenticate with your credentials. The system identifies your role automatically.</p>
+          </div>
+          <div className="list-item">
+            <strong>2. Role-based access</strong>
+            <p className="meta" style={{ marginTop: 6 }}>You are redirected to the correct dashboard. Navigation is filtered by your permissions.</p>
+          </div>
+          <div className="list-item">
+            <strong>3. Learn & analyse</strong>
+            <p className="meta" style={{ marginTop: 6 }}>Students practise; teachers monitor; admins configure. Everything updates in real time.</p>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
