@@ -295,8 +295,9 @@ export async function resetBktState(user_id: number, skill_id: number) {
   return data
 }
 
-export async function askTutor(payload: { query: string; user_id: number; domain?: string }) {
-  const { data } = await apiClient.post('/api/v1/tutor/ask', payload)
+export async function askTutor(payload: { query: string; user_id: number; domain?: string; session_id?: string }) {
+  const body = { session_id: `tutor-${Date.now()}`, ...payload }
+  const { data } = await apiClient.post('/api/v1/tutor/ask', body)
   return data
 }
 

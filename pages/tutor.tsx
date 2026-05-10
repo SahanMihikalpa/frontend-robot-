@@ -99,11 +99,19 @@ export default function TutorPage() {
     } else {
       try {
         const res = await askTutor({ query: q, user_id: user?.id || 0, domain: 'education' })
-        setMessages((prev) => [...prev, { role: 'assistant', text: res.response || res.answer || '' }])
-        setLastSources(res.rag_sources || [])
-        setLastAction(res.teaching_action || '')
+        const text = typeof res?.response === 'string' ? res.response
+          : typeof res?.answer === 'string' ? res.answer
+          : typeof res?.message === 'string' ? res.message
+          : ''
+        setMessages((prev) => [...prev, { role: 'assistant', text }])
+        setLastSources(res?.rag_sources || [])
+        setLastAction(typeof res?.teaching_action === 'string' ? res.teaching_action : '')
       } catch (err: any) {
-        setError(err?.response?.data?.detail || 'Tutor request failed')
+        const detail = err?.response?.data?.detail
+        const msg = Array.isArray(detail)
+          ? detail.map((d: any) => d?.msg || JSON.stringify(d)).join('; ')
+          : typeof detail === 'string' ? detail : 'Tutor request failed'
+        setError(msg)
       } finally {
         setLoading(false)
       }
