@@ -25,6 +25,25 @@ export default function App({ Component, pageProps }: AppProps) {
       const pathname = router.pathname
 
       if (isPublicRoute(pathname)) {
+        // Redirect already-authenticated users away from login/register
+        const token = getAuthTokenFromStorage()
+        if (token && pathname !== '/') {
+          let me = getStoredUser()
+          if (!me?.role) {
+            try {
+              me = await getCurrentUser()
+              setStoredUser(me || {})
+            } catch {
+              clearAuthSession()
+              setReady(true)
+              return
+            }
+          }
+          if (me?.role) {
+            router.replace(getRoleHome(me.role))
+            return
+          }
+        }
         setReady(true)
         return
       }

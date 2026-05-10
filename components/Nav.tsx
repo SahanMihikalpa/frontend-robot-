@@ -7,6 +7,7 @@ export default function Nav() {
   const router = useRouter()
   const [role, setRole] = useState<string | null>(null)
   const [authed, setAuthed] = useState(false)
+  const currentPath = router.pathname
 
   useEffect(() => {
     const token = getAuthTokenFromStorage()
@@ -18,7 +19,6 @@ export default function Nav() {
   const links = useMemo(() => {
     if (!authed) {
       return [
-        { href: '/', label: 'Home' },
         { href: '/login', label: 'Sign in' },
         { href: '/register', label: 'Register' },
       ]
@@ -26,9 +26,9 @@ export default function Nav() {
 
     if (role === 'teacher') {
       return [
-        { href: '/', label: 'Home' },
         { href: '/dashboard/teacher', label: 'Dashboard' },
         { href: '/questions', label: 'Questions' },
+        { href: '/knowledge', label: 'Knowledge' },
         { href: '/history', label: 'History' },
         { href: '/tutor', label: 'Tutor' },
         { href: '/engagement', label: 'Engagement' },
@@ -38,7 +38,6 @@ export default function Nav() {
 
     if (role === 'admin') {
       return [
-        { href: '/', label: 'Home' },
         { href: '/dashboard/admin', label: 'Dashboard' },
         { href: '/questions', label: 'Questions' },
         { href: '/history', label: 'History' },
@@ -52,7 +51,6 @@ export default function Nav() {
     }
 
     return [
-      { href: '/', label: 'Home' },
       { href: '/dashboard/student', label: 'Dashboard' },
       { href: '/practice', label: 'Practice' },
       { href: '/mastery', label: 'Mastery' },
@@ -64,13 +62,19 @@ export default function Nav() {
 
   function logout() {
     clearAuthSession()
-    router.push('/login')
+    router.push('/')
   }
 
   return (
     <div className="nav-links">
       {links.map((link) => (
-        <Link key={link.href} href={link.href}>{link.label}</Link>
+        <Link
+          key={link.href}
+          href={link.href}
+          className={currentPath === link.href ? 'active' : ''}
+        >
+          {link.label}
+        </Link>
       ))}
       {authed && (
         <button type="button" className="nav-button" onClick={logout}>
