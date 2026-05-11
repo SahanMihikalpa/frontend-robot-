@@ -27,6 +27,7 @@ export default function Nav() {
     if (role === 'teacher') {
       return [
         { href: '/dashboard/teacher', label: 'Dashboard' },
+        { href: '/skills', label: 'Skills' },
         { href: '/questions', label: 'Questions' },
         { href: '/knowledge', label: 'Knowledge' },
         { href: '/history', label: 'History' },
@@ -39,6 +40,7 @@ export default function Nav() {
     if (role === 'admin') {
       return [
         { href: '/dashboard/admin', label: 'Dashboard' },
+        { href: '/skills', label: 'Skills' },
         { href: '/questions', label: 'Questions' },
         { href: '/history', label: 'History' },
         { href: '/tutor', label: 'Tutor' },
@@ -53,7 +55,8 @@ export default function Nav() {
     return [
       { href: '/dashboard/student', label: 'Dashboard' },
       //{ href: '/practice', label: 'Practice' },
-      { href: '/learn', label: 'Learn' },
+      //{ href: '/learn', label: 'Learn' },
+      { href: '/learn', label: 'Practice' },
       { href: '/mastery', label: 'Mastery' },
       { href: '/history', label: 'History' },
       //{ href: '/tutor', label: 'Tutor' },
