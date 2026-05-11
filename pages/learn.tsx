@@ -3,13 +3,38 @@ import {
   getCurrentUser, listSkills, getMasterySummary,
   startChatSession, sendChatMessage, endChatSession,
   analyzeVisualEngagement, getAuthToken,
+  getSessionStatus, getAssessmentQuestions, completeAssessment,
 } from '../lib/api'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type MsgRole = 'system' | 'student'
-type MsgType = 'PRACTICE_QUESTION' | 'FEEDBACK' | 'EXPLANATION' | 'HINT' | 'DIALOGUE' | 'ANSWER' | 'QUESTION' | 'SUMMARY'
+type MsgType = 'PRACTICE_QUESTION' | 'FEEDBACK' | 'EXPLANATION' | 'HINT' | 'DIALOGUE' | 'ANSWER' | 'QUESTION' | 'SUMMARY' | 'SESSION_RESUMED' | 'SESSION_START'
 type VoiceState = 'idle' | 'recording' | 'processing'
+type Phase = 'skill-pick' | 'assessment' | 'session'
+
+type SkillStatus = {
+  has_active_session: boolean
+  session_id: string | null
+  assessment_done: boolean
+  mastery: number | null
+  message_count: number
+}
+
+type AssessmentQ = {
+  question_id: number
+  question_text: string
+  options: Record<string, string> | null
+  correct_answer: string
+  difficulty: number | null
+}
+
+type AssessmentAnswer = {
+  question_id: number
+  answer: string
+  is_correct: boolean
+  time_taken: number
+}
 
 type ChatMsg = {
   id: string
@@ -27,6 +52,14 @@ type ChatMsg = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function uid() { return Math.random().toString(36).slice(2) }
+
+/** Safely coerce any value to a plain string — never lets an object reach JSX */
+function safeStr(v: any): string {
+  if (typeof v === 'string') return v
+  if (v == null) return ''
+  if (typeof v === 'object') return (v.text || v.content || v.label || v.key || JSON.stringify(v)) as string
+  return String(v)
+}
 
 function fmtTime(sec: number) {
   const m = Math.floor(sec / 60).toString().padStart(2, '0')
@@ -110,8 +143,8 @@ function QuestionPanel({
               </button>
             )}
             {cameraOn && <span className="badge success" style={{ fontSize: 11 }}>👁 On</span>}
-            <button type="button" className="btn small danger" onClick={onEnd} style={{ fontSize: 12 }}>
-              End
+            <button type="button" className="btn small secondary" onClick={onEnd} style={{ fontSize: 12 }}>
+              ← Exit
             </button>
           </div>
         </div>
@@ -181,7 +214,7 @@ function QuestionPanel({
                         fontSize: 14, lineHeight: 1.5, transition: 'all 0.15s',
                       }}
                     >
-                      <strong style={{ marginRight: 8, opacity: 0.7 }}>{k}.</strong>{v}
+                      <strong style={{ marginRight: 8, opacity: 0.7 }}>{k}.</strong>{safeStr(v)}
                     </button>
                   )
                 })}
@@ -251,8 +284,8 @@ function ChatBubble({ msg }: { msg: ChatMsg }) {
 
         <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14 }}>
           {msg.type === 'FEEDBACK'
-            ? msg.content.replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || msg.content
-            : msg.content}
+            ? safeStr(msg.content).replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || safeStr(msg.content)
+            : safeStr(msg.content)}
         </p>
 
         {msg.type === 'FEEDBACK' && msg.masteryAfter != null && (
@@ -283,6 +316,20 @@ export default function LearnPage() {
   const [skills, setSkills] = useState<any[]>([])
   const [selectedSkill, setSelectedSkill] = useState<number | null>(null)
   const [mastery, setMastery] = useState(0)
+  const [phase, setPhase] = useState<Phase>('skill-pick')
+
+  // Session-status per skill (fetched when skill is selected)
+  const [skillStatus, setSkillStatus] = useState<SkillStatus | null>(null)
+  const [statusLoading, setStatusLoading] = useState(false)
+
+  // Assessment state
+  const [assessmentQs, setAssessmentQs] = useState<AssessmentQ[]>([])
+  const [assessmentIdx, setAssessmentIdx] = useState(0)
+  const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([])
+  const [assessmentSelected, setAssessmentSelected] = useState<string | null>(null)
+  const [assessmentFeedback, setAssessmentFeedback] = useState<boolean | null>(null)
+  const [assessmentSubmitting, setAssessmentSubmitting] = useState(false)
+  const assessmentStartRef = useRef<number>(Date.now())
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMsg[]>([])
@@ -350,9 +397,96 @@ export default function LearnPage() {
     if (timerRef.current) clearInterval(timerRef.current)
   }
 
-  // ─── Session ──────────────────────────────────────────────────────────────
+  // ─── Skill select → fetch status ──────────────────────────────────────────
 
-  async function beginSession() {
+  async function handleSkillSelect(skillId: number) {
+    setSelectedSkill(skillId)
+    setSkillStatus(null)
+    setError('')
+    if (!user?.id) return
+    setStatusLoading(true)
+    try {
+      const status = await getSessionStatus(skillId)
+      setSkillStatus(status)
+      if (status.mastery != null) setMastery(status.mastery * 100)
+    } catch {
+      setSkillStatus(null)
+    } finally {
+      setStatusLoading(false)
+    }
+  }
+
+  // ─── Assessment flow ───────────────────────────────────────────────────────
+
+  async function startAssessment() {
+    if (!selectedSkill) return
+    setError('')
+    setLoading(true)
+    try {
+      const data = await getAssessmentQuestions(selectedSkill)
+      if (!data.questions || data.questions.length === 0) {
+        // No questions available — skip assessment, go straight to session
+        await beginSession(true)
+        return
+      }
+      setAssessmentQs(data.questions)
+      setAssessmentIdx(0)
+      setAssessmentAnswers([])
+      setAssessmentSelected(null)
+      setAssessmentFeedback(null)
+      assessmentStartRef.current = Date.now()
+      setPhase('assessment')
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || 'Could not load assessment.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleAssessmentAnswer(key: string) {
+    if (assessmentSelected || assessmentSubmitting) return
+    const q = assessmentQs[assessmentIdx]
+    const correct = key === q.correct_answer
+    setAssessmentSelected(key)
+    setAssessmentFeedback(correct)
+  }
+
+  async function handleAssessmentNext() {
+    const q = assessmentQs[assessmentIdx]
+    const timeTaken = (Date.now() - assessmentStartRef.current) / 1000
+    const newAnswers: AssessmentAnswer[] = [
+      ...assessmentAnswers,
+      {
+        question_id: q.question_id,
+        answer: assessmentSelected!,
+        is_correct: assessmentFeedback!,
+        time_taken: timeTaken,
+      },
+    ]
+    setAssessmentAnswers(newAnswers)
+    assessmentStartRef.current = Date.now()
+
+    if (assessmentIdx + 1 < assessmentQs.length) {
+      setAssessmentIdx((i) => i + 1)
+      setAssessmentSelected(null)
+      setAssessmentFeedback(null)
+    } else {
+      // All done → submit assessment
+      setAssessmentSubmitting(true)
+      try {
+        const result = await completeAssessment({ skill_id: selectedSkill!, answers: newAnswers })
+        setMastery(result.mastery * 100)
+        // Update local status
+        setSkillStatus((s) => s ? { ...s, assessment_done: true, mastery: result.mastery } : s)
+      } catch { /* non-fatal */ }
+      setAssessmentSubmitting(false)
+      await beginSession(false)
+    }
+  }
+
+  // ─── Session start / resume ────────────────────────────────────────────────
+
+  async function beginSession(skipAssessment = false) {
     if (!selectedSkill || !user?.id) return
     setError('')
     setLoading(true)
@@ -361,18 +495,74 @@ export default function LearnPage() {
       const sid = res.session_id || res.id || `local-${Date.now()}`
       setSessionId(sid)
       sessionIdRef.current = sid
-      setMessages([])
       setSessionEnded(false)
       setSummary(null)
       setElapsed(0)
       if (timerRef.current) clearInterval(timerRef.current)
       timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000)
-      const firstMsg = res.first_message || res.message || res
-      addSystemMsg(firstMsg)
+
+      if (res.resumed) {
+        // Restore previous session messages
+        const rawHistory = Array.isArray(res.history) ? res.history : []
+        const restored: ChatMsg[] = rawHistory.map((m: any) => {
+          const role: MsgRole = m.sender === 'STUDENT' ? 'student' : 'system'
+          const rawType = m.message_type as MsgType
+          // extractOptions already handles {key,text} array items → safe string values
+          const options = extractOptions(m)
+          // Safe content extraction — DB can store ANSWER content as {key, text} object
+          const content: string = safeStr(m.content)
+          return {
+            id: uid(),
+            role,
+            type: options ? 'PRACTICE_QUESTION' : rawType,
+            content,
+            options,
+            isCorrect: m.metadata?.is_correct,
+            masteryBefore: m.metadata?.mastery_before,
+            masteryAfter: m.metadata?.mastery_after,
+            timestamp: new Date(m.created_at).getTime(),
+          }
+        })
+        // Prepend a SESSION_RESUMED notice to the chat
+        const resumeNotice: ChatMsg = {
+          id: uid(), role: 'system', type: 'SESSION_RESUMED',
+          content: '▶️ Welcome back! Continuing your previous session.',
+          timestamp: Date.now(),
+        }
+        setMessages([resumeNotice, ...restored])
+
+        // Restore the active question ref so the student can answer it immediately
+        const lastRestoredQ = restored.slice().reverse().find((m) => m.type === 'PRACTICE_QUESTION')
+        if (lastRestoredQ) {
+          activeQuestionRef.current = lastRestoredQ
+          setLastAnswerCorrect(null)
+        }
+        // Restore mastery from BKT state returned from backend
+        if (res.mastery_start != null) setMastery(res.mastery_start * 100)
+      } else {
+        setMessages([])
+        const firstMsg = res.first_message || res.message || res
+        addSystemMsg(firstMsg)
+      }
+      setPhase('session')
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Could not start session.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleStartOrContinue() {
+    if (!selectedSkill || !user?.id) return
+    if (skillStatus?.has_active_session) {
+      // Resume existing session
+      await beginSession(true)
+    } else if (!skillStatus?.assessment_done) {
+      // New skill — show assessment first
+      await startAssessment()
+    } else {
+      // Returning to skill, assessment already done — start fresh session
+      await beginSession(true)
     }
   }
 
@@ -485,13 +675,28 @@ export default function LearnPage() {
 
   async function handleEndSession() {
     if (!sessionId) return
+    // Stop local timers / camera — but do NOT close the session on the backend.
+    // The session stays active (is_active=True) so the student can resume it later.
+    // History is already persisted in the DB message-by-message.
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
     stopEngagementCapture()
-    try {
-      const res = await endChatSession(sessionId)
-      setSummary(res)
-    } catch { setSummary({ session_id: sessionId, time_elapsed: elapsed }) }
-    setSessionEnded(true)
+    // Exit to skill picker — keep session live in DB
+    setSessionId(null)
+    setMessages([])
+    setSessionEnded(false)
+    setSummary(null)
+    setError('')
+    setElapsed(0)
+    setLastAnswerCorrect(null)
+    // Refresh skill status so the "Continue Session" badge updates immediately
+    if (selectedSkill && user?.id) {
+      try {
+        const status = await getSessionStatus(selectedSkill)
+        setSkillStatus(status)
+        if (status.mastery != null) setMastery(status.mastery * 100)
+      } catch { /* non-fatal */ }
+    }
+    setPhase('skill-pick')
   }
 
   function handleHintBtn() {
@@ -680,6 +885,78 @@ export default function LearnPage() {
 
   // ─── Skill picker (before session) ────────────────────────────────────────
 
+  // ─── Assessment phase UI ──────────────────────────────────────────────────
+  if (phase === 'assessment' && assessmentQs.length > 0) {
+    const q = assessmentQs[assessmentIdx]
+    const total = assessmentQs.length
+    const pct = Math.round(((assessmentIdx) / total) * 100)
+    return (
+      <div style={{ maxWidth: 640, margin: '0 auto' }}>
+        <section className="card stack">
+          <div>
+            <div className="row" style={{ marginBottom: 4 }}>
+              <h2 style={{ margin: 0 }}>Initial Assessment</h2>
+              <span className="badge neutral">{assessmentIdx + 1} / {total}</span>
+            </div>
+            <p className="meta">ඔබේ දැනුම් මට්ටම measure කිරීමට ප්‍රශ්න කිහිපයකට answer කරන්න.</p>
+            <div className="progress" style={{ marginTop: 8 }}>
+              <span style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+
+          <div style={{ padding: '16px 0' }}>
+            <p style={{ fontSize: 16, lineHeight: 1.7, fontWeight: 500 }}>{q.question_text}</p>
+            {q.difficulty && (
+              <span className="badge neutral" style={{ fontSize: 11, marginTop: 4, display: 'inline-block' }}>
+                Difficulty {q.difficulty}
+              </span>
+            )}
+          </div>
+
+          {q.options && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {Object.entries(q.options).map(([k, v]) => {
+                let border = '1px solid rgba(255,255,255,0.1)'
+                let bg = 'rgba(255,255,255,0.03)'
+                let color = '#e2e8f0'
+                if (assessmentSelected === k) {
+                  if (assessmentFeedback === true)  { border = '1px solid #4ade80'; bg = 'rgba(74,222,128,0.15)'; color = '#4ade80' }
+                  if (assessmentFeedback === false)  { border = '1px solid #f87171'; bg = 'rgba(248,113,113,0.15)'; color = '#f87171' }
+                } else if (assessmentSelected && k === q.correct_answer) {
+                  border = '1px solid #4ade80'; bg = 'rgba(74,222,128,0.08)'; color = '#4ade80'
+                } else if (assessmentSelected) {
+                  color = '#475569'
+                }
+                return (
+                  <button key={k} type="button"
+                    onClick={() => handleAssessmentAnswer(k)}
+                    disabled={!!assessmentSelected}
+                    style={{ textAlign: 'left', width: '100%', padding: '12px 16px', borderRadius: 10, border, background: bg, color, cursor: assessmentSelected ? 'default' : 'pointer', fontSize: 14, lineHeight: 1.5 }}
+                  >
+                    <strong style={{ marginRight: 8, opacity: 0.7 }}>{k}.</strong>{safeStr(v)}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {assessmentSelected && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span className={`badge ${assessmentFeedback ? 'success' : 'danger'}`}>
+                {assessmentFeedback ? '✓ Correct!' : '✗ Incorrect'}
+              </span>
+              <button type="button" className="btn" onClick={handleAssessmentNext} disabled={assessmentSubmitting}>
+                {assessmentSubmitting ? 'Submitting…' : assessmentIdx + 1 < assessmentQs.length ? 'Next →' : 'Finish Assessment →'}
+              </button>
+            </div>
+          )}
+
+          {error && <p className="feedback error">{error}</p>}
+        </section>
+      </div>
+    )
+  }
+
   if (!sessionId && !sessionEnded) {
     return (
       <div className="grid-two" style={{ alignItems: 'start' }}>
@@ -698,18 +975,52 @@ export default function LearnPage() {
                 {skills.map((s: any) => (
                   <button key={s.id} type="button"
                     className={`chip ${selectedSkill === s.id ? 'active' : ''}`}
-                    onClick={() => setSelectedSkill(s.id)}
+                    onClick={() => handleSkillSelect(s.id)}
                   >
                     {s.name}
+                    {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
+                      <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.7 }}>▶ active</span>
+                    )}
                   </button>
                 ))}
               </div>
             )}
+
+            {/* Skill status info */}
+            {selectedSkill && skillStatus && !statusLoading && (
+              <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                {skillStatus.has_active_session ? (
+                  <p className="meta" style={{ margin: 0 }}>
+                    ▶️ <strong>Active session</strong> — {skillStatus.message_count} messages saved.
+                    {skillStatus.mastery != null && ` Mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
+                  </p>
+                ) : skillStatus.assessment_done ? (
+                  <p className="meta" style={{ margin: 0 }}>
+                    ✅ Assessment done.
+                    {skillStatus.mastery != null && ` Current mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
+                  </p>
+                ) : (
+                  <p className="meta" style={{ margin: 0 }}>
+                    📋 New skill — initial assessment will run first (3 questions).
+                  </p>
+                )}
+              </div>
+            )}
+            {statusLoading && <p className="meta" style={{ margin: 0 }}>Checking session…</p>}
           </div>
 
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button type="button" className="btn" disabled={!selectedSkill || loading} onClick={beginSession}>
-              {loading ? 'Starting…' : 'Start session'}
+            <button
+              type="button"
+              className="btn"
+              disabled={!selectedSkill || loading || statusLoading}
+              onClick={handleStartOrContinue}
+              style={skillStatus?.has_active_session ? { background: '#7c3aed' } : {}}
+            >
+              {loading ? 'Loading…' :
+               statusLoading ? 'Checking…' :
+               skillStatus?.has_active_session ? '▶ Continue Session' :
+               'Start Session'}
             </button>
             <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, color: 'var(--muted)', cursor: 'pointer' }}>
               <input type="checkbox" checked={cameraOn} onChange={(e) => e.target.checked ? startEngagementCapture() : stopEngagementCapture()} />
@@ -793,8 +1104,18 @@ export default function LearnPage() {
           )}
         </section>
         <div className="row">
-          <button type="button" className="btn" onClick={() => { setSessionId(null); setSessionEnded(false); setSummary(null); setMessages([]) }}>
-            New session
+          <button type="button" className="btn" onClick={() => {
+            setSessionId(null); setSessionEnded(false); setSummary(null)
+            setMessages([]); setPhase('skill-pick')
+            // Refresh status so skill picker shows updated mastery
+            if (selectedSkill && user?.id) {
+              getSessionStatus(selectedSkill).then((s) => {
+                setSkillStatus(s)
+                if (s.mastery != null) setMastery(s.mastery * 100)
+              }).catch(() => {})
+            }
+          }}>
+            ← Back to Skills
           </button>
           <button type="button" className="btn secondary" onClick={() => { window.location.href = '/dashboard/student' }}>
             Dashboard

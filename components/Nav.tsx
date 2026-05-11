@@ -32,7 +32,7 @@ export default function Nav() {
         { href: '/knowledge', label: 'Knowledge' },
         { href: '/history', label: 'History' },
         //{ href: '/tutor', label: 'Tutor' },
-        { href: '/engagement', label: 'Engagement' },
+        //{ href: '/engagement', label: 'Engagement' },
         { href: '/analytics', label: 'Analytics' },
       ]
     }
@@ -44,7 +44,7 @@ export default function Nav() {
         { href: '/questions', label: 'Questions' },
         { href: '/history', label: 'History' },
         { href: '/tutor', label: 'Tutor' },
-        { href: '/engagement', label: 'Engagement' },
+        //{ href: '/engagement', label: 'Engagement' },
         { href: '/hardware', label: 'Hardware' },
         { href: '/voice', label: 'Voice' },
         { href: '/knowledge', label: 'Knowledge' },
@@ -60,7 +60,7 @@ export default function Nav() {
       { href: '/mastery', label: 'Mastery' },
       { href: '/history', label: 'History' },
       //{ href: '/tutor', label: 'Tutor' },
-      { href: '/engagement', label: 'Engagement' },
+      //{ href: '/engagement', label: 'Engagement' },
     ]
   }, [authed, role])
 
