@@ -49,7 +49,6 @@ apiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = readToken()
     if (token) {
-      config.headers = config.headers || {}
       config.headers.Authorization = `Bearer ${token}`
     }
   }
@@ -521,6 +520,40 @@ export async function getSkillsAnalytics() {
 }
 
 // ─── Unified Chat Endpoints ───────────────────────────────────────────────────
+
+export async function getSessionStatus(skill_id: number) {
+  const { data } = await apiClient.get('/api/v1/chat/session-status', { params: { skill_id } })
+  return data as {
+    has_active_session: boolean
+    session_id: string | null
+    assessment_done: boolean
+    mastery: number | null
+    message_count: number
+  }
+}
+
+export async function getAssessmentQuestions(skill_id: number) {
+  const { data } = await apiClient.get(`/api/v1/chat/assessment/${skill_id}`)
+  return data as {
+    skill_id: number
+    skill_name: string
+    questions: Array<{
+      question_id: number
+      question_text: string
+      options: Record<string, string> | null
+      correct_answer: string
+      difficulty: number | null
+    }>
+  }
+}
+
+export async function completeAssessment(payload: {
+  skill_id: number
+  answers: Array<{ question_id: number; answer: string; is_correct: boolean; time_taken?: number }>
+}) {
+  const { data } = await apiClient.post('/api/v1/chat/assessment/complete', payload)
+  return data as { skill_id: number; mastery: number; correct: number; total: number; accuracy: number; assessment_done: boolean }
+}
 
 export async function startChatSession(payload: { skill_id: number; user_id: number }) {
   const { data } = await apiClient.post('/api/v1/chat/session', payload)
