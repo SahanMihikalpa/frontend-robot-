@@ -34,8 +34,19 @@ function fmtTime(sec: number) {
 }
 
 function extractOptions(raw: any): Record<string, string> | undefined {
-  const opts = raw?.options || raw?.choices
-  if (!opts || typeof opts !== 'object' || Array.isArray(opts)) return undefined
+  const opts = raw?.metadata?.options || raw?.options || raw?.choices || raw?.answer_options || raw?.mc_options
+  if (!opts) return undefined
+  if (Array.isArray(opts)) {
+    if (opts.length === 0) return undefined
+    const result: Record<string, string> = {}
+    const keys = ['A', 'B', 'C', 'D', 'E']
+    opts.forEach((item: any, i: number) => {
+      const key = item?.key || keys[i] || String.fromCharCode(65 + i)
+      result[key] = typeof item === 'string' ? item : item?.text || item?.label || item?.value || String(item)
+    })
+    return result
+  }
+  if (typeof opts !== 'object') return undefined
   return opts as Record<string, string>
 }
 
@@ -117,18 +128,40 @@ function Bubble({ msg, onAnswer, pendingAnswer }: {
         {isStudent ? 'You' : 'Learning AI'} · {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </span>
       <div
-        className={`chat-bubble ${isStudent ? 'user' : 'assistant'}`}
-        style={{ maxWidth: '85%' }}
+        className={`chat-bubble ${isStudent ? 'user' : msg.type === 'FEEDBACK' ? (msg.isCorrect ? 'feedback-correct' : 'feedback-wrong') : 'assistant'}`}
+        style={{
+          maxWidth: '85%',
+          ...(msg.type === 'FEEDBACK' && {
+            background: msg.isCorrect ? 'rgba(74,222,128,0.08)' : 'rgba(248,113,113,0.08)',
+            border: `1px solid ${msg.isCorrect ? 'rgba(74,222,128,0.3)' : 'rgba(248,113,113,0.3)'}`,
+          }),
+        }}
       >
-        <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{msg.content}</p>
+        {/* Feedback header */}
+        {msg.type === 'FEEDBACK' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ fontSize: 18 }}>{msg.isCorrect ? '✅' : '❌'}</span>
+            <strong style={{ color: msg.isCorrect ? '#4ade80' : '#f87171', fontSize: 14 }}>
+              {msg.isCorrect ? 'Correct!' : 'Not quite'}
+            </strong>
+          </div>
+        )}
 
-        {/* Mastery delta shown in feedback */}
-        {msg.type === 'FEEDBACK' && msg.masteryBefore != null && msg.masteryAfter != null && (
-          <div style={{ marginTop: 10 }}>
+        <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+          {msg.type === 'FEEDBACK'
+            ? msg.content.replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || undefined
+            : msg.content}
+        </p>
+
+        {/* Mastery bar shown in feedback */}
+        {msg.type === 'FEEDBACK' && msg.masteryAfter != null && (
+          <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
             <MasteryBar pct={msg.masteryAfter * 100} label="Mastery" />
-            <p className="meta" style={{ fontSize: 11, marginTop: 4 }}>
-              {msg.masteryBefore < msg.masteryAfter ? '↑' : '→'} {(msg.masteryBefore * 100).toFixed(0)}% → {(msg.masteryAfter * 100).toFixed(0)}%
-            </p>
+            {msg.masteryBefore != null && (
+              <p className="meta" style={{ fontSize: 11, marginTop: 4 }}>
+                {msg.masteryBefore < msg.masteryAfter ? '↑' : '→'} {(msg.masteryBefore * 100).toFixed(0)}% → {(msg.masteryAfter * 100).toFixed(0)}%
+              </p>
+            )}
           </div>
         )}
 
@@ -257,10 +290,12 @@ export default function LearnPage() {
     const content = typeof raw === 'string' ? raw
       : raw?.content || raw?.text || raw?.message || raw?.question_text || ''
     if (!content) return
-    const type: MsgType = raw?.type || raw?.message_type || 'DIALOGUE'
+    const options = extractOptions(raw)
+    const rawType: MsgType = raw?.type || raw?.message_type || 'DIALOGUE'
+    const type: MsgType = options ? 'PRACTICE_QUESTION' : rawType
     const msg: ChatMsg = {
       id: uid(), role: 'system', type, content,
-      options: extractOptions(raw),
+      options,
       timestamp: Date.now(),
     }
     setMessages((prev) => {
@@ -299,24 +334,32 @@ export default function LearnPage() {
         engagement_data: engagementScore != null ? { engagement_score: engagementScore } : undefined,
       })
 
+      // Extract feedback — may be a nested object with content + metadata
+      const feedbackRaw = res?.feedback_message || res?.feedback
+      const feedbackObj = typeof feedbackRaw === 'object' && feedbackRaw !== null ? feedbackRaw : null
+      const feedbackContent = feedbackObj?.content ?? (typeof feedbackRaw === 'string' ? feedbackRaw : null)
+      const feedbackMeta = feedbackObj?.metadata ?? {}
+      const isCorrect = feedbackMeta?.is_correct ?? res?.is_correct ?? res?.correct ?? null
+      const masteryAfter = feedbackMeta?.mastery_after ?? res?.mastery_after ?? null
+      const masteryBefore = feedbackMeta?.mastery_before ?? res?.mastery_before ?? null
+
       // Mark correctness on student bubble
-      const correct = res?.is_correct ?? res?.correct ?? null
       setMessages((prev) => prev.map((m) =>
-        m.id === studentMsg.id ? { ...m, isCorrect: correct ?? undefined } : m
+        m.id === studentMsg.id ? { ...m, isCorrect: isCorrect ?? undefined } : m
       ))
 
       // Feedback message
-      if (res?.feedback_message || res?.feedback) {
-        const fContent = res.feedback_message || res.feedback
+      if (feedbackContent) {
         const fm: ChatMsg = {
           id: uid(), role: 'system', type: 'FEEDBACK',
-          content: typeof fContent === 'string' ? fContent : JSON.stringify(fContent),
-          masteryBefore: res?.mastery_before,
-          masteryAfter: res?.mastery_after,
+          content: feedbackContent,
+          masteryBefore: masteryBefore ?? undefined,
+          masteryAfter: masteryAfter ?? undefined,
+          isCorrect: isCorrect ?? undefined,
           timestamp: Date.now(),
         }
         setMessages((prev) => [...prev, fm])
-        if (res?.mastery_after != null) setMastery(res.mastery_after * 100)
+        if (masteryAfter != null) setMastery(masteryAfter * 100)
       }
 
       // Next message
@@ -355,12 +398,15 @@ export default function LearnPage() {
         content: q,
       })
 
-      const explanation = res?.explanation_message || res?.hint_message || res?.response || res?.answer || res?.message || ''
-      if (explanation && typeof explanation === 'string') {
+      const explanationRaw = res?.explanation_message || res?.hint_message || res?.response || res?.answer || res?.message
+      const explanationContent = typeof explanationRaw === 'string'
+        ? explanationRaw
+        : explanationRaw?.content || null
+      if (explanationContent) {
         setMessages((prev) => [...prev, {
           id: uid(), role: 'system',
           type: isHint ? 'HINT' : 'EXPLANATION',
-          content: explanation, timestamp: Date.now(),
+          content: explanationContent, timestamp: Date.now(),
         }])
       }
 
