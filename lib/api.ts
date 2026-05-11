@@ -520,4 +520,32 @@ export async function getSkillsAnalytics() {
   return data
 }
 
+// ─── Unified Chat Endpoints ───────────────────────────────────────────────────
+
+export async function startChatSession(payload: { skill_id: number; user_id: number }) {
+  const { data } = await apiClient.post('/api/v1/chat/session', payload)
+  return data
+}
+
+export async function sendChatMessage(payload: {
+  session_id: string
+  message_type: 'ANSWER' | 'QUESTION' | 'HINT_REQUEST'
+  content: string
+  engagement_data?: JsonObject
+  response_time_ms?: number
+}) {
+  const { data } = await apiClient.post('/api/v1/chat/message', payload)
+  return data
+}
+
+export async function getChatSession(session_id: string) {
+  const { data } = await apiClient.get(`/api/v1/chat/session/${session_id}`)
+  return data
+}
+
+export async function endChatSession(session_id: string) {
+  const { data } = await apiClient.post('/api/v1/chat/end-session', { session_id })
+  return data
+}
+
 export default apiClient

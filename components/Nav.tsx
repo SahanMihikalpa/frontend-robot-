@@ -30,7 +30,7 @@ export default function Nav() {
         { href: '/questions', label: 'Questions' },
         { href: '/knowledge', label: 'Knowledge' },
         { href: '/history', label: 'History' },
-        { href: '/tutor', label: 'Tutor' },
+        //{ href: '/tutor', label: 'Tutor' },
         { href: '/engagement', label: 'Engagement' },
         { href: '/analytics', label: 'Analytics' },
       ]
@@ -52,10 +52,11 @@ export default function Nav() {
 
     return [
       { href: '/dashboard/student', label: 'Dashboard' },
-      { href: '/practice', label: 'Practice' },
+      //{ href: '/practice', label: 'Practice' },
+      { href: '/learn', label: 'Learn' },
       { href: '/mastery', label: 'Mastery' },
       { href: '/history', label: 'History' },
-      { href: '/tutor', label: 'Tutor' },
+      //{ href: '/tutor', label: 'Tutor' },
       { href: '/engagement', label: 'Engagement' },
     ]
   }, [authed, role])
