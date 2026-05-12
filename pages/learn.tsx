@@ -112,6 +112,7 @@ function QuestionPanel({
   engagementScore,
   cameraOn,
   onEnableCamera,
+  onDisableCamera,
   skillName,
 }: {
   question: ChatMsg | null
@@ -125,6 +126,7 @@ function QuestionPanel({
   engagementScore: number | null
   cameraOn: boolean
   onEnableCamera: () => void
+  onDisableCamera: () => void
   skillName: string
 }) {
   const answered = !!question?.selectedAnswer
@@ -138,11 +140,15 @@ function QuestionPanel({
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <span className="meta" style={{ fontSize: 12 }}>⏱ <strong>{fmtTime(elapsed)}</strong></span>
             {!cameraOn && (
-              <button type="button" className="btn small secondary" onClick={onEnableCamera} style={{ fontSize: 11 }}>
-                👁 Camera
+              <button type="button" className="btn small secondary" onClick={onEnableCamera} style={{ fontSize: 11 }} title="Enable camera engagement tracking">
+                👁 Camera off
               </button>
             )}
-            {cameraOn && <span className="badge success" style={{ fontSize: 11 }}>👁 On</span>}
+            {cameraOn && (
+              <button type="button" className="btn small secondary" onClick={onDisableCamera} style={{ fontSize: 11, color: '#4ade80' }} title="Camera tracking active — click to disable">
+                👁 On
+              </button>
+            )}
             <button type="button" className="btn small secondary" onClick={onEnd} style={{ fontSize: 12 }}>
               ← Exit
             </button>
@@ -349,9 +355,8 @@ export default function LearnPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const rafRef = useRef<number | null>(null)
+  const engagementIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const capturingRef = useRef(false)
-  const frameCountRef = useRef(0)
   const sessionIdRef = useRef<string | null>(null)
   const userRef = useRef<any>(null)
 
@@ -545,6 +550,12 @@ export default function LearnPage() {
         addSystemMsg(firstMsg)
       }
       setPhase('session')
+      // Auto-start camera engagement capture when session begins.
+      // Runs silently — if the user denies camera permission the catch inside
+      // startEngagementCapture swallows the error and cameraOn stays false.
+      if (!capturingRef.current) {
+        startEngagementCapture()
+      }
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Could not start session.')
     } finally {
@@ -851,36 +862,45 @@ export default function LearnPage() {
       if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play() }
       capturingRef.current = true
       setCameraOn(true)
-      engagementLoop()
-    } catch { /* camera optional */ }
+      // First capture after 2 s (camera warm-up), then every 10 s
+      setTimeout(() => captureEngagementFrame(), 2000)
+      engagementIntervalRef.current = setInterval(captureEngagementFrame, 10_000)
+    } catch { /* camera permission denied — non-fatal */ }
   }
 
   function stopEngagementCapture() {
     capturingRef.current = false
     setCameraOn(false)
-    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+    if (engagementIntervalRef.current) { clearInterval(engagementIntervalRef.current); engagementIntervalRef.current = null }
     if (videoRef.current) { videoRef.current.pause(); videoRef.current.srcObject = null }
     streamRef.current?.getTracks().forEach((t) => t.stop())
     streamRef.current = null
   }
 
-  function engagementLoop() {
-    if (!capturingRef.current) return
-    frameCountRef.current++
-    if (frameCountRef.current % 150 === 0 && videoRef.current) {
-      const v = videoRef.current
-      const w = v.videoWidth || 320; const h = v.videoHeight || 240
-      if (!canvasRef.current) { const c = document.createElement('canvas'); c.width = w; c.height = h; canvasRef.current = c }
-      const ctx = canvasRef.current.getContext('2d')
-      if (ctx) {
-        ctx.drawImage(v, 0, 0, w, h)
-        const b64 = canvasRef.current.toDataURL('image/jpeg', 0.6).replace(/^data:image\/(png|jpeg);base64,/, '')
-        analyzeVisualEngagement({ user_id: userRef.current?.id || 0, session_id: sessionIdRef.current || 'learn', frame_data: b64 })
-          .then((r) => { const s = r?.engagement_score ?? r?.attention_score; if (typeof s === 'number') setEngagementScore(s) })
-          .catch(() => { })
-      }
+  function captureEngagementFrame() {
+    if (!capturingRef.current || !videoRef.current) return
+    const v = videoRef.current
+    const w = v.videoWidth || 320
+    const h = v.videoHeight || 240
+    if (!canvasRef.current) {
+      const c = document.createElement('canvas'); c.width = w; c.height = h; canvasRef.current = c
     }
-    rafRef.current = requestAnimationFrame(engagementLoop)
+    const ctx = canvasRef.current.getContext('2d')
+    if (!ctx) return
+    ctx.drawImage(v, 0, 0, w, h)
+    const b64 = canvasRef.current.toDataURL('image/jpeg', 0.7).replace(/^data:image\/(png|jpeg);base64,/, '')
+    analyzeVisualEngagement({
+      user_id: userRef.current?.id || 0,
+      session_id: sessionIdRef.current || 'learn',
+      frame_data: b64,
+    })
+      .then((r) => {
+        if (!r) return
+        // backend returns visual_engagement_score; fallback to other field names
+        const s = r.visual_engagement_score ?? r.engagement_score ?? r.attention_score
+        if (typeof s === 'number') setEngagementScore(s)
+      })
+      .catch(() => { /* silent — engagement is optional */ })
   }
 
   // ─── Skill picker (before session) ────────────────────────────────────────
@@ -1022,10 +1042,9 @@ export default function LearnPage() {
                skillStatus?.has_active_session ? '▶ Continue Session' :
                'Start Session'}
             </button>
-            <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, color: 'var(--muted)', cursor: 'pointer' }}>
-              <input type="checkbox" checked={cameraOn} onChange={(e) => e.target.checked ? startEngagementCapture() : stopEngagementCapture()} />
-              Enable engagement camera
-            </label>
+            <span className="meta" style={{ fontSize: 12 }}>
+              👁 Camera engagement tracking will start automatically
+            </span>
           </div>
 
           {error && <p className="feedback error">{error}</p>}
@@ -1151,6 +1170,7 @@ export default function LearnPage() {
           engagementScore={engagementScore}
           cameraOn={cameraOn}
           onEnableCamera={startEngagementCapture}
+          onDisableCamera={stopEngagementCapture}
           skillName={skillName}
         />
       </div>
