@@ -113,7 +113,17 @@ export default function TeacherDashboard() {
         <h3 style={{ margin: 0 }}>Quick actions</h3>
         <div className="list">
           <div className="list-item">
-            <Link href="/skills" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/teacher/students" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
+              📋 Student Roster
+            </Link>
+          </div>
+          <div className="list-item">
+            <Link href="/teacher/heatmap" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
+              🟩 Skill Heatmap
+            </Link>
+          </div>
+          <div className="list-item">
+            <Link href="/skills" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
               Manage skills
             </Link>
           </div>

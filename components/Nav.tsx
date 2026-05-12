@@ -27,12 +27,12 @@ export default function Nav() {
     if (role === 'teacher') {
       return [
         { href: '/dashboard/teacher', label: 'Dashboard' },
+        { href: '/teacher/students', label: 'Students' },
+        { href: '/teacher/heatmap', label: 'Heatmap' },
         { href: '/skills', label: 'Skills' },
         { href: '/questions', label: 'Questions' },
         { href: '/knowledge', label: 'Knowledge' },
         { href: '/history', label: 'History' },
-        //{ href: '/tutor', label: 'Tutor' },
-        //{ href: '/engagement', label: 'Engagement' },
         { href: '/analytics', label: 'Analytics' },
       ]
     }
