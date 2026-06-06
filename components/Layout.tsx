@@ -19,7 +19,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       return
     }
 
-    setName(me.full_name || me.username || 'Student')
+    setName(me.full_name || me.username || me.email || 'User')
     setRole(me.role || '')
   }, [router.pathname])
 
