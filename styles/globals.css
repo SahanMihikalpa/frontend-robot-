@@ -1,5 +1,5 @@
 :root{
-  --bg:#F5F1EB;
+  --bg:#f1e9dd;
   --surface:#FFFCF8;
   --card:#FFFFFF;
 
@@ -46,9 +46,17 @@ body{
 
   padding:24px 48px;
 
-  background:var(--bg);
+  background:var(--surface);
 
   border-bottom:1px solid var(--border);
+
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.03),
+    0 8px 24px rgba(0,0,0,0.04);
+
+  position:sticky;
+  top:0;
+  z-index:100;
 }
 .brand{display:flex;align-items:center;gap:12px}
 .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
@@ -120,14 +128,23 @@ body{
   font-weight:600;
 }
 .nav-button{
-  background:transparent;
-  color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.08);
+  background:none;
+  border:none;
+
+  color:#C85B43; /* terracotta red */
+
+  font-size:15px;
+  font-weight:500;
+
   padding:8px 10px;
-  border-radius:8px;
+
   cursor:pointer;
-  font-size:14px;
-  transition:background 0.15s;
+
+  transition:all .2s ease;
+}
+
+.nav-button:hover{
+  color:#B24D37;
 }
 .nav-button:hover{background:rgba(255,255,255,0.05)}
 
