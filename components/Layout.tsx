@@ -45,7 +45,14 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         </div>
       </header>
 
-      <main className="container">{children}</main>
+      <main 
+        className={
+          router.pathname === '/login' ||
+          router.pathname === '/register'
+            ? ''
+            : 'container'
+        }
+      >{children}</main>
     </div>
   )
 }

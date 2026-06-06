@@ -1,6 +1,6 @@
 :root{
-  --bg:#f1e9dd;
-  --surface:#FFFCF8;
+  --bg:#F3EEE7;
+  --surface:#F8F4EE;
   --card:#FFFFFF;
 
   --text:#171411;
@@ -398,4 +398,29 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .nav-links{gap:8px}
   .nav-links a{padding:6px 8px;font-size:13px}
   .modal{padding:16px}
+}
+
+/* ===== Editorial Login Inputs ===== */
+
+.editorial-input{
+  width:100% !important;
+  background:transparent !important;
+
+  border:none !important;
+  border-bottom:1px solid #D6CEC5 !important;
+
+  border-radius:0 !important;
+
+  padding:12px 0 14px 0 !important;
+
+  font-size:18px !important;
+
+  color:#171411 !important;
+
+  box-shadow:none !important;
+  outline:none !important;
+}
+
+.editorial-input:focus{
+  border-bottom:1px solid #C85B43 !important;
 }
