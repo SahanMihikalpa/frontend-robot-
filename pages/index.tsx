@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getAuthTokenFromStorage, getStoredUser, getRoleHome } from '../lib/session'
+import Image from 'next/image'
 
 export default function Home() {
   const [authed, setAuthed] = useState(false)
@@ -18,77 +19,377 @@ export default function Home() {
   return (
     <div className="stack" style={{ gap: 32 }}>
       {/* Hero */}
-      <section className="card" style={{ padding: '40px 32px', textAlign: 'center' }}>
-        <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 800, lineHeight: 1.2 }}>
-          <span style={{ color: '#7dd3fc' }}>Personalized</span> Robot Learning Platform
-        </h1>
-        <p className="meta" style={{ maxWidth: 520, margin: '0 auto 28px', fontSize: 16 }}>
-          Adaptive learning driven by BKT & DKT, with AI tutoring, visual engagement sensing, and real-time analytics.
-        </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          {authed ? (
-            <Link href={dashboardHref} className="btn">Go to my dashboard</Link>
-          ) : (
-            <>
-              <Link href="/login" className="btn">Sign in</Link>
-              <Link href="/register" className="btn secondary">Create account</Link>
-            </>
-          )}
+
+      <section
+        style={{
+          minHeight: 'calc(100vh - 90px)',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          border: '1px solid rgba(114,106,97,0.12)',
+          background: '#F4F0EA',
+          overflow: 'hidden'
+        }}
+      >
+        {/* LEFT PANEL */}
+
+        <div
+          style={{
+            padding: '90px 80px',
+            borderRight: '1px solid rgba(114,106,97,0.12)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
+          }}
+        >
+          <p
+            style={{
+              letterSpacing: '.35em',
+              textTransform: 'uppercase',
+              fontSize: 12,
+              color: '#726A61'
+            }}
+          >
+            Personalized Learning
+          </p>
+
+          <h1
+            className="editorial-title"
+            style={{
+              fontSize: '5rem',
+              lineHeight: '1',
+              marginTop: 30,
+              marginBottom: 30,
+              fontWeight: 500,
+              color: '#171411'
+            }}
+          >
+            A tutor that
+            <br />
+            learns the
+            <br />
+            way{' '}
+            <span
+              style={{
+                color: '#C85B43',
+                fontStyle: 'italic'
+              }}
+            >
+              you
+            </span>{' '}
+            learn.
+          </h1>
+
+          <p
+            style={{
+              maxWidth: 550,
+              color: '#726A61',
+              lineHeight: 1.8,
+              fontSize: 18,
+              marginBottom: 40
+            }}
+          >
+            Adaptive learning driven by BKT & DKT, with AI tutoring,
+            visual engagement sensing, and real-time analytics.
+          </p>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: 16,
+              flexWrap: 'wrap'
+            }}
+          >
+            {authed ? (
+              <Link href={dashboardHref} className="btn">
+                Go to my dashboard
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="btn">
+                  Sign in
+                </Link>
+
+                <Link href="/register" className="btn secondary">
+                  Create account
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT PANEL */}
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative'
+          }}
+        >
+          <Image
+            src="/Hero.svg"
+            alt="Atlas Robot"
+            width={360}
+            height={360}
+          />
         </div>
       </section>
 
       {/* Role cards */}
       <div className="grid-three">
         <div className="card stack">
-          <div style={{ fontSize: 28 }}>🎓</div>
-          <h3 style={{ margin: 0 }}>Students</h3>
-          <p className="meta">Practice adaptive questions, track mastery across skills, and get AI tutor help any time.</p>
-          <ul className="meta" style={{ paddingLeft: 16, margin: 0 }}>
-            <li>BKT/DKT question selection</li>
-            <li>Mastery progress map</li>
-            <li>Chat tutor with RAG</li>
-            <li>Visual engagement tracking</li>
-          </ul>
+          <div
+            style={{
+              border: '1px solid rgba(114,106,97,.18)',
+              borderRadius: 30,
+              padding: 40,
+              background: '#F4F0EA'
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: '.25em',
+                textTransform: 'uppercase',
+                color: '#726A61'
+              }}
+            >
+              I AM A
+            </div>
+
+            <h3
+              className="editorial-title"
+              style={{
+                marginTop: 12,
+                fontSize: '2rem'
+              }}
+            >
+              Student
+            </h3>
+
+            <p
+              style={{
+                color: '#726A61',
+                lineHeight: 1.8
+              }}
+            >
+              Practice adaptive questions, track mastery,
+              and receive AI tutoring support.
+            </p>
+          </div>
         </div>
         <div className="card stack">
-          <div style={{ fontSize: 28 }}>📊</div>
-          <h3 style={{ margin: 0 }}>Teachers</h3>
-          <p className="meta">Monitor class performance, identify at-risk students, and manage the question bank.</p>
-          <ul className="meta" style={{ paddingLeft: 16, margin: 0 }}>
-            <li>Class analytics dashboard</li>
-            <li>Student performance details</li>
-            <li>Question CRUD</li>
-            <li>Knowledge base upload</li>
-          </ul>
+          <div
+            style={{
+              border: '1px solid rgba(114,106,97,.18)',
+              borderRadius: 30,
+              padding: 40,
+              background: '#F4F0EA'
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: '.25em',
+                textTransform: 'uppercase',
+                color: '#726A61'
+              }}
+            >
+              I AM A
+            </div>
+
+            <h3
+              className="editorial-title"
+              style={{
+                marginTop: 12,
+                fontSize: '2rem'
+              }}
+            >
+              Teacher
+            </h3>
+
+            <p
+              style={{
+                color: '#726A61',
+                lineHeight: 1.8
+              }}
+            >
+              Monitor engagement, performance analytics,
+              and classroom progress.
+            </p>
+          </div>
         </div>
         <div className="card stack">
-          <div style={{ fontSize: 28 }}>⚙️</div>
-          <h3 style={{ margin: 0 }}>Admins</h3>
-          <p className="meta">Manage hardware, voice pipeline, knowledge documents, and platform-wide data.</p>
-          <ul className="meta" style={{ paddingLeft: 16, margin: 0 }}>
-            <li>Hardware status & camera</li>
-            <li>Voice pipeline control</li>
-            <li>Full analytics access</li>
-            <li>Knowledge base management</li>
-          </ul>
+          <div
+            style={{
+              border: '1px solid rgba(114,106,97,.18)',
+              borderRadius: 30,
+              padding: 40,
+              background: '#F4F0EA'
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: '.25em',
+                textTransform: 'uppercase',
+                color: '#726A61'
+              }}
+            >
+              I AM AN
+            </div>
+
+            <h3
+              className="editorial-title"
+              style={{
+                marginTop: 12,
+                fontSize: '2rem'
+              }}
+            >
+              Admin
+            </h3>
+
+            <p
+              style={{
+                color: '#726A61',
+                lineHeight: 1.8
+              }}
+            >
+              Manage hardware, analytics,
+              knowledge bases and platform operations.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* How it works */}
-      <section className="card stack">
-        <h3 style={{ margin: 0 }}>How it works</h3>
-        <div className="grid-three">
-          <div className="list-item">
-            <strong>1. Sign in</strong>
-            <p className="meta" style={{ marginTop: 6 }}>Authenticate with your credentials. The system identifies your role automatically.</p>
+      {/* How It Works */}
+      <section
+        style={{
+          padding: '40px 80px 120px',
+          background: '#F4F0EA'
+        }}
+      >
+        <p
+          style={{
+            letterSpacing: '.35em',
+            textTransform: 'uppercase',
+            fontSize: 12,
+            color: '#726A61',
+            textAlign: 'center'
+          }}
+        >
+          How It Works
+        </p>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3,1fr)',
+            gap: 50,
+            marginTop: 60
+          }}
+        >
+          {/* Step 01 */}
+
+          <div>
+            <div
+              style={{
+                fontSize: 64,
+                color: '#C85B43',
+                fontFamily: 'serif'
+              }}
+            >
+              01
+            </div>
+
+            <h3
+              className="editorial-title"
+              style={{
+                marginTop: 12,
+                marginBottom: 16,
+                fontSize: '2rem'
+              }}
+            >
+              Sign In
+            </h3>
+
+            <p
+              style={{
+                color: '#726A61',
+                lineHeight: 1.8
+              }}
+            >
+              Authenticate securely and access your personalized learning experience.
+            </p>
           </div>
-          <div className="list-item">
-            <strong>2. Role-based access</strong>
-            <p className="meta" style={{ marginTop: 6 }}>You are redirected to the correct dashboard. Navigation is filtered by your permissions.</p>
+
+          {/* Step 02 */}
+
+          <div>
+            <div
+              style={{
+                fontSize: 64,
+                color: '#C85B43',
+                fontFamily: 'serif'
+              }}
+            >
+              02
+            </div>
+
+            <h3
+              className="editorial-title"
+              style={{
+                marginTop: 12,
+                marginBottom: 16,
+                fontSize: '2rem'
+              }}
+            >
+              Choose Role
+            </h3>
+
+            <p
+              style={{
+                color: '#726A61',
+                lineHeight: 1.8
+              }}
+            >
+              Students, teachers and administrators receive role-specific capabilities.
+            </p>
           </div>
-          <div className="list-item">
-            <strong>3. Learn & analyse</strong>
-            <p className="meta" style={{ marginTop: 6 }}>Students practise; teachers monitor; admins configure. Everything updates in real time.</p>
+
+          {/* Step 03 */}
+
+          <div>
+            <div
+              style={{
+                fontSize: 64,
+                color: '#C85B43',
+                fontFamily: 'serif'
+              }}
+            >
+              03
+            </div>
+
+            <h3
+              className="editorial-title"
+              style={{
+                marginTop: 12,
+                marginBottom: 16,
+                fontSize: '2rem'
+              }}
+            >
+              Learn & Analyse
+            </h3>
+
+            <p
+              style={{
+                color: '#726A61',
+                lineHeight: 1.8
+              }}
+            >
+              Adaptive learning, AI tutoring, engagement sensing and analytics work together in real time.
+            </p>
           </div>
         </div>
       </section>

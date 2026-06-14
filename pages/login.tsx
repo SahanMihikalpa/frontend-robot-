@@ -36,7 +36,6 @@ export default function Login() {
       gridTemplateColumns: '1fr 1fr',
       marginTop: 0,
       border: '1px solid var(--border)',
-      background: 'var(--surface)',
       overflow: 'hidden'
     }}
   >
@@ -44,7 +43,7 @@ export default function Login() {
 
     <div
       style={{
-        padding: '90px 60px',
+        padding: '20px 60px 40px',
         borderRight: '1px solid rgba(114,106,97,0.12)',
         display: 'flex',
         flexDirection: 'column',
@@ -152,7 +151,7 @@ export default function Login() {
 
     <div
       style={{
-        padding: '80px 80px',
+        padding: '10px 60px 40px',
         display: 'flex',
         alignItems: 'center'
       }}
