@@ -17,17 +17,17 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="stack" style={{ gap: 32 }}>
-      {/* Hero */}
+    <>
+    {/* Hero */}
 
       <section
         style={{
+          width: '100vw',
+          marginLeft: 'calc(50% - 50vw)',
           minHeight: 'calc(100vh - 90px)',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          border: '1px solid rgba(114,106,97,0.12)',
-          background: '#F4F0EA',
-          overflow: 'hidden'
+          background: '#F4F0EA'
         }}
       >
         {/* LEFT PANEL */}
@@ -124,7 +124,9 @@ export default function Home() {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            position: 'relative'
+            position: 'relative',
+            background:
+            'radial-gradient(circle, rgba(200,91,67,.18) 0%, rgba(200,91,67,.08) 45%, transparent 75%)'
           }}
         >
           <Image
@@ -135,6 +137,8 @@ export default function Home() {
           />
         </div>
       </section>
+    
+    <div className="stack" style={{ gap: 32 }}>
 
       {/* Role cards */}
       <div className="grid-three">
@@ -394,5 +398,6 @@ export default function Home() {
         </div>
       </section>
     </div>
+    </>
   )
 }
