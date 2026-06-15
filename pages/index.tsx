@@ -24,13 +24,20 @@ export default function Home() {
         style={{
           width: '100vw',
           marginLeft: 'calc(50% - 50vw)',
-          minHeight: 'calc(100vh - 90px)',
+          minHeight: '75vh',
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: '44% 56%',
           background: '#F4F0EA'
         }}
       >
-        {/* LEFT PANEL */}
+        <div
+          style={{
+            maxWidth: 800,
+            width: '100%',
+            margin: '0 auto'
+          }}
+        >
+          {/* LEFT PANEL */}
 
         <div
           style={{
@@ -99,6 +106,7 @@ export default function Home() {
               flexWrap: 'wrap'
             }}
           >
+          
             {authed ? (
               <Link href={dashboardHref} className="btn">
                 Go to my dashboard
@@ -109,12 +117,47 @@ export default function Home() {
                   Sign in
                 </Link>
 
-                <Link href="/register" className="btn secondary">
+                <Link href="/register" className="btn">
                   Create account
                 </Link>
               </>
             )}
           </div>
+          <div
+            style={{
+              display: 'flex',
+              gap: 40,
+              marginTop: 60
+            }}
+          >
+            <div>
+              <div className="editorial-title" style={{ fontSize: 36 }}>
+                AI
+              </div>
+              <div style={{ color: '#726A61' }}>
+                Tutoring
+              </div>
+            </div>
+
+            <div>
+              <div className="editorial-title" style={{ fontSize: 36 }}>
+                BKT
+              </div>
+              <div style={{ color: '#726A61' }}>
+                Knowledge Tracking
+              </div>
+            </div>
+
+            <div>
+              <div className="editorial-title" style={{ fontSize: 36 }}>
+                DKT
+              </div>
+              <div style={{ color: '#726A61' }}>
+                Deep Learning Models
+              </div>
+            </div>
+          </div>
+        </div>
         </div>
 
         {/* RIGHT PANEL */}
@@ -129,11 +172,29 @@ export default function Home() {
             'radial-gradient(circle, rgba(200,91,67,.18) 0%, rgba(200,91,67,.08) 45%, transparent 75%)'
           }}
         >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `
+                linear-gradient(rgba(114,106,97,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(114,106,97,0.08) 1px, transparent 1px)
+              `,
+              backgroundSize: '38px 38px',
+              animation: 'meshScroll 2s linear infinite',
+              opacity: 1.0,
+              zIndex: 0
+            }}
+          />
           <Image
             src="/Hero.svg"
             alt="Atlas Robot"
-            width={360}
-            height={360}
+            width={400}
+            height={400}
+            style={{
+              position: 'relative',
+              zIndex: 2
+            }}
           />
         </div>
       </section>

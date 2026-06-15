@@ -427,3 +427,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .editorial-input:focus{
   border-bottom:1px solid #C85B43 !important;
 }
+
+@keyframes meshScroll {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 40px 40px;
+  }
+}
