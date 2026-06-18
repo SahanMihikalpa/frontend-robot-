@@ -135,27 +135,40 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className="stack">
-      <section className="card stack">
-        <div className="section-title">
+    <div className="questions-page">
+      <section className="questions-hero">
+        <div>
+          <p className="teacher-eyebrow">Question Bank</p>
+          <h2 className="editorial-title">Questions</h2>
+          <p>
+            Build and maintain the assessment items that drive practice,
+            mastery tracking, and teacher insight.
+            {canEdit ? ' Create, edit, and delete questions.' : ' Read-only view.'}
+          </p>
+        </div>
+        <div className="questions-hero-actions">
+          <span className="skills-count-pill">{questions.length} total</span>
+          {canEdit && (
+            <button type="button" className="skills-action primary" onClick={openCreate}>New question</button>
+          )}
+        </div>
+      </section>
+
+      <section className="questions-filter-panel">
+        <div className="skills-panel-header">
           <div>
-            <h2>Questions</h2>
-            <p className="meta">Question bank. {canEdit ? 'Create, edit, and delete questions.' : 'Read-only view.'}</p>
+            <p className="teacher-eyebrow">Filter</p>
+            <h3 className="editorial-title">Skill focus</h3>
           </div>
-          <div className="row" style={{ gap: 8 }}>
-            <span className="badge">{questions.length} total</span>
-            {canEdit && (
-              <button type="button" className="btn small" onClick={openCreate}>+ New question</button>
-            )}
-          </div>
+          <span className="skills-count-pill subtle">{filtered.length} shown</span>
         </div>
 
-        <div className="chip-row">
-          <button type="button" className={`chip ${selectedSkill === 'all' ? 'active' : ''}`} onClick={() => setSelectedSkill('all')}>
+        <div className="questions-chip-row">
+          <button type="button" className={`skills-chip ${selectedSkill === 'all' ? 'active' : ''}`} onClick={() => setSelectedSkill('all')}>
             All skills
           </button>
           {skills.map((s) => (
-            <button key={s.id} type="button" className={`chip ${selectedSkill === s.id ? 'active' : ''}`} onClick={() => setSelectedSkill(s.id)}>
+            <button key={s.id} type="button" className={`skills-chip ${selectedSkill === s.id ? 'active' : ''}`} onClick={() => setSelectedSkill(s.id)}>
               {s.name}
             </button>
           ))}
@@ -164,64 +177,82 @@ export default function QuestionsPage() {
         {error && <p className="feedback error">{error}</p>}
       </section>
 
-      <section className="card stack">
-        <div className="section-title">
-          <h3>Question list</h3>
-          <span className="badge neutral">{filtered.length} shown</span>
+      <section className="questions-panel">
+        <div className="skills-panel-header">
+          <div>
+            <p className="teacher-eyebrow">Catalogue</p>
+            <h3 className="editorial-title">Question list</h3>
+          </div>
+          <span className="skills-count-pill subtle">{filtered.length} shown</span>
         </div>
 
         {loading ? (
-          <div className="empty-state"><p className="meta">Loading…</p></div>
+          <div className="empty-state"><p className="meta">Loading...</p></div>
         ) : filtered.length === 0 ? (
           <div className="empty-state"><p>No questions found.</p></div>
         ) : (
-          <div className="list">
+          <div className="questions-list">
             {filtered.map((q) => (
-              <div key={q.id} className="list-item">
-                <div className="row">
-                  <strong style={{ flex: 1 }}>{q.question_text}</strong>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span className="badge neutral">{q.question_type}</span>
-                    {canEdit && (
-                      <>
-                        <button type="button" className="btn small secondary" onClick={() => openEdit(q)}>Edit</button>
-                        <button type="button" className="btn small danger" onClick={() => setDeleteTarget(q)}>Delete</button>
-                      </>
-                    )}
+              <article key={q.id} className="question-card">
+                <div className="question-card-main">
+                  <div>
+                    <p className="question-type-pill">{q.question_type}</p>
+                    <h4>{q.question_text}</h4>
                   </div>
+                  {canEdit && (
+                    <div className="skills-row-actions">
+                      <button type="button" className="skills-mini-action" onClick={() => openEdit(q)}>Edit</button>
+                      <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(q)}>Delete</button>
+                    </div>
+                  )}
                 </div>
-                <p className="meta" style={{ marginTop: 4 }}>
+
+                <p className="question-meta">
                   Skill: {q.skill_name || q.skill_id}
-                  {q.difficulty != null && ` · Difficulty ${q.difficulty}`}
-                  {q.correct_answer && ` · Answer: ${q.correct_answer}`}
+                  {q.difficulty != null && ` | Difficulty ${q.difficulty}`}
+                  {q.correct_answer && ` | Answer: ${q.correct_answer}`}
                 </p>
+
                 {q.options && Object.keys(q.options).length > 0 && (
-                  <div className="chip-row" style={{ marginTop: 6 }}>
+                  <div className="question-options">
                     {Object.entries(q.options).map(([k, v]) => (
-                      <span key={k} className={`chip ${k === q.correct_answer ? 'active' : ''}`} style={{ fontSize: 12 }}>
-                        {k}. {v}
+                      <span key={k} className={`question-option ${k === q.correct_answer ? 'active' : ''}`}>
+                        <strong>{k}</strong>
+                        {v}
                       </span>
                     ))}
                   </div>
                 )}
-              </div>
+              </article>
             ))}
           </div>
         )}
       </section>
 
-      {/* Create / Edit modal */}
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay skills-modal-overlay" onClick={() => setShowForm(false)}>
+          <div className="modal skills-modal questions-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="skills-modal-kicker">{editId != null ? 'Question Editor' : 'Question Builder'}</p>
             <h3>{editId != null ? 'Edit question' : 'New question'}</h3>
+            <p className="skills-modal-subtitle">Write a question, connect it to a skill, and define the answer set used during practice.</p>
 
-            <div className="field">
-              <label>Skill *</label>
-              <select value={form.skill_id} onChange={(e) => setF('skill_id', e.target.value)}>
-                <option value="">Select a skill</option>
-                {skills.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
+            <div className="questions-modal-grid">
+              <div className="field">
+                <label>Skill *</label>
+                <select value={form.skill_id} onChange={(e) => setF('skill_id', e.target.value)}>
+                  <option value="">Select a skill</option>
+                  {skills.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+
+              <div className="field">
+                <label>Question type</label>
+                <select value={form.question_type} onChange={(e) => setF('question_type', e.target.value)}>
+                  <option value="multiple_choice">Multiple choice</option>
+                  <option value="true_false">True / False</option>
+                  <option value="open">Open</option>
+                </select>
+              </div>
             </div>
 
             <div className="field">
@@ -229,60 +260,55 @@ export default function QuestionsPage() {
               <textarea rows={3} value={form.question_text} onChange={(e) => setF('question_text', e.target.value)} />
             </div>
 
-            <div className="field">
-              <label>Question type</label>
-              <select value={form.question_type} onChange={(e) => setF('question_type', e.target.value)}>
-                <option value="multiple_choice">Multiple choice</option>
-                <option value="true_false">True / False</option>
-                <option value="open">Open</option>
-              </select>
+            <div className="questions-options-grid">
+              {(['A', 'B', 'C', 'D'] as const).map((letter) => (
+                <div className="field" key={letter}>
+                  <label>Option {letter}</label>
+                  <input
+                    type="text"
+                    value={form[`opt${letter}` as keyof typeof form]}
+                    onChange={(e) => setF(`opt${letter}` as keyof typeof BLANK_FORM, e.target.value)}
+                  />
+                </div>
+              ))}
             </div>
 
-            {(['A', 'B', 'C', 'D'] as const).map((letter) => (
-              <div className="field" key={letter}>
-                <label>Option {letter}</label>
-                <input
-                  type="text"
-                  value={form[`opt${letter}` as keyof typeof form]}
-                  onChange={(e) => setF(`opt${letter}` as keyof typeof BLANK_FORM, e.target.value)}
-                />
+            <div className="questions-modal-grid">
+              <div className="field">
+                <label>Correct answer</label>
+                <select value={form.correct_answer} onChange={(e) => setF('correct_answer', e.target.value)}>
+                  {['A', 'B', 'C', 'D'].map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
               </div>
-            ))}
 
-            <div className="field">
-              <label>Correct answer</label>
-              <select value={form.correct_answer} onChange={(e) => setF('correct_answer', e.target.value)}>
-                {['A', 'B', 'C', 'D'].map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </div>
-
-            <div className="field">
-              <label>Difficulty (1–5)</label>
-              <input type="number" min={1} max={5} value={form.difficulty} onChange={(e) => setF('difficulty', e.target.value)} />
+              <div className="field">
+                <label>Difficulty (1-5)</label>
+                <input type="number" min={1} max={5} value={form.difficulty} onChange={(e) => setF('difficulty', e.target.value)} />
+              </div>
             </div>
 
             {error && <p className="feedback error">{error}</p>}
 
-            <div className="row">
-              <button type="button" className="btn" onClick={saveForm} disabled={saving}>
-                {saving ? 'Saving…' : editId != null ? 'Update' : 'Create'}
+            <div className="skills-modal-actions">
+              <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
+                {saving ? 'Saving...' : editId != null ? 'Update' : 'Create'}
               </button>
-              <button type="button" className="btn secondary" onClick={() => setShowForm(false)}>Cancel</button>
+              <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete confirmation */}
       {deleteTarget && (
-        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
+        <div className="modal-overlay skills-modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
+            <p className="skills-modal-kicker">Delete Question</p>
             <h3>Delete question?</h3>
             <p className="meta">"{deleteTarget.question_text}"</p>
             <p className="meta">This cannot be undone.</p>
-            <div className="row">
-              <button type="button" className="btn danger" onClick={confirmDelete}>Yes, delete</button>
-              <button type="button" className="btn secondary" onClick={() => setDeleteTarget(null)}>Cancel</button>
+            <div className="skills-modal-actions">
+              <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
+              <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
             </div>
           </div>
         </div>
