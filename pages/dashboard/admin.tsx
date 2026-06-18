@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { getHardwareStatus, getKnowledgeStats, listStudentsAnalytics } from '../../lib/api'
 
 function StatusBadge({ active }: { active: boolean | undefined }) {
-  if (active == null) return <span className="badge neutral">Unknown</span>
-  return active ? <span className="badge success">Online</span> : <span className="badge danger">Offline</span>
+  if (active == null) return <span className="admin-status-badge neutral">Unknown</span>
+  return active ? <span className="admin-status-badge success">Online</span> : <span className="admin-status-badge danger">Offline</span>
 }
 
 export default function AdminDashboard() {
@@ -25,7 +25,7 @@ export default function AdminDashboard() {
       try {
         const kb = await getKnowledgeStats()
         setKbStats(kb)
-      } catch { /* ignore — KB may not have documents yet */ }
+      } catch { /* ignore - KB may not have documents yet */ }
     }
     load()
   }, [])
@@ -35,99 +35,121 @@ export default function AdminDashboard() {
   const spkActive = hardware?.speaker_active ?? hardware?.speaker?.active
 
   return (
-    <div className="grid">
-      <section className="card stack">
-        <div className="section-title">
-          <div>
-            <h2>Admin Dashboard</h2>
-            <p className="meta">System health, hardware status, and platform overview.</p>
-          </div>
+    <div className="admin-dashboard">
+      <section className="teacher-hero admin-hero">
+        <div>
+          <p className="teacher-eyebrow">Operations</p>
+          <h2 className="editorial-title">Admin Dashboard</h2>
+          <p>Monitor system health, hardware availability, classroom activity, and knowledge-base coverage from one operations view.</p>
         </div>
-
-        {error && <p className="feedback error">{error}</p>}
-
-        <div className="kpi-grid">
-          <div className="kpi-card">
-            <p className="kpi-label">Tracked students</p>
-            <p className="kpi-value">{students.length}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">KB documents</p>
-            <p className="kpi-value">{kbStats?.total_documents ?? '—'}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">KB chunks</p>
-            <p className="kpi-value">{kbStats?.total_chunks ?? '—'}</p>
-          </div>
-        </div>
-
-        <h4 style={{ margin: 0 }}>Hardware status</h4>
-        <div className="list">
-          {[
-            { label: 'Camera', active: camActive },
-            { label: 'Microphone', active: micActive },
-            { label: 'Speaker', active: spkActive },
-          ].map(({ label, active }) => (
-            <div key={label} className="list-item">
-              <div className="row">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span className={`status-dot ${active ? 'online' : 'offline'}`} />
-                  <strong>{label}</strong>
-                </div>
-                <StatusBadge active={active} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <h4 style={{ margin: 0 }}>Recent students</h4>
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.length === 0 ? (
-                <tr><td colSpan={2} style={{ textAlign: 'center', color: 'var(--muted)' }}>No students</td></tr>
-              ) : students.slice(0, 8).map((s: any, idx: number) => (
-                <tr key={s.user_id || s.id || idx}>
-                  <td>{s.name || s.username || s.full_name || `Student ${idx + 1}`}</td>
-                  <td>{s.email || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="teacher-hero-note">
+          <span>Platform</span>
+          <strong>{students.length}</strong>
+          <p>tracked students</p>
         </div>
       </section>
 
-      <aside className="card stack">
-        <h3 style={{ margin: 0 }}>Quick actions</h3>
-        <div className="list">
-          <div className="list-item">
-            <Link href="/hardware" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
+      {error && <p className="feedback error">{error}</p>}
+
+      <div className="teacher-layout">
+        <section className="teacher-main">
+          <div className="teacher-kpi-grid">
+            <div className="teacher-kpi-card">
+              <p>Tracked students</p>
+              <strong>{students.length}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>KB documents</p>
+              <strong>{kbStats?.total_documents ?? '-'}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>KB chunks</p>
+              <strong>{kbStats?.total_chunks ?? '-'}</strong>
+            </div>
+          </div>
+
+          <section className="teacher-panel admin-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Hardware</p>
+                <h3 className="editorial-title">Device status</h3>
+              </div>
+              <Link href="/hardware" className="teacher-text-link">Open control</Link>
+            </div>
+
+            <div className="admin-device-grid">
+              {[
+                { label: 'Camera', active: camActive },
+                { label: 'Microphone', active: micActive },
+                { label: 'Speaker', active: spkActive },
+              ].map(({ label, active }) => (
+                <div key={label} className="admin-device-card">
+                  <div>
+                    <span className={`admin-device-dot ${active ? 'online' : 'offline'}`} />
+                    <strong>{label}</strong>
+                  </div>
+                  <StatusBadge active={active} />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="teacher-panel admin-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Classroom</p>
+                <h3 className="editorial-title">Recent students</h3>
+              </div>
+              <Link href="/analytics" className="teacher-text-link">Full analytics</Link>
+            </div>
+
+            <div className="teacher-table-wrap">
+              <table className="teacher-table admin-students-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.length === 0 ? (
+                    <tr><td colSpan={2} className="teacher-empty-cell">No students</td></tr>
+                  ) : students.slice(0, 8).map((s: any, idx: number) => (
+                    <tr key={s.user_id || s.id || idx}>
+                      <td>{s.name || s.username || s.full_name || `Student ${idx + 1}`}</td>
+                      <td>{s.email || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <aside className="teacher-actions admin-actions">
+          <p className="teacher-eyebrow">Workspace</p>
+          <h3 className="editorial-title">Quick actions</h3>
+
+          <div className="teacher-action-list">
+            <Link href="/hardware" className="teacher-action primary">
+              <span>01</span>
               Hardware control
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/voice" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/voice" className="teacher-action">
+              <span>02</span>
               Voice pipeline
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/knowledge" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/knowledge" className="teacher-action">
+              <span>03</span>
               Knowledge base
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/analytics" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/analytics" className="teacher-action">
+              <span>04</span>
               Full analytics
             </Link>
           </div>
-        </div>
-      </aside>
+        </aside>
+      </div>
     </div>
   )
 }

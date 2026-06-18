@@ -1627,6 +1627,256 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .questions-options-grid .field{
   margin:0;
 }
+.knowledge-page{
+  max-width:1280px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.knowledge-hero{
+  padding:42px;
+  display:flex;
+  justify-content:space-between;
+  gap:28px;
+  align-items:flex-end;
+  background:
+    linear-gradient(135deg, rgba(200,91,67,.10), transparent 42%),
+    var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.knowledge-hero h2{
+  margin:10px 0 16px;
+  color:var(--text);
+  font-size:clamp(46px, 7vw, 82px);
+  line-height:.95;
+}
+.knowledge-hero p{
+  max-width:720px;
+  margin:0;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.8;
+}
+.knowledge-stat-grid{
+  min-width:280px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.knowledge-stat-grid div{
+  min-height:132px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:#171411;
+  border-radius:8px;
+}
+.knowledge-stat-grid span{
+  color:#D8C9BD;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.knowledge-stat-grid strong{
+  color:#F8F4EE;
+  font-family:"Playfair Display", serif;
+  font-size:50px;
+  font-weight:500;
+  line-height:1;
+}
+.knowledge-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 420px;
+  gap:24px;
+  align-items:flex-start;
+}
+.knowledge-main{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.knowledge-panel,
+.knowledge-results{
+  padding:28px;
+  background:linear-gradient(180deg,#FBF7F1 0%,var(--surface) 100%);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.knowledge-results{
+  position:sticky;
+  top:112px;
+}
+.knowledge-file-drop{
+  min-height:132px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:12px;
+  color:var(--muted);
+  background:#F4F0EA;
+  border:1px dashed rgba(200,91,67,.38);
+  border-radius:8px;
+  cursor:pointer;
+}
+.knowledge-file-drop span{
+  color:var(--text);
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.knowledge-file-drop input{
+  color:var(--muted);
+}
+.knowledge-file-meta{
+  margin:12px 0;
+  color:var(--accent);
+  font-size:13px;
+  font-weight:800;
+}
+.knowledge-doc-list,
+.knowledge-result-list{
+  display:grid;
+  gap:12px;
+}
+.knowledge-doc-card{
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:center;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.knowledge-doc-card strong{
+  color:var(--text);
+}
+.knowledge-doc-card p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+.knowledge-query-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+}
+.knowledge-query-row input{
+  min-height:48px;
+  padding:13px 14px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid #D8CFC5 !important;
+  border-radius:8px !important;
+}
+.knowledge-result-card{
+  padding:16px;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.knowledge-result-topline{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+}
+.knowledge-result-topline strong{
+  color:var(--text);
+}
+.knowledge-result-topline span{
+  padding:4px 9px;
+  color:var(--accent);
+  background:rgba(200,91,67,.09);
+  border:1px solid rgba(200,91,67,.22);
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+.knowledge-result-card p{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.65;
+}
+.admin-dashboard{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.admin-hero{
+  margin-top:4px;
+}
+.admin-panel{
+  background:linear-gradient(180deg,#FBF7F1 0%,var(--surface) 100%);
+}
+.admin-device-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.admin-device-card{
+  min-height:132px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.admin-device-card div{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.admin-device-card strong{
+  color:var(--text);
+  font-size:16px;
+}
+.admin-device-dot{
+  width:11px;
+  height:11px;
+  border-radius:999px;
+  background:var(--muted);
+}
+.admin-device-dot.online{
+  background:#1F4D3A;
+}
+.admin-device-dot.offline{
+  background:#A63D40;
+}
+.admin-status-badge{
+  width:max-content;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+.admin-status-badge.success{
+  color:#1F4D3A;
+  background:rgba(31,77,58,.10);
+  border:1px solid rgba(31,77,58,.20);
+}
+.admin-status-badge.danger{
+  color:#A63D40;
+  background:rgba(166,61,64,.10);
+  border:1px solid rgba(166,61,64,.20);
+}
+.admin-status-badge.neutral{
+  color:var(--muted);
+  background:#F4F0EA;
+  border:1px solid var(--border);
+}
+.admin-students-table{
+  min-width:520px;
+}
 @keyframes teacherPageFloat{
   from{
     opacity:0;
@@ -1756,6 +2006,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .skills-hero-actions{justify-content:flex-start}
   .questions-hero{flex-direction:column}
   .questions-hero-actions{justify-content:flex-start}
+  .knowledge-hero,
+  .knowledge-layout{grid-template-columns:1fr}
+  .knowledge-hero{flex-direction:column;align-items:flex-start}
+  .knowledge-results{position:static}
+  .admin-device-grid{grid-template-columns:1fr}
   .site-header{padding:12px 16px;flex-wrap:wrap}
   .container{padding:14px}
 }
@@ -1797,6 +2052,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     grid-template-columns:1fr;
     margin:0 22px;
   }
+  .knowledge-hero,
+  .knowledge-panel,
+  .knowledge-results{padding:22px}
+  .knowledge-hero h2{font-size:44px}
+  .knowledge-stat-grid{width:100%;grid-template-columns:1fr}
+  .knowledge-query-row{grid-template-columns:1fr}
+  .knowledge-doc-card{align-items:flex-start;flex-direction:column}
   .teacher-sort-control{
     width:100%;
     align-items:stretch;
