@@ -57,6 +57,7 @@ export default function Nav() {
       //{ href: '/practice', label: 'Practice' },
       //{ href: '/learn', label: 'Learn' },
       { href: '/learn', label: 'Practice' },
+      { href: '/selflearn', label: 'Learn Anything' },
       { href: '/mastery', label: 'Mastery' },
       { href: '/history', label: 'History' },
       //{ href: '/tutor', label: 'Tutor' },
