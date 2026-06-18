@@ -1,46 +1,44 @@
 /**
- * /teacher/heatmap — Student × Skill mastery colour grid
+ * /teacher/heatmap - Student x Skill mastery colour grid
  */
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getClassHeatmap, HeatmapData, statusColor, statusLabel } from '../../lib/teacher-api'
 
-// Darker background colours for cells (coloured fill, bright text)
 function cellBg(status: string): string {
   switch (status) {
-    case 'mastered':     return '#166534'
-    case 'near_mastery': return '#1e40af'
-    case 'learning':     return '#92400e'
-    case 'struggling':   return '#991b1b'
-    default:             return '#1e293b'
+    case 'mastered':     return '#1F4D3A'
+    case 'near_mastery': return '#3F5F88'
+    case 'learning':     return '#B8893C'
+    case 'struggling':   return '#A63D40'
+    default:             return '#D8CFC5'
   }
 }
 
 function cellText(status: string): string {
   switch (status) {
-    case 'mastered':     return '#4ade80'
-    case 'near_mastery': return '#93c5fd'
-    case 'learning':     return '#fcd34d'
-    case 'struggling':   return '#fca5a5'
-    default:             return '#64748b'
+    case 'mastered':     return '#F8F4EE'
+    case 'near_mastery': return '#F8F4EE'
+    case 'learning':     return '#171411'
+    case 'struggling':   return '#F8F4EE'
+    default:             return '#726A61'
   }
 }
 
-// What a teacher should do for each cell colour
 const ACTION_GUIDE: Record<string, { label: string; description: string; teacher_action: string }> = {
   mastered: {
     label: 'Mastered',
-    description: 'P(mastery) ≥ 95%. Student has demonstrated reliable knowledge.',
+    description: 'P(mastery) >= 95%. Student has demonstrated reliable knowledge.',
     teacher_action: 'No action needed. Consider introducing the next skill.',
   },
   near_mastery: {
     label: 'Near Mastery',
-    description: 'P(mastery) 85–95%. Almost there, minor gaps remain.',
-    teacher_action: 'Assign 2–3 more practice questions on this skill.',
+    description: 'P(mastery) 85-95%. Almost there, minor gaps remain.',
+    teacher_action: 'Assign 2-3 more practice questions on this skill.',
   },
   learning: {
     label: 'Learning',
-    description: 'P(mastery) 30–85%. Student is actively progressing.',
+    description: 'P(mastery) 30-85%. Student is actively progressing.',
     teacher_action: 'Normal progress. Continue current exercises.',
   },
   struggling: {
@@ -55,26 +53,22 @@ const ACTION_GUIDE: Record<string, { label: string; description: string; teacher
   },
 }
 
-// ── Collapsible info panel ─────────────────────────────────────────────────
-function InfoBox({ title, children, accent = '#60a5fa', defaultOpen = false }: {
+function InfoBox({ title, children, accent = '#C85B43', defaultOpen = false }: {
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div style={{ borderRadius: 10, border: `1px solid ${accent}33`, overflow: 'hidden', fontSize: 13 }}>
+    <div className="teacher-heatmap-info" style={{ borderColor: `${accent}33` }}>
       <button
+        type="button"
         onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', textAlign: 'left', padding: '10px 14px',
-          background: accent + '12', border: 'none', cursor: 'pointer',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          color: 'inherit',
-        }}>
-        <span style={{ fontWeight: 600, color: accent }}>ℹ {title}</span>
-        <span style={{ color: accent, fontSize: 11, opacity: 0.8 }}>{open ? '▲ close' : '▼ expand'}</span>
+        className="teacher-heatmap-info-toggle"
+        style={{ background: accent + '10' }}>
+        <span style={{ color: accent }}>{title}</span>
+        <span style={{ color: accent }}>{open ? 'Close' : 'Expand'}</span>
       </button>
       {open && (
-        <div style={{ padding: '12px 16px', background: accent + '0a', borderTop: `1px solid ${accent}22`, lineHeight: 1.75 }}>
+        <div className="teacher-heatmap-info-content" style={{ borderTopColor: `${accent}22` }}>
           {children}
         </div>
       )}
@@ -96,7 +90,6 @@ export default function TeacherHeatmap() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Build lookup: user_id → skill_id → cell
   const lookup: Record<number, Record<number, HeatmapData['matrix'][0]>> = {}
   if (data) {
     for (const cell of data.matrix) {
@@ -105,7 +98,6 @@ export default function TeacherHeatmap() {
     }
   }
 
-  // Filtered students (only show rows containing the selected status)
   const displayStudents = data?.students.filter(st => {
     if (!filterStatus) return true
     return data.skills.some(sk => {
@@ -115,7 +107,6 @@ export default function TeacherHeatmap() {
     })
   }) ?? []
 
-  // Summary counts across entire matrix
   const counts = { mastered: 0, near_mastery: 0, learning: 0, struggling: 0, not_started: 0 }
   if (data) {
     for (const st of data.students) {
@@ -128,194 +119,203 @@ export default function TeacherHeatmap() {
   }
 
   return (
-    <div className="stack" style={{ maxWidth: '100%', padding: '24px 16px' }}>
-
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+    <div className="teacher-heatmap-page">
+      <section className="teacher-hero teacher-heatmap-hero">
         <div>
-          <h2 style={{ margin: 0 }}>Skill Coverage Heatmap</h2>
-          <p className="meta">At-a-glance view of every student's mastery for every skill.</p>
+          <p className="teacher-eyebrow">Skill Coverage</p>
+          <h2 className="editorial-title">Skill Coverage Heatmap</h2>
+          <p>
+            Scan every student-skill pairing, filter by learning stage, and spot
+            the classroom patterns that need attention.
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Link href="/teacher/students" className="btn secondary">Student Roster</Link>
-          <Link href="/dashboard/teacher" className="btn secondary">← Dashboard</Link>
+        <div className="teacher-hero-note">
+          <span>Matrix</span>
+          <strong>{data ? data.students.length : 0}</strong>
+          <p>students mapped</p>
         </div>
+      </section>
+
+      <div className="teacher-roster-nav teacher-heatmap-nav">
+        <Link href="/teacher/students" className="teacher-action primary">
+          <span>01</span>
+          Student Roster
+        </Link>
+        <Link href="/dashboard/teacher" className="teacher-action">
+          <span>02</span>
+          Dashboard
+        </Link>
       </div>
 
-      {/* How to read it */}
-      <InfoBox title="How to read this heatmap" accent="#60a5fa" defaultOpen>
-        <p style={{ margin: '0 0 8px' }}>
-          Each <strong>row</strong> is a student. Each <strong>column</strong> is a skill. Each <strong>cell</strong> shows
-          the student's current BKT mastery probability (P(mastery)) for that skill as a percentage.
-          The cell colour indicates which learning stage the student is at:
+      <InfoBox title="How to read this heatmap" accent="#C85B43" defaultOpen>
+        <p>
+          Each row is a student. Each column is a skill. Each cell shows the
+          student's current BKT mastery probability for that skill.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8, marginBottom: 8 }}>
+        <div className="teacher-heatmap-guide-grid">
           {Object.entries(ACTION_GUIDE).map(([key, val]) => (
-            <div key={key} style={{
-              padding: '8px 12px', borderRadius: 8,
-              background: cellBg(key), border: `1px solid ${cellText(key)}30`,
-            }}>
-              <span style={{ color: cellText(key), fontWeight: 700, fontSize: 13 }}>{val.label}</span>
-              <p style={{ margin: '3px 0 2px', fontSize: 12, color: cellText(key), opacity: 0.85 }}>{val.description}</p>
-              <p style={{ margin: 0, fontSize: 12, color: '#fbbf24' }}>💡 {val.teacher_action}</p>
+            <div key={key} className="teacher-heatmap-guide-card" style={{ borderColor: `${cellBg(key)}55` }}>
+              <span style={{ background: cellBg(key), color: cellText(key) }}>{val.label}</span>
+              <p>{val.description}</p>
+              <small>{val.teacher_action}</small>
             </div>
           ))}
         </div>
-        <p style={{ margin: 0, color: '#94a3b8', fontSize: 12 }}>
-          Hover over any cell to see the exact mastery % and recommended action.
-          Click a student name to open their full detail page.
+        <p className="teacher-heatmap-hint">
+          Hover over any cell to see the exact mastery percentage and recommended action.
+          Open a student name to view their full detail page.
         </p>
       </InfoBox>
 
-      {/* Class-level summary */}
       {data && data.students.length > 0 && (
-        <div style={{
-          padding: '12px 16px', borderRadius: 10,
-          background: 'var(--card)', border: '1px solid var(--border)',
-        }}>
-          <p style={{ margin: '0 0 10px', fontWeight: 600, fontSize: 13 }}>Class-wide summary</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <section className="teacher-panel teacher-heatmap-summary">
+          <div className="teacher-panel-header">
+            <div>
+              <p className="teacher-eyebrow">Class Summary</p>
+              <h3 className="editorial-title">Mastery distribution</h3>
+            </div>
+            {filterStatus && (
+              <button
+                className="teacher-clear-filter"
+                onClick={() => setFilterStatus(null)}
+              >
+                Clear filter
+              </button>
+            )}
+          </div>
+
+          <div className="teacher-heatmap-filter-grid">
             {Object.entries(counts).map(([status, count]) => {
               const total = Object.values(counts).reduce((a, b) => a + b, 0)
               const pct = total > 0 ? Math.round(count / total * 100) : 0
               const guide = ACTION_GUIDE[status]
               return (
-                <div key={status} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '6px 12px', borderRadius: 8,
-                  background: cellBg(status), cursor: 'pointer',
-                  outline: filterStatus === status ? `2px solid ${cellText(status)}` : 'none',
-                }}
+                <button
+                  key={status}
+                  type="button"
+                  className={`teacher-heatmap-filter ${filterStatus === status ? 'active' : ''}`}
                   onClick={() => setFilterStatus(filterStatus === status ? null : status)}
                   title={`Click to filter to only students with at least one ${guide.label} skill`}
+                  style={{
+                    borderColor: filterStatus === status ? cellBg(status) : undefined,
+                  }}
                 >
-                  <div>
-                    <div style={{ color: cellText(status), fontWeight: 700, fontSize: 12 }}>{guide.label}</div>
-                    <div style={{ color: cellText(status), fontSize: 16, fontWeight: 800 }}>
-                      {count} <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.7 }}>({pct}%)</span>
-                    </div>
-                  </div>
-                </div>
+                  <span style={{ background: cellBg(status), color: cellText(status) }}>
+                    {guide.label}
+                  </span>
+                  <strong>{count}</strong>
+                  <small>{pct}% of cells</small>
+                </button>
               )
             })}
-            {filterStatus && (
-              <button
-                className="btn small secondary"
-                onClick={() => setFilterStatus(null)}
-                style={{ alignSelf: 'center' }}>
-                ✕ Clear filter
-              </button>
-            )}
           </div>
-          <p className="meta" style={{ fontSize: 11, marginTop: 8 }}>
-            Counts are per student–skill cell.
-            {filterStatus && <strong style={{ color: '#60a5fa' }}> Showing only students with at least one "{ACTION_GUIDE[filterStatus]?.label}" skill.</strong>}
-            {!filterStatus && ' Click a colour block to filter students.'}
+
+          <p className="teacher-heatmap-filter-note">
+            Counts are per student-skill cell.
+            {filterStatus && <strong> Showing only students with at least one "{ACTION_GUIDE[filterStatus]?.label}" skill.</strong>}
+            {!filterStatus && ' Click a block to filter students.'}
           </p>
-        </div>
+        </section>
       )}
 
       {error && <p className="feedback error">{error}</p>}
 
-      {/* Grid */}
       {loading ? (
-        <p className="meta">Loading heatmap…</p>
+        <p className="teacher-heatmap-state">Loading heatmap...</p>
       ) : !data || data.students.length === 0 ? (
-        <p className="meta">No data available yet.</p>
+        <p className="teacher-heatmap-state">No data available yet.</p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ borderCollapse: 'separate', borderSpacing: 3, minWidth: 600 }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', padding: '4px 8px', fontSize: 12, color: 'var(--muted)', minWidth: 130 }}>
-                  Student
-                </th>
-                {data.skills.map(sk => (
-                  <th key={sk.skill_id} style={{
-                    padding: '4px 6px', fontSize: 11, color: 'var(--muted)',
-                    maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    textAlign: 'center', fontWeight: 500,
-                  }} title={sk.skill_name}>
-                    {sk.skill_name.length > 10 ? sk.skill_name.slice(0, 10) + '…' : sk.skill_name}
-                  </th>
-                ))}
-                <th style={{ padding: '4px 8px', fontSize: 11, color: 'var(--muted)', textAlign: 'right' }}>
-                  Struggling
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayStudents.map(st => {
-                const rowStruggling = data.skills.filter(sk => {
-                  const cell = lookup[st.user_id]?.[sk.skill_id]
-                  return (cell?.status ?? 'not_started') === 'struggling'
-                }).length
-                return (
-                  <tr key={st.user_id}>
-                    <td style={{ padding: '2px 8px', fontSize: 13, whiteSpace: 'nowrap' }}>
-                      <Link href={`/teacher/students/${st.user_id}`}
-                        style={{ color: 'var(--fg)', textDecoration: 'none', fontWeight: 500 }}>
-                        {st.full_name}
-                      </Link>
-                    </td>
-                    {data.skills.map(sk => {
-                      const cell   = lookup[st.user_id]?.[sk.skill_id]
-                      const status = cell?.status ?? 'not_started'
-                      const p      = cell?.p_mastery
-                      const guide  = ACTION_GUIDE[status]
-                      return (
-                        <td key={sk.skill_id}
-                          style={{
-                            width: 40, height: 36, textAlign: 'center',
-                            background: cellBg(status), borderRadius: 6,
-                            color: cellText(status), fontSize: 11, fontWeight: 600,
-                            cursor: 'default', verticalAlign: 'middle',
-                            transition: 'filter .15s',
-                          }}
-                          onMouseEnter={e => {
-                            const rect = (e.target as HTMLElement).getBoundingClientRect()
-                            setTooltip({
-                              text: `${st.full_name} · ${sk.skill_name}: ${p != null ? Math.round(p * 100) + '%' : '—'} (${guide?.label})`,
-                              action: guide?.teacher_action ?? '',
-                              x: rect.left + window.scrollX,
-                              y: rect.top + window.scrollY - 70,
-                            })
-                          }}
-                          onMouseLeave={() => setTooltip(null)}
-                        >
-                          {p != null ? Math.round(p * 100) : '—'}
-                        </td>
-                      )
-                    })}
-                    {/* Per-row struggling count */}
-                    <td style={{ padding: '2px 8px', textAlign: 'right', fontSize: 12 }}>
-                      {rowStruggling > 0
-                        ? <span style={{ color: '#f87171', fontWeight: 700 }}>⚠ {rowStruggling}</span>
-                        : <span style={{ color: '#4ade80' }}>✓</span>}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <section className="teacher-panel teacher-heatmap-panel">
+          <div className="teacher-panel-header">
+            <div>
+              <p className="teacher-eyebrow">Matrix View</p>
+              <h3 className="editorial-title">Student x skill grid</h3>
+            </div>
+            <p className="teacher-heatmap-filter-note">
+              {displayStudents.length} of {data.students.length} students shown
+            </p>
+          </div>
+
+          <div className="teacher-heatmap-scroll">
+            <table className="teacher-heatmap-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  {data.skills.map(sk => (
+                    <th key={sk.skill_id} title={sk.skill_name}>
+                      {sk.skill_name.length > 10 ? sk.skill_name.slice(0, 10) + '...' : sk.skill_name}
+                    </th>
+                  ))}
+                  <th>Struggling</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayStudents.map(st => {
+                  const rowStruggling = data.skills.filter(sk => {
+                    const cell = lookup[st.user_id]?.[sk.skill_id]
+                    return (cell?.status ?? 'not_started') === 'struggling'
+                  }).length
+                  return (
+                    <tr key={st.user_id}>
+                      <td>
+                        <Link href={`/teacher/students/${st.user_id}`} className="teacher-heatmap-student-link">
+                          {st.full_name}
+                        </Link>
+                      </td>
+                      {data.skills.map(sk => {
+                        const cell   = lookup[st.user_id]?.[sk.skill_id]
+                        const status = cell?.status ?? 'not_started'
+                        const p      = cell?.p_mastery
+                        const guide  = ACTION_GUIDE[status]
+                        return (
+                          <td
+                            key={sk.skill_id}
+                            className="teacher-heatmap-cell"
+                            style={{
+                              background: cellBg(status),
+                              color: cellText(status),
+                            }}
+                            onMouseEnter={e => {
+                              const rect = (e.target as HTMLElement).getBoundingClientRect()
+                              setTooltip({
+                                text: `${st.full_name} - ${sk.skill_name}: ${p != null ? Math.round(p * 100) + '%' : '-'} (${guide?.label})`,
+                                action: guide?.teacher_action ?? '',
+                                x: rect.left + window.scrollX,
+                                y: rect.top + window.scrollY - 70,
+                              })
+                            }}
+                            onMouseLeave={() => setTooltip(null)}
+                          >
+                            {p != null ? Math.round(p * 100) : '-'}
+                          </td>
+                        )
+                      })}
+                      <td className="teacher-heatmap-row-status">
+                        {rowStruggling > 0
+                          ? <span className="danger">Alert {rowStruggling}</span>
+                          : <span className="success">Clear</span>}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
-      {/* Floating tooltip */}
       {tooltip && (
-        <div style={{
-          position: 'fixed',
-          left: tooltip.x, top: tooltip.y,
-          background: 'var(--card)', border: '1px solid var(--border)',
-          padding: '8px 14px', borderRadius: 10, fontSize: 13,
-          boxShadow: '0 4px 16px rgba(0,0,0,.4)', zIndex: 9999,
-          pointerEvents: 'none', maxWidth: 300,
-        }}>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>{tooltip.text}</div>
-          <div style={{ color: '#fbbf24', fontSize: 12 }}>💡 {tooltip.action}</div>
+        <div
+          className="teacher-heatmap-tooltip"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+          }}
+        >
+          <div>{tooltip.text}</div>
+          <p>{tooltip.action}</p>
         </div>
       )}
-
     </div>
   )
 }

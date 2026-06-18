@@ -869,6 +869,629 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   font-size:13px;
   line-height:1.7;
 }
+.teacher-heatmap-page{
+  max-width:1280px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.teacher-heatmap-hero{
+  margin-top:4px;
+}
+.teacher-heatmap-nav{
+  justify-content:flex-end;
+}
+.teacher-heatmap-info{
+  overflow:hidden;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.teacher-heatmap-info-toggle{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  padding:17px 20px;
+  border:none;
+  color:var(--text);
+  cursor:pointer;
+  text-align:left;
+}
+.teacher-heatmap-info-toggle span:first-child{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.teacher-heatmap-info-toggle span:last-child{
+  font-size:12px;
+  font-weight:800;
+}
+.teacher-heatmap-info-content{
+  padding:20px;
+  border-top:1px solid var(--border);
+  color:var(--text);
+  line-height:1.7;
+}
+.teacher-heatmap-info-content > p{
+  margin:0 0 16px;
+  color:var(--muted);
+}
+.teacher-heatmap-guide-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+.teacher-heatmap-guide-card{
+  min-height:148px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.teacher-heatmap-guide-card span{
+  width:max-content;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+.teacher-heatmap-guide-card p{
+  margin:0;
+  color:var(--text);
+  font-size:13px;
+  line-height:1.5;
+}
+.teacher-heatmap-guide-card small{
+  margin-top:auto;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+.teacher-heatmap-hint,
+.teacher-heatmap-filter-note{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+.teacher-heatmap-summary{
+  padding-bottom:24px;
+}
+.teacher-clear-filter{
+  min-height:38px;
+  padding:8px 14px;
+  color:var(--accent);
+  background:rgba(200,91,67,.08);
+  border:1px solid rgba(200,91,67,.24);
+  border-radius:999px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:800;
+}
+.teacher-heatmap-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+.teacher-heatmap-filter{
+  min-height:138px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--text);
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+  text-align:left;
+}
+.teacher-heatmap-filter span{
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+.teacher-heatmap-filter strong{
+  color:var(--text);
+  font-family:"Playfair Display", serif;
+  font-size:42px;
+  font-weight:500;
+  line-height:1;
+}
+.teacher-heatmap-filter small{
+  color:var(--muted);
+  font-size:12px;
+}
+.teacher-heatmap-filter.active{
+  background:#FFF9F3;
+  box-shadow:inset 0 0 0 1px currentColor;
+}
+.teacher-heatmap-state{
+  margin:0;
+  padding:32px;
+  color:var(--muted);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.teacher-heatmap-panel{
+  padding:28px;
+}
+.teacher-heatmap-scroll{
+  overflow:auto;
+  border-top:1px solid var(--border);
+}
+.teacher-heatmap-table{
+  width:max-content;
+  min-width:100%;
+  border-collapse:separate;
+  border-spacing:5px;
+}
+.teacher-heatmap-table th{
+  padding:10px 8px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-align:center;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.teacher-heatmap-table th:first-child{
+  min-width:180px;
+  text-align:left;
+  position:sticky;
+  left:0;
+  z-index:2;
+  background:var(--surface);
+}
+.teacher-heatmap-table td{
+  padding:6px 8px;
+  font-size:13px;
+  vertical-align:middle;
+}
+.teacher-heatmap-table td:first-child{
+  position:sticky;
+  left:0;
+  z-index:1;
+  background:var(--surface);
+}
+.teacher-heatmap-student-link{
+  color:var(--text);
+  text-decoration:none;
+  font-weight:800;
+  white-space:nowrap;
+}
+.teacher-heatmap-student-link:hover{
+  color:var(--accent);
+}
+.teacher-heatmap-cell{
+  width:44px;
+  height:40px;
+  padding:0 !important;
+  border-radius:8px;
+  text-align:center;
+  font-size:12px !important;
+  font-weight:800;
+  cursor:default;
+}
+.teacher-heatmap-row-status{
+  min-width:96px;
+  text-align:right;
+  white-space:nowrap;
+}
+.teacher-heatmap-row-status span{
+  display:inline-flex;
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+.teacher-heatmap-row-status .danger{
+  color:#A63D40;
+  background:rgba(166,61,64,.10);
+}
+.teacher-heatmap-row-status .success{
+  color:#1F4D3A;
+  background:rgba(31,77,58,.10);
+}
+.teacher-heatmap-tooltip{
+  position:fixed;
+  z-index:9999;
+  max-width:320px;
+  padding:12px 14px;
+  color:var(--text);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  box-shadow:0 16px 38px rgba(23,20,17,.16);
+  pointer-events:none;
+}
+.teacher-heatmap-tooltip div{
+  margin-bottom:6px;
+  font-weight:800;
+}
+.teacher-heatmap-tooltip p{
+  margin:0;
+  color:var(--accent);
+  font-size:12px;
+  line-height:1.5;
+}
+.skills-page{
+  max-width:1180px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.skills-hero{
+  padding:42px;
+  background:
+    linear-gradient(135deg, rgba(200,91,67,.10), transparent 42%),
+    var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.skills-hero-top{
+  display:flex;
+  justify-content:space-between;
+  gap:28px;
+  align-items:flex-start;
+  margin-bottom:28px;
+}
+.skills-hero h2{
+  margin:10px 0 16px;
+  color:var(--text);
+  font-size:clamp(46px, 7vw, 82px);
+  line-height:.95;
+}
+.skills-hero p{
+  max-width:710px;
+  margin:0;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.8;
+}
+.skills-hero-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.skills-count-pill,
+.skills-action,
+.skills-chip,
+.skills-mini-action,
+.skills-question-pill,
+.skills-category-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:800;
+  text-decoration:none;
+}
+.skills-count-pill{
+  min-height:38px;
+  padding:8px 14px;
+  color:var(--accent);
+  background:rgba(200,91,67,.09);
+  border:1px solid rgba(200,91,67,.22);
+}
+.skills-count-pill.subtle{
+  color:var(--muted);
+  background:#F4F0EA;
+  border-color:var(--border);
+}
+.skills-action{
+  min-height:40px;
+  padding:9px 16px;
+  border:1px solid var(--border);
+  cursor:pointer;
+}
+.skills-action.primary{
+  color:#fff;
+  background:var(--accent);
+  border-color:var(--accent);
+}
+.skills-action.secondary{
+  color:var(--text);
+  background:#F4F0EA;
+}
+.skills-search-row{
+  margin-bottom:16px;
+}
+.skills-search-input{
+  width:100% !important;
+  min-height:54px;
+  padding:14px 18px !important;
+  color:var(--text) !important;
+  background:#FBF7F1 !important;
+  border:1px solid var(--border) !important;
+  border-radius:8px !important;
+  font-size:15px !important;
+}
+.skills-chip-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.skills-chip{
+  min-height:36px;
+  padding:8px 14px;
+  color:var(--muted);
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  cursor:pointer;
+}
+.skills-chip.active{
+  color:#fff;
+  background:var(--accent);
+  border-color:var(--accent);
+}
+.skills-panel{
+  padding:28px;
+  background:linear-gradient(180deg,#FBF7F1 0%,var(--surface) 100%);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.skills-panel-header{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-start;
+  margin-bottom:24px;
+}
+.skills-panel-header h3{
+  margin:8px 0 0;
+  color:var(--text);
+  font-size:34px;
+  line-height:1.05;
+}
+.skills-graph-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:14px;
+}
+.skills-graph-item{
+  padding:16px;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.skills-graph-topline{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.skills-graph-topline strong{
+  flex:1;
+  color:var(--text);
+}
+.skills-table-wrap{
+  overflow:auto;
+  border-top:1px solid var(--border);
+}
+.skills-table{
+  width:100%;
+  min-width:860px;
+  border-collapse:collapse;
+}
+.skills-table th,
+.skills-table td{
+  padding:16px 12px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  vertical-align:top;
+  font-size:14px;
+}
+.skills-table th{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+.skills-table tr:last-child td{
+  border-bottom:none;
+}
+.skills-table .badge{
+  border-radius:999px;
+  font-weight:800;
+}
+.skills-table .badge.neutral,
+.skills-graph-item .badge.neutral{
+  color:var(--muted);
+  background:#F4F0EA;
+  border:1px solid var(--border);
+}
+.skills-name{
+  display:block;
+  color:var(--text);
+  font-size:15px;
+}
+.skills-question-pill{
+  min-width:36px;
+  min-height:30px;
+  padding:5px 11px;
+  color:var(--accent);
+  background:rgba(200,91,67,.09);
+  border:1px solid rgba(200,91,67,.22);
+  font-variant-numeric:tabular-nums;
+}
+.skills-category-pill{
+  padding:5px 10px;
+  color:var(--muted);
+  background:#F4F0EA;
+  border:1px solid var(--border);
+}
+.skills-row-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.skills-mini-action{
+  min-height:32px;
+  padding:7px 11px;
+  color:var(--accent);
+  background:rgba(200,91,67,.08);
+  border:1px solid rgba(200,91,67,.22);
+  cursor:pointer;
+}
+.skills-mini-action.danger{
+  color:#A63D40;
+  background:rgba(166,61,64,.08);
+  border-color:rgba(166,61,64,.22);
+}
+.modal.skills-modal{
+  width:100%;
+  max-width:560px;
+  padding:0;
+  gap:18px;
+  overflow:hidden;
+  background:#FBF7F1;
+  border:1px solid #E3D5C9;
+  border-radius:10px;
+  box-shadow:0 28px 80px rgba(23,20,17,.28);
+}
+.modal.skills-modal::before{
+  content:"";
+  display:block;
+  height:10px;
+  background:linear-gradient(90deg,#C85B43,#DCA56F);
+}
+.modal-overlay.skills-modal-overlay{
+  background:rgba(23,20,17,.42);
+  backdrop-filter:blur(6px);
+}
+.modal.skills-modal h3{
+  margin:8px 30px 8px;
+  color:var(--text);
+  font-family:"Playfair Display", serif;
+  font-size:38px;
+  font-weight:500;
+  line-height:1.05;
+}
+.skills-modal-kicker{
+  margin:28px 30px 0;
+  color:var(--accent);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+}
+.skills-modal-subtitle{
+  margin:0 30px 18px;
+  max-width:430px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.65;
+}
+.modal.skills-modal > .meta{
+  margin-left:30px !important;
+  margin-right:30px !important;
+  color:var(--muted);
+  line-height:1.65;
+}
+.modal.skills-modal .field{
+  gap:9px;
+  margin:0 30px;
+  padding:0 0 18px;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid rgba(222,216,208,.9);
+  border-radius:8px;
+}
+.modal.skills-modal .field label{
+  color:var(--text);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+.modal.skills-modal .field input,
+.modal.skills-modal .field textarea,
+.modal.skills-modal .field select{
+  min-height:48px;
+  padding:13px 14px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid #D8CFC5 !important;
+  border-radius:8px !important;
+  font-size:14px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+}
+.modal.skills-modal .field textarea{
+  min-height:104px;
+}
+.modal.skills-modal .field input:focus,
+.modal.skills-modal .field textarea:focus,
+.modal.skills-modal .field select:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px rgba(200,91,67,.12) !important;
+}
+.modal.skills-modal select option{
+  background:#FFF9F3;
+  color:var(--text);
+}
+.modal.skills-modal input[type=range]{
+  accent-color:var(--accent);
+  padding:0 !important;
+  background:transparent !important;
+  border:none !important;
+}
+.skills-modal-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top:2px;
+  padding:10px 30px 30px;
+}
+.skills-modal-button{
+  min-height:42px;
+  padding:10px 18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:999px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:800;
+  box-shadow:0 8px 18px rgba(23,20,17,.05);
+}
+.skills-modal-button.primary{
+  color:#fff;
+  background:var(--accent);
+  border-color:var(--accent);
+  box-shadow:0 10px 24px rgba(200,91,67,.18);
+}
+.skills-modal-button.danger{
+  color:#fff;
+  background:#A63D40;
+  border-color:#A63D40;
+}
+.skills-modal-button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
 @keyframes teacherPageFloat{
   from{
     opacity:0;
@@ -993,6 +1616,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .teacher-roster-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .teacher-guide-grid{grid-template-columns:1fr}
+  .teacher-heatmap-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .skills-hero-top{flex-direction:column}
+  .skills-hero-actions{justify-content:flex-start}
   .site-header{padding:12px 16px;flex-wrap:wrap}
   .container{padding:14px}
 }
@@ -1009,6 +1635,20 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .teacher-panel-header{flex-direction:column}
   .teacher-roster-nav{justify-content:stretch}
   .teacher-roster-nav .teacher-action{width:100%}
+  .teacher-heatmap-filter-grid{grid-template-columns:1fr}
+  .teacher-heatmap-panel{padding:22px}
+  .teacher-heatmap-info-content{padding:16px}
+  .teacher-heatmap-table th:first-child,
+  .teacher-heatmap-table td:first-child{
+    position:static;
+  }
+  .skills-hero,
+  .skills-panel{padding:22px}
+  .skills-hero h2{font-size:44px}
+  .skills-action,
+  .skills-count-pill{width:100%}
+  .skills-hero-actions{width:100%}
+  .skills-panel-header{flex-direction:column}
   .teacher-sort-control{
     width:100%;
     align-items:stretch;
