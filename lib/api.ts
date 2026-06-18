@@ -581,4 +581,61 @@ export async function endChatSession(session_id: string) {
   return data
 }
 
+// ─── Self-directed learning (student-created skills, no teacher) ───────────────
+
+export async function slStartSession(payload: { topic: string; teaching_provider?: string; dynamic_skill_id?: number }) {
+  const { data } = await apiClient.post('/api/v1/selflearn/session', payload)
+  return data
+}
+
+// Upload course material (PDF/TXT/MD) → build a private, material-backed skill.
+export async function slCreatePack(payload: { topic: string; files: File[] }) {
+  const form = new FormData()
+  form.append('topic', payload.topic)
+  payload.files.forEach((f) => form.append('files', f))
+  const { data } = await apiClient.post('/api/v1/selflearn/pack', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return data as {
+    skill: { id: number; canonical_name: string; description?: string; is_private: boolean }
+    documents: Array<{ filename: string; status: string; method?: string; chunk_count: number; warning?: string }>
+    ingested: number; skipped: number; concepts: number; material_backed: boolean; subject: string
+  }
+}
+
+export async function slSendMessage(payload: { session_id: string; content: string }) {
+  const { data } = await apiClient.post('/api/v1/selflearn/message', payload)
+  return data
+}
+
+export async function slResumeSession(session_id: string) {
+  const { data } = await apiClient.get(`/api/v1/selflearn/session/${session_id}`)
+  return data
+}
+
+export async function slGetMastery(session_id: string) {
+  const { data } = await apiClient.get(`/api/v1/selflearn/mastery/${session_id}`)
+  return data
+}
+
+export async function slGetProgress() {
+  const { data } = await apiClient.get('/api/v1/selflearn/progress')
+  return data as Array<{
+    session_id: string; topic: string; is_private: boolean; phase: string; status: string
+    current_level: string; last_active_at?: string; overall_mastery: number
+    concepts_total: number; concepts_mastered: number
+    documents: Array<{ filename: string; status: string; chunk_count: number; warning?: string }>
+  }>
+}
+
+export async function slListSessions() {
+  const { data } = await apiClient.get('/api/v1/selflearn/sessions')
+  return data
+}
+
+export async function slGetProviders() {
+  const { data } = await apiClient.get('/api/v1/selflearn/providers')
+  return data
+}
+
 export default apiClient
