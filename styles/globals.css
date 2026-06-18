@@ -1877,6 +1877,216 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .admin-students-table{
   min-width:520px;
 }
+.tutor-page{
+  max-width:1280px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.tutor-hero{
+  padding:42px;
+  display:flex;
+  justify-content:space-between;
+  gap:28px;
+  align-items:flex-end;
+  background:
+    linear-gradient(135deg, rgba(200,91,67,.10), transparent 42%),
+    var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.tutor-hero h2{
+  margin:10px 0 16px;
+  color:var(--text);
+  font-size:clamp(46px, 7vw, 82px);
+  line-height:.95;
+}
+.tutor-hero p{
+  max-width:720px;
+  margin:0;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.8;
+}
+.tutor-status-card{
+  min-width:220px;
+  min-height:150px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  background:#171411;
+  border-radius:8px;
+}
+.tutor-status-card span{
+  color:#D8C9BD;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.tutor-status-card strong{
+  margin-top:16px;
+  color:#F8F4EE;
+  font-family:"Playfair Display", serif;
+  font-size:42px;
+  font-weight:500;
+  line-height:1;
+}
+.tutor-status-card p{
+  margin:8px 0 0;
+  color:#D8C9BD;
+  font-size:13px;
+}
+.tutor-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 360px;
+  gap:24px;
+  align-items:flex-start;
+}
+.tutor-chat-panel,
+.tutor-side-panel{
+  padding:28px;
+  background:linear-gradient(180deg,#FBF7F1 0%,var(--surface) 100%);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.tutor-side-panel{
+  position:sticky;
+  top:112px;
+}
+.tutor-chat-window{
+  min-height:360px;
+  max-height:520px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  overflow-y:auto;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.tutor-message{
+  max-width:78%;
+  padding:12px 14px;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.6;
+}
+.tutor-message.user{
+  align-self:flex-end;
+  color:#fff;
+  background:var(--accent);
+}
+.tutor-message.assistant{
+  align-self:flex-start;
+  color:var(--text);
+  background:#FFFDF9;
+  border:1px solid var(--border);
+}
+.tutor-prompt-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:16px;
+}
+.tutor-composer{
+  margin-top:16px;
+}
+.tutor-composer textarea{
+  width:100%;
+  min-height:112px;
+  padding:14px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid #D8CFC5 !important;
+  border-radius:8px !important;
+  resize:vertical;
+}
+.tutor-toolbar{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:center;
+  margin-top:16px;
+}
+.tutor-button-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.tutor-clear-button{
+  min-height:40px;
+  padding:9px 14px;
+  color:var(--muted);
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:999px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:800;
+}
+.tutor-stream-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+}
+.tutor-info-card,
+.tutor-source-card,
+.tutor-path-item{
+  padding:14px;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.tutor-info-card p,
+.tutor-source-card p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+}
+.tutor-info-card strong{
+  display:block;
+  margin-top:6px;
+  color:var(--text);
+  line-height:1.5;
+}
+.tutor-source-block,
+.tutor-path-block{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:18px;
+}
+.tutor-source-card span{
+  margin-left:8px;
+  color:var(--accent);
+  font-weight:800;
+}
+.tutor-path-item{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.tutor-path-item span{
+  color:var(--accent);
+  font-family:"Playfair Display", serif;
+  font-size:22px;
+  line-height:1;
+}
+.tutor-path-item p{
+  margin:0;
+  color:var(--text);
+  font-size:13px;
+  line-height:1.45;
+}
 @keyframes teacherPageFloat{
   from{
     opacity:0;
@@ -2011,6 +2221,10 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .knowledge-hero{flex-direction:column;align-items:flex-start}
   .knowledge-results{position:static}
   .admin-device-grid{grid-template-columns:1fr}
+  .tutor-hero,
+  .tutor-layout{grid-template-columns:1fr}
+  .tutor-hero{flex-direction:column;align-items:flex-start}
+  .tutor-side-panel{position:static}
   .site-header{padding:12px 16px;flex-wrap:wrap}
   .container{padding:14px}
 }
@@ -2059,6 +2273,16 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .knowledge-stat-grid{width:100%;grid-template-columns:1fr}
   .knowledge-query-row{grid-template-columns:1fr}
   .knowledge-doc-card{align-items:flex-start;flex-direction:column}
+  .tutor-hero,
+  .tutor-chat-panel,
+  .tutor-side-panel{padding:22px}
+  .tutor-hero h2{font-size:44px}
+  .tutor-status-card{width:100%}
+  .tutor-message{max-width:92%}
+  .tutor-toolbar{align-items:flex-start;flex-direction:column}
+  .tutor-button-row,
+  .tutor-button-row .skills-action,
+  .tutor-clear-button{width:100%}
   .teacher-sort-control{
     width:100%;
     align-items:stretch;
