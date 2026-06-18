@@ -99,12 +99,18 @@ function extractOptions(raw: any): Record<string, string> | undefined {
 function MasteryBar({ pct, label }: { pct: number; label?: string }) {
   const clamped = Math.min(pct, 100)
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      {label && <span className="meta" style={{ whiteSpace: 'nowrap', fontSize: 12 }}>{label}</span>}
-      <div className="progress" style={{ flex: 1, height: 6 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      {label && (
+        <span style={{ whiteSpace: 'nowrap', fontSize: 12, color: 'var(--muted)', minWidth: 60 }}>
+          {label}
+        </span>
+      )}
+      <div className="teacher-progress" style={{ flex: 1 }}>
         <span style={{ width: `${clamped}%` }} />
       </div>
-      <span style={{ fontSize: 12, minWidth: 32, textAlign: 'right' }}>{clamped.toFixed(0)}%</span>
+      <span style={{ fontSize: 12, minWidth: 36, textAlign: 'right', fontWeight: 700, color: 'var(--text)' }}>
+        {clamped.toFixed(0)}%
+      </span>
     </div>
   )
 }
@@ -144,52 +150,59 @@ function QuestionPanel({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
       {/* Skill + metrics row */}
-      <div className="card" style={{ padding: '10px 14px' }}>
+      <div className="teacher-panel" style={{ padding: '14px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <span className="badge neutral" style={{ fontSize: 12 }}>{skillName || 'Learning session'}</span>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <span className="meta" style={{ fontSize: 12 }}>⏱ <strong>{fmtTime(elapsed)}</strong></span>
+          <div>
+            <p className="teacher-eyebrow" style={{ margin: 0 }}>{skillName || 'Learning session'}</p>
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>
+              ⏱ {fmtTime(elapsed)}
+            </span>
             {!cameraOn && (
-              <button type="button" className="btn small secondary" onClick={onEnableCamera} style={{ fontSize: 11 }} title="Enable camera engagement tracking">
+              <button type="button" className="teacher-action" onClick={onEnableCamera}
+                style={{ minHeight: 'unset', padding: '6px 12px', fontSize: 11, gap: 6 }}
+                title="Enable camera engagement tracking">
                 👁 Camera off
               </button>
             )}
             {cameraOn && (
-              <button type="button" className="btn small secondary" onClick={onDisableCamera} style={{ fontSize: 11, color: '#4ade80' }} title="Camera tracking active — click to disable">
+              <button type="button" className="teacher-action primary" onClick={onDisableCamera}
+                style={{ minHeight: 'unset', padding: '6px 12px', fontSize: 11, gap: 6 }}
+                title="Camera tracking active — click to disable">
                 👁 On
               </button>
             )}
-            <button type="button" className="btn small secondary" onClick={onEnd} style={{ fontSize: 12 }}>
+            <button type="button" className="teacher-action" onClick={onEnd}
+              style={{ minHeight: 'unset', padding: '6px 14px', fontSize: 12 }}>
               ← Exit
             </button>
           </div>
         </div>
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 12 }}>
           <MasteryBar pct={mastery} label="Mastery" />
         </div>
         {engagementScore != null && (
-          <div style={{ marginTop: 6 }}>
+          <div style={{ marginTop: 8 }}>
             <MasteryBar pct={engagementScore * 100} label="Engagement" />
           </div>
         )}
       </div>
 
       {/* Question display */}
-      <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, padding: '20px 18px', overflowY: 'auto' }}>
+      <div className="teacher-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 18, overflowY: 'auto' }}>
         {!question ? (
-          <div className="empty-state" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="empty-state" style={{ flex: 1 }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 36, marginBottom: 10 }}>💬</div>
-              <p className="meta">Waiting for the next question…</p>
+              <p style={{ color: 'var(--muted)', margin: 0 }}>Waiting for the next question…</p>
             </div>
           </div>
         ) : (
           <>
             <div>
-              <span className="badge neutral" style={{ fontSize: 11, marginBottom: 10, display: 'inline-block' }}>
-                Practice Question
-              </span>
-              <p style={{ fontSize: 16, lineHeight: 1.7, margin: 0, fontWeight: 500 }}>
+              <p className="teacher-eyebrow" style={{ marginBottom: 10 }}>Practice Question</p>
+              <p style={{ fontSize: 16, lineHeight: 1.7, margin: 0, fontWeight: 500, color: 'var(--text)' }}>
                 {question.content}
               </p>
             </div>
@@ -197,26 +210,22 @@ function QuestionPanel({
             {question.options && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {Object.entries(question.options).map(([k, v]) => {
-                  let border = '1px solid rgba(255,255,255,0.1)'
-                  let bg = 'rgba(255,255,255,0.03)'
-                  let color = '#e2e8f0'
+                  let borderColor = 'var(--border)'
+                  let bg = 'var(--surface)'
+                  let color = 'var(--text)'
+
                   if (answered && k === question.selectedAnswer) {
                     if (answerCorrect === true) {
-                      border = '1px solid #4ade80'
-                      bg = 'rgba(74,222,128,0.15)'
-                      color = '#4ade80'
+                      borderColor = '#1F4D3A'; bg = 'rgba(31,77,58,0.08)'; color = '#1F4D3A'
                     } else if (answerCorrect === false) {
-                      border = '1px solid #f87171'
-                      bg = 'rgba(248,113,113,0.15)'
-                      color = '#f87171'
+                      borderColor = '#A63D40'; bg = 'rgba(166,61,64,0.08)'; color = '#A63D40'
                     } else {
-                      border = '1px solid var(--accent)'
-                      bg = 'rgba(14,165,233,0.12)'
-                      color = 'var(--accent)'
+                      borderColor = 'var(--accent)'; bg = 'var(--accent-dim)'; color = 'var(--accent)'
                     }
                   } else if (answered) {
-                    color = '#475569'
+                    color = 'var(--muted)'
                   }
+
                   return (
                     <button
                       key={k}
@@ -224,13 +233,15 @@ function QuestionPanel({
                       onClick={() => !answered && !pendingAnswer && onAnswer(k)}
                       disabled={answered || pendingAnswer}
                       style={{
-                        textAlign: 'left', width: '100%', padding: '12px 16px',
-                        borderRadius: 10, border, background: bg, color,
+                        textAlign: 'left', width: '100%', padding: '13px 16px',
+                        borderRadius: 8, border: `1px solid ${borderColor}`,
+                        background: bg, color,
                         cursor: answered || pendingAnswer ? 'default' : 'pointer',
-                        fontSize: 14, lineHeight: 1.5, transition: 'all 0.15s',
+                        fontSize: 14, lineHeight: 1.5,
+                        transition: 'all 0.15s', fontFamily: 'inherit',
                       }}
                     >
-                      <strong style={{ marginRight: 8, opacity: 0.7 }}>{k}.</strong>{safeStr(v)}
+                      <strong style={{ marginRight: 8, opacity: 0.6 }}>{k}.</strong>{safeStr(v)}
                     </button>
                   )
                 })}
@@ -238,18 +249,20 @@ function QuestionPanel({
             )}
 
             <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
-              {/* <button
-                type="button"
-                className="btn small secondary"
-                onClick={onHint}
+              {/* <button type="button" className="teacher-action" onClick={onHint}
                 disabled={answered || pendingAnswer}
-              >
+                style={{ minHeight: 'unset', padding: '8px 14px', fontSize: 13 }}>
                 💡 Hint
               </button> */}
               {answered && (
                 <span
-                  className={`badge ${answerCorrect === true ? 'success' : answerCorrect === false ? 'danger' : 'neutral'}`}
-                  style={{ fontSize: 12, alignSelf: 'center' }}
+                  style={{
+                    fontSize: 13, fontWeight: 700, padding: '6px 14px',
+                    borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: answerCorrect === true ? 'rgba(31,77,58,0.1)' : answerCorrect === false ? 'rgba(166,61,64,0.1)' : 'var(--accent-dim)',
+                    color: answerCorrect === true ? '#1F4D3A' : answerCorrect === false ? '#A63D40' : 'var(--accent)',
+                    border: `1px solid ${answerCorrect === true ? 'rgba(31,77,58,0.3)' : answerCorrect === false ? 'rgba(166,61,64,0.3)' : 'rgba(200,91,67,0.3)'}`,
+                  }}
                 >
                   {answerCorrect === true ? '✓ Correct! Next question loading…' : answerCorrect === false ? '✗ Wrong — next question loading…' : 'Submitted…'}
                 </span>
@@ -266,27 +279,35 @@ function QuestionPanel({
 function ChatBubble({ msg }: { msg: ChatMsg }) {
   const isStudent = msg.role === 'student'
 
-  let bubbleStyle: React.CSSProperties = {}
+  let bubbleExtra: React.CSSProperties = {}
   if (msg.type === 'FEEDBACK') {
-    bubbleStyle = {
-      background: msg.isCorrect ? 'rgba(74,222,128,0.08)' : 'rgba(248,113,113,0.08)',
-      border: `1px solid ${msg.isCorrect ? 'rgba(74,222,128,0.3)' : 'rgba(248,113,113,0.3)'}`,
+    bubbleExtra = {
+      background: msg.isCorrect ? 'rgba(31,77,58,0.08)' : 'rgba(166,61,64,0.08)',
+      border: `1px solid ${msg.isCorrect ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
     }
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: isStudent ? 'flex-end' : 'flex-start', gap: 3 }}>
-      <span className="meta" style={{ fontSize: 11 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: isStudent ? 'flex-end' : 'flex-start', gap: 4 }}>
+      <span style={{ fontSize: 11, color: 'var(--muted)' }}>
         {isStudent ? 'You' : 'Tutor AI'} · {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </span>
       <div
         className={`chat-bubble ${isStudent ? 'user' : 'assistant'}`}
-        style={{ maxWidth: '88%', ...bubbleStyle }}
+        style={{
+          maxWidth: '88%',
+          background: isStudent ? 'var(--accent)' : 'var(--surface)',
+          color: isStudent ? '#fff' : 'var(--text)',
+          border: isStudent ? 'none' : '1px solid var(--border)',
+          borderBottomRightRadius: isStudent ? 4 : 14,
+          borderBottomLeftRadius: isStudent ? 14 : 4,
+          ...bubbleExtra,
+        }}
       >
         {msg.type === 'FEEDBACK' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 16 }}>{msg.isCorrect ? '✅' : '❌'}</span>
-            <strong style={{ color: msg.isCorrect ? '#4ade80' : '#f87171', fontSize: 13 }}>
+            <strong style={{ color: msg.isCorrect ? '#1F4D3A' : '#A63D40', fontSize: 13 }}>
               {msg.isCorrect ? 'Correct!' : 'Not quite'}
             </strong>
           </div>
@@ -294,7 +315,7 @@ function ChatBubble({ msg }: { msg: ChatMsg }) {
         {msg.type === 'HINT' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 14 }}>💡</span>
-            <strong style={{ fontSize: 12, color: '#fbbf24' }}>Hint</strong>
+            <strong style={{ fontSize: 12, color: '#B8893C' }}>Hint</strong>
           </div>
         )}
 
@@ -310,25 +331,25 @@ function ChatBubble({ msg }: { msg: ChatMsg }) {
             <img
               src={msg.imageUrl}
               alt="AI-generated infographic"
-              style={{ maxWidth: '100%', borderRadius: 10, display: 'block', border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ maxWidth: '100%', borderRadius: 8, display: 'block', border: '1px solid var(--border)' }}
             />
-            <span className="meta" style={{ fontSize: 10, marginTop: 4, display: 'block' }}>
+            <span style={{ fontSize: 10, marginTop: 4, display: 'block', color: 'var(--muted)' }}>
               🖼️ Visual generated by Gemini
             </span>
           </div>
         )}
 
         {!msg.imageUrl && msg.imageError && (
-          <p className="meta" style={{ fontSize: 11, marginTop: 8, fontStyle: 'italic' }}>
-            🖼️ Couldn’t generate a visual for this one.
+          <p style={{ fontSize: 11, marginTop: 8, fontStyle: 'italic', color: 'var(--muted)', margin: 0 }}>
+            🖼️ Couldn't generate a visual for this one.
           </p>
         )}
 
         {msg.type === 'FEEDBACK' && msg.masteryAfter != null && (
-          <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
             <MasteryBar pct={msg.masteryAfter * 100} label="Mastery" />
             {msg.masteryBefore != null && (
-              <p className="meta" style={{ fontSize: 11, marginTop: 3 }}>
+              <p style={{ fontSize: 11, marginTop: 4, color: 'var(--muted)', margin: '4px 0 0' }}>
                 {msg.masteryBefore < msg.masteryAfter ? '↑' : '→'} {(msg.masteryBefore * 100).toFixed(0)}% → {(msg.masteryAfter * 100).toFixed(0)}%
               </p>
             )}
@@ -336,7 +357,15 @@ function ChatBubble({ msg }: { msg: ChatMsg }) {
         )}
 
         {msg.type === 'ANSWER' && msg.isCorrect != null && (
-          <span className={`badge ${msg.isCorrect ? 'success' : 'danger'}`} style={{ marginTop: 6, display: 'inline-flex', fontSize: 11 }}>
+          <span
+            style={{
+              marginTop: 6, display: 'inline-flex', fontSize: 11,
+              padding: '3px 10px', borderRadius: 999, fontWeight: 700,
+              background: msg.isCorrect ? 'rgba(31,77,58,0.12)' : 'rgba(166,61,64,0.12)',
+              color: msg.isCorrect ? '#1F4D3A' : '#A63D40',
+              border: `1px solid ${msg.isCorrect ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+            }}
+          >
             {msg.isCorrect ? '✓ Correct' : '✗ Incorrect'}
           </span>
         )}
@@ -939,177 +968,260 @@ export default function LearnPage() {
       .catch(() => { /* silent — engagement is optional */ })
   }
 
-  // ─── Skill picker (before session) ────────────────────────────────────────
-
   // ─── Assessment phase UI ──────────────────────────────────────────────────
+
   if (phase === 'assessment' && assessmentQs.length > 0) {
     const q = assessmentQs[assessmentIdx]
     const total = assessmentQs.length
     const pct = Math.round(((assessmentIdx) / total) * 100)
+
     return (
-      <div style={{ maxWidth: 640, margin: '0 auto' }}>
-        <section className="card stack">
-          <div>
-            <div className="row" style={{ marginBottom: 4 }}>
-              <h2 style={{ margin: 0 }}>Initial Assessment</h2>
-              <span className="badge neutral">{assessmentIdx + 1} / {total}</span>
+      <div style={{ maxWidth: 680, margin: '0 auto' }}>
+        <div className="teacher-dashboard">
+          <section className="teacher-hero" style={{ padding: '36px 40px' }}>
+            <div>
+              <p className="teacher-eyebrow">Initial Assessment</p>
+              <h2 className="editorial-title" style={{ fontSize: 'clamp(36px,5vw,60px)', margin: '10px 0 14px' }}>
+                Knowledge check
+              </h2>
+              <p style={{ margin: 0, color: 'var(--muted)', fontSize: 16, lineHeight: 1.7 }}>
+                Answer a few questions so we can calibrate the right difficulty for you.
+              </p>
             </div>
-            <p className="meta">ඔබේ දැනුම් මට්ටම measure කිරීමට ප්‍රශ්න කිහිපයකට answer කරන්න.</p>
-            <div className="progress" style={{ marginTop: 8 }}>
-              <span style={{ width: `${pct}%` }} />
+            <div className="teacher-hero-note">
+              <span>Question</span>
+              <strong style={{ fontSize: 52 }}>{assessmentIdx + 1}<span style={{ fontSize: 28, opacity: 0.5 }}>/{total}</span></strong>
+              <p>initial assessment</p>
             </div>
-          </div>
+          </section>
 
-          <div style={{ padding: '16px 0' }}>
-            <p style={{ fontSize: 16, lineHeight: 1.7, fontWeight: 500 }}>{q.question_text}</p>
+          <section className="teacher-panel">
+            <div style={{ marginBottom: 20 }}>
+              <div className="teacher-progress">
+                <span style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+
+            <p style={{ fontSize: 17, lineHeight: 1.75, fontWeight: 500, color: 'var(--text)', margin: '0 0 20px' }}>
+              {q.question_text}
+            </p>
+
             {q.difficulty && (
-              <span className="badge neutral" style={{ fontSize: 11, marginTop: 4, display: 'inline-block' }}>
+              <p className="teacher-eyebrow" style={{ marginBottom: 16 }}>
                 Difficulty {q.difficulty}
-              </span>
+              </p>
             )}
-          </div>
 
-          {q.options && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {Object.entries(q.options).map(([k, v]) => {
-                let border = '1px solid rgba(255,255,255,0.1)'
-                let bg = 'rgba(255,255,255,0.03)'
-                let color = '#e2e8f0'
-                if (assessmentSelected === k) {
-                  if (assessmentFeedback === true)  { border = '1px solid #4ade80'; bg = 'rgba(74,222,128,0.15)'; color = '#4ade80' }
-                  if (assessmentFeedback === false)  { border = '1px solid #f87171'; bg = 'rgba(248,113,113,0.15)'; color = '#f87171' }
-                } else if (assessmentSelected && k === q.correct_answer) {
-                  border = '1px solid #4ade80'; bg = 'rgba(74,222,128,0.08)'; color = '#4ade80'
-                } else if (assessmentSelected) {
-                  color = '#475569'
-                }
-                return (
-                  <button key={k} type="button"
-                    onClick={() => handleAssessmentAnswer(k)}
-                    disabled={!!assessmentSelected}
-                    style={{ textAlign: 'left', width: '100%', padding: '12px 16px', borderRadius: 10, border, background: bg, color, cursor: assessmentSelected ? 'default' : 'pointer', fontSize: 14, lineHeight: 1.5 }}
-                  >
-                    <strong style={{ marginRight: 8, opacity: 0.7 }}>{k}.</strong>{safeStr(v)}
-                  </button>
-                )
-              })}
-            </div>
-          )}
+            {q.options && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {Object.entries(q.options).map(([k, v]) => {
+                  let borderColor = 'var(--border)'
+                  let bg = 'var(--surface)'
+                  let color = 'var(--text)'
 
-          {assessmentSelected && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span className={`badge ${assessmentFeedback ? 'success' : 'danger'}`}>
-                {assessmentFeedback ? '✓ Correct!' : '✗ Incorrect'}
-              </span>
-              <button type="button" className="btn" onClick={handleAssessmentNext} disabled={assessmentSubmitting}>
-                {assessmentSubmitting ? 'Submitting…' : assessmentIdx + 1 < assessmentQs.length ? 'Next →' : 'Finish Assessment →'}
-              </button>
-            </div>
-          )}
+                  if (assessmentSelected === k) {
+                    if (assessmentFeedback === true)  { borderColor = '#1F4D3A'; bg = 'rgba(31,77,58,0.08)'; color = '#1F4D3A' }
+                    if (assessmentFeedback === false)  { borderColor = '#A63D40'; bg = 'rgba(166,61,64,0.08)'; color = '#A63D40' }
+                  } else if (assessmentSelected && k === q.correct_answer) {
+                    borderColor = '#1F4D3A'; bg = 'rgba(31,77,58,0.06)'; color = '#1F4D3A'
+                  } else if (assessmentSelected) {
+                    color = 'var(--muted)'
+                  }
 
-          {error && <p className="feedback error">{error}</p>}
-        </section>
+                  return (
+                    <button key={k} type="button"
+                      onClick={() => handleAssessmentAnswer(k)}
+                      disabled={!!assessmentSelected}
+                      style={{
+                        textAlign: 'left', width: '100%', padding: '14px 18px',
+                        borderRadius: 8, border: `1px solid ${borderColor}`,
+                        background: bg, color,
+                        cursor: assessmentSelected ? 'default' : 'pointer',
+                        fontSize: 15, lineHeight: 1.5, fontFamily: 'inherit',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <strong style={{ marginRight: 10, opacity: 0.6 }}>{k}.</strong>{safeStr(v)}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {assessmentSelected && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 20 }}>
+                <span
+                  style={{
+                    fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 6,
+                    background: assessmentFeedback ? 'rgba(31,77,58,0.1)' : 'rgba(166,61,64,0.1)',
+                    color: assessmentFeedback ? '#1F4D3A' : '#A63D40',
+                    border: `1px solid ${assessmentFeedback ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+                  }}
+                >
+                  {assessmentFeedback ? '✓ Correct!' : '✗ Incorrect'}
+                </span>
+                <button type="button" className="teacher-action primary"
+                  onClick={handleAssessmentNext}
+                  disabled={assessmentSubmitting}
+                  style={{ minHeight: 'unset', padding: '10px 22px' }}
+                >
+                  {assessmentSubmitting ? 'Submitting…' : assessmentIdx + 1 < assessmentQs.length ? 'Next →' : 'Finish Assessment →'}
+                </button>
+              </div>
+            )}
+
+            {error && <p className="feedback error" style={{ marginTop: 16 }}>{error}</p>}
+          </section>
+        </div>
       </div>
     )
   }
 
+  // ─── Skill picker ─────────────────────────────────────────────────────────
+
   if (!sessionId && !sessionEnded) {
     return (
-      <div className="grid-two" style={{ alignItems: 'start' }}>
-        <section className="card stack">
+      <div className="teacher-dashboard">
+        <section className="teacher-hero">
           <div>
-            <h2>Practice Session</h2>
-            <p className="meta">Select a topic and start practising. Questions appear on the left, tutor chat on the right.</p>
-          </div>
-
-          <div className="stack">
-            <h4 style={{ margin: 0 }}>Choose a topic</h4>
-            {skills.length === 0 ? (
-              <p className="meta">Loading skills…</p>
-            ) : (
-              <div className="chip-row">
-                {skills.map((s: any) => (
-                  <button key={s.id} type="button"
-                    className={`chip ${selectedSkill === s.id ? 'active' : ''}`}
-                    onClick={() => handleSkillSelect(s.id)}
-                  >
-                    {s.name}
-                    {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
-                      <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.7 }}>▶ active</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Skill status info */}
-            {selectedSkill && skillStatus && !statusLoading && (
-              <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                {skillStatus.has_active_session ? (
-                  <p className="meta" style={{ margin: 0 }}>
-                    ▶️ <strong>Active session</strong> — {skillStatus.message_count} messages saved.
-                    {skillStatus.mastery != null && ` Mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
-                  </p>
-                ) : skillStatus.assessment_done ? (
-                  <p className="meta" style={{ margin: 0 }}>
-                    ✅ Assessment done.
-                    {skillStatus.mastery != null && ` Current mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
-                  </p>
-                ) : (
-                  <p className="meta" style={{ margin: 0 }}>
-                    📋 New skill — initial assessment will run first (3 questions).
-                  </p>
-                )}
-              </div>
-            )}
-            {statusLoading && <p className="meta" style={{ margin: 0 }}>Checking session…</p>}
-          </div>
-
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className="btn"
-              disabled={!selectedSkill || loading || statusLoading}
-              onClick={handleStartOrContinue}
-              style={skillStatus?.has_active_session ? { background: '#7c3aed' } : {}}
-            >
-              {loading ? 'Loading…' :
-               statusLoading ? 'Checking…' :
-               skillStatus?.has_active_session ? '▶ Continue Session' :
-               'Start Session'}
-            </button>
-            <span className="meta" style={{ fontSize: 12 }}>
-              👁 Camera engagement tracking will start automatically
-            </span>
-          </div>
-
-          {error && <p className="feedback error">{error}</p>}
-          <video ref={videoRef} playsInline muted style={{ display: 'none' }} />
-        </section>
-
-        <aside className="card stack">
-          <h3 style={{ margin: 0 }}>How it works</h3>
-          <div className="list">
-            {[
-              ['Pick a topic', 'Select a skill. The AI picks the right difficulty for you.'],
-              ['Answer questions', 'Questions appear on the left. Click an option to answer.'],
-              ['Chat with tutor', 'Feedback and explanations appear on the right. Ask anything.'],
-              ['Hint anytime', 'Click Hint or type "hint" in the chat for guidance.'],
-              ['End and review', 'End the session to see accuracy, mastery, and time.'],
-            ].map(([title, desc]) => (
-              <div className="list-item" key={title}>
-                <strong>{title}</strong>
-                <p className="meta" style={{ marginTop: 4 }}>{desc}</p>
-              </div>
-            ))}
+            <p className="teacher-eyebrow">Practice Studio</p>
+            <h2 className="editorial-title">
+              Practice Session
+            </h2>
+            <p>
+              Select a topic and start practising. Questions appear on the left, tutor chat on the right.
+            </p>
           </div>
           {mastery > 0 && (
-            <div>
-              <p className="meta" style={{ marginBottom: 6 }}>Current overall mastery</p>
-              <MasteryBar pct={mastery} />
+            <div className="teacher-hero-note">
+              <span>Overall mastery</span>
+              <strong>{mastery.toFixed(0)}%</strong>
+              <p>across all skills</p>
             </div>
           )}
-        </aside>
+        </section>
+
+        <div className="teacher-layout">
+          <section className="teacher-main">
+            <section className="teacher-panel">
+              <div className="teacher-panel-header">
+                <div>
+                  <p className="teacher-eyebrow">Step 1</p>
+                  <h3 className="editorial-title">Choose a topic</h3>
+                </div>
+              </div>
+
+              {skills.length === 0 ? (
+                <p style={{ color: 'var(--muted)', margin: 0 }}>Loading skills…</p>
+              ) : (
+                <div className="skills-chip-row">
+                  {skills.map((s: any) => (
+                    <button key={s.id} type="button"
+                      className={`skills-chip ${selectedSkill === s.id ? 'active' : ''}`}
+                      onClick={() => handleSkillSelect(s.id)}
+                      style={{ borderRadius: 8, fontSize: 14 }}
+                    >
+                      {s.name}
+                      {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
+                        <span style={{ marginLeft: 8, fontSize: 10, opacity: 0.75 }}>▶ active</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Skill status info */}
+              {selectedSkill && skillStatus && !statusLoading && (
+                <div style={{
+                  marginTop: 16, padding: '14px 18px', borderRadius: 8,
+                  background: 'var(--bg)', border: '1px solid var(--border)',
+                }}>
+                  {skillStatus.has_active_session ? (
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 14 }}>
+                      ▶️ <strong>Active session</strong> — {skillStatus.message_count} messages saved.
+                      {skillStatus.mastery != null && ` Mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
+                    </p>
+                  ) : skillStatus.assessment_done ? (
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 14 }}>
+                      ✅ Assessment done.
+                      {skillStatus.mastery != null && ` Current mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
+                    </p>
+                  ) : (
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 14 }}>
+                      📋 New skill — initial assessment will run first (3 questions).
+                    </p>
+                  )}
+                </div>
+              )}
+              {statusLoading && (
+                <p style={{ color: 'var(--muted)', margin: '12px 0 0', fontSize: 14 }}>Checking session…</p>
+              )}
+            </section>
+
+            <section className="teacher-panel">
+              <div className="teacher-panel-header">
+                <div>
+                  <p className="teacher-eyebrow">Step 2</p>
+                  <h3 className="editorial-title">Begin learning</h3>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="teacher-action primary"
+                  disabled={!selectedSkill || loading || statusLoading}
+                  onClick={handleStartOrContinue}
+                  style={{
+                    minHeight: 'unset', padding: '12px 28px', fontSize: 15,
+                    ...(skillStatus?.has_active_session ? { background: '#7c3aed', borderColor: '#7c3aed' } : {}),
+                  }}
+                >
+                  {loading ? 'Loading…' :
+                   statusLoading ? 'Checking…' :
+                   skillStatus?.has_active_session ? '▶ Continue Session' :
+                   'Start Session'}
+                </button>
+                <p style={{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>
+                  👁 Camera engagement tracking will start automatically
+                </p>
+              </div>
+
+              {error && <p className="feedback error" style={{ marginTop: 12 }}>{error}</p>}
+            </section>
+          </section>
+
+          <aside className="teacher-actions">
+            <p className="teacher-eyebrow">How it works</p>
+            <h3 className="editorial-title">Your session guide</h3>
+
+            <div className="teacher-action-list">
+              {[
+                ['01', 'Pick a topic', 'Select a skill. The AI picks the right difficulty for you.'],
+                ['02', 'Answer questions', 'Questions appear on the left. Click an option to answer.'],
+                ['03', 'Chat with tutor', 'Feedback and explanations appear on the right. Ask anything.'],
+                ['04', 'Hint anytime', 'Click Hint or type "hint" in the chat for guidance.'],
+                ['05', 'End and review', 'End the session to see accuracy, mastery, and time.'],
+              ].map(([num, title, desc]) => (
+                <div key={num} style={{
+                  display: 'flex', gap: 14, padding: '14px 0',
+                  borderBottom: '1px solid var(--border)',
+                }}>
+                  <span style={{
+                    fontFamily: '"Playfair Display", serif', fontSize: 18,
+                    fontWeight: 500, color: 'var(--muted)', minWidth: 24, paddingTop: 2,
+                  }}>{num}</span>
+                  <div>
+                    <strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>{title}</strong>
+                    <p style={{ margin: 0, fontSize: 13, color: 'var(--muted)', lineHeight: 1.6 }}>{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
+
+        <video ref={videoRef} playsInline muted style={{ display: 'none' }} />
       </div>
     )
   }
@@ -1119,60 +1231,81 @@ export default function LearnPage() {
   if (sessionEnded && summary) {
     const acc = summary.accuracy_pct ?? summary.accuracy ?? null
     return (
-      <div className="stack" style={{ maxWidth: 600, margin: '0 auto' }}>
-        <section className="card stack" style={{ textAlign: 'center', padding: '32px 24px' }}>
-          <div style={{ fontSize: 48 }}>🎉</div>
-          <h2 style={{ margin: 0 }}>Session complete!</h2>
-          <p className="meta">Great work. Here's your summary.</p>
-        </section>
-        <section className="card stack">
-          <div className="kpi-grid">
-            <div className="kpi-card">
-              <p className="kpi-label">Questions</p>
-              <p className="kpi-value">{summary.practice_questions ?? summary.total_questions ?? '—'}</p>
-            </div>
-            <div className="kpi-card">
-              <p className="kpi-label">Accuracy</p>
-              <p className="kpi-value" style={{ color: '#4ade80' }}>
-                {acc != null ? `${typeof acc === 'number' && acc <= 1 ? Math.round(acc * 100) : Math.round(acc)}%` : '—'}
-              </p>
-            </div>
-            <div className="kpi-card">
-              <p className="kpi-label">Time</p>
-              <p className="kpi-value">{fmtTime(summary.time_elapsed ?? elapsed)}</p>
-            </div>
+      <div className="teacher-dashboard">
+        <section className="teacher-hero">
+          <div>
+            <p className="teacher-eyebrow">Session Complete</p>
+            <h2 className="editorial-title">
+              Great work! 🎉
+            </h2>
+            <p>Here's a summary of your session performance.</p>
           </div>
-          {summary.mastery_start != null && summary.mastery_end != null && (
-            <div>
-              <div className="row" style={{ marginBottom: 6 }}>
-                <p className="meta">Mastery progress</p>
-                <span className="meta">{(summary.mastery_start * 100).toFixed(0)}% → {(summary.mastery_end * 100).toFixed(0)}%</span>
-              </div>
-              <MasteryBar pct={summary.mastery_end * 100} />
-            </div>
-          )}
-          {summary.avg_engagement != null && (
-            <div className="list-item">
-              <p className="meta">Avg engagement</p>
-              <strong>{(summary.avg_engagement * 100).toFixed(0)}%</strong>
+          {summary.mastery_end != null && (
+            <div className="teacher-hero-note">
+              <span>Final mastery</span>
+              <strong>{(summary.mastery_end * 100).toFixed(0)}%</strong>
+              <p>{summary.mastery_start != null ? `from ${(summary.mastery_start * 100).toFixed(0)}%` : 'achieved'}</p>
             </div>
           )}
         </section>
-        <div className="row">
-          <button type="button" className="btn" onClick={() => {
-            setSessionId(null); setSessionEnded(false); setSummary(null)
-            setMessages([]); setPhase('skill-pick')
-            // Refresh status so skill picker shows updated mastery
-            if (selectedSkill && user?.id) {
-              getSessionStatus(selectedSkill).then((s) => {
-                setSkillStatus(s)
-                if (s.mastery != null) setMastery(s.mastery * 100)
-              }).catch(() => {})
-            }
-          }}>
+
+        <div className="teacher-kpi-grid">
+          <div className="teacher-kpi-card">
+            <p>Questions</p>
+            <strong>{summary.practice_questions ?? summary.total_questions ?? '—'}</strong>
+          </div>
+          <div className="teacher-kpi-card">
+            <p>Accuracy</p>
+            <strong style={{ color: '#1F4D3A' }}>
+              {acc != null ? `${typeof acc === 'number' && acc <= 1 ? Math.round(acc * 100) : Math.round(acc)}%` : '—'}
+            </strong>
+          </div>
+          <div className="teacher-kpi-card">
+            <p>Time</p>
+            <strong>{fmtTime(summary.time_elapsed ?? elapsed)}</strong>
+          </div>
+        </div>
+
+        {(summary.mastery_start != null && summary.mastery_end != null) || summary.avg_engagement != null ? (
+          <section className="teacher-panel">
+            {summary.mastery_start != null && summary.mastery_end != null && (
+              <div style={{ marginBottom: summary.avg_engagement != null ? 20 : 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <p className="teacher-eyebrow" style={{ margin: 0 }}>Mastery Progress</p>
+                  <span style={{ fontSize: 13, color: 'var(--muted)' }}>
+                    {(summary.mastery_start * 100).toFixed(0)}% → {(summary.mastery_end * 100).toFixed(0)}%
+                  </span>
+                </div>
+                <MasteryBar pct={summary.mastery_end * 100} />
+              </div>
+            )}
+            {summary.avg_engagement != null && (
+              <div>
+                <p className="teacher-eyebrow" style={{ margin: '0 0 10px' }}>Average Engagement</p>
+                <MasteryBar pct={summary.avg_engagement * 100} />
+              </div>
+            )}
+          </section>
+        ) : null}
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button type="button" className="teacher-action primary"
+            style={{ minHeight: 'unset', padding: '12px 24px' }}
+            onClick={() => {
+              setSessionId(null); setSessionEnded(false); setSummary(null)
+              setMessages([]); setPhase('skill-pick')
+              if (selectedSkill && user?.id) {
+                getSessionStatus(selectedSkill).then((s) => {
+                  setSkillStatus(s)
+                  if (s.mastery != null) setMastery(s.mastery * 100)
+                }).catch(() => {})
+              }
+            }}>
             ← Back to Skills
           </button>
-          <button type="button" className="btn secondary" onClick={() => { window.location.href = '/dashboard/student' }}>
+          <button type="button" className="teacher-action"
+            style={{ minHeight: 'unset', padding: '12px 24px' }}
+            onClick={() => { window.location.href = '/dashboard/student' }}>
             Dashboard
           </button>
         </div>
@@ -1191,7 +1324,7 @@ export default function LearnPage() {
   )
 
   return (
-    <div style={{ display: 'flex', gap: 14, height: 'calc(100vh - 130px)', minHeight: 520 }}>
+    <div style={{ display: 'flex', gap: 16, height: 'calc(100vh - 130px)', minHeight: 520 }}>
       {/* ── LEFT: Question panel ── */}
       <div style={{ width: '44%', minWidth: 280, flexShrink: 0 }}>
         <QuestionPanel
@@ -1212,46 +1345,63 @@ export default function LearnPage() {
       </div>
 
       {/* ── RIGHT: Tutor chat panel ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
         {/* Chat header */}
-        <div className="card" style={{ padding: '10px 14px', flexShrink: 0 }}>
+        <div className="teacher-panel" style={{ padding: '14px 20px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <h4 style={{ margin: 0, fontSize: 14 }}>Tutor Chat</h4>
+            <div>
+              <p className="teacher-eyebrow" style={{ margin: 0 }}>AI Tutor</p>
+            </div>
             {voiceStatus ? (
-              <span className="meta" style={{ fontSize: 12, color: 'var(--accent)', fontStyle: 'italic' }}>
+              <span style={{ fontSize: 13, color: 'var(--accent)', fontStyle: 'italic', fontWeight: 600 }}>
                 🔄 {voiceStatus}
               </span>
             ) : (
-              <span className="meta" style={{ fontSize: 12 }}>Type or use voice</span>
+              <span style={{ fontSize: 13, color: 'var(--muted)' }}>Type or use voice</span>
             )}
           </div>
         </div>
 
         {/* Chat messages */}
         <div
-          className="card chat-messages"
-          style={{ flex: 1, overflowY: 'auto', gap: 12, padding: '14px 16px', minHeight: 0 }}
+          className="chat-messages"
+          style={{
+            flex: 1, overflowY: 'auto', gap: 14, padding: '16px 20px', minHeight: 0,
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
+          }}
         >
           {chatMessages.length === 0 && voiceStreamText === '' && (
             <div className="empty-state">
-              <p className="meta">Answer a question on the left, or ask the tutor via text or voice…</p>
+              <p style={{ color: 'var(--muted)', margin: 0 }}>
+                Answer a question on the left, or ask the tutor via text or voice…
+              </p>
             </div>
           )}
           {chatMessages.map((msg) => <ChatBubble key={msg.id} msg={msg} />)}
 
           {/* Live LLM streaming from voice pipeline */}
           {voiceStreamText && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3 }}>
-              <span className="meta" style={{ fontSize: 11 }}>Tutor AI · live</span>
-              <div className="chat-bubble assistant" style={{ maxWidth: '88%' }}>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14 }}>{voiceStreamText}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+              <span style={{ fontSize: 11, color: 'var(--muted)' }}>Tutor AI · live</span>
+              <div style={{
+                background: 'var(--surface)', border: '1px solid var(--border)',
+                borderRadius: 14, borderBottomLeftRadius: 4,
+                padding: '10px 14px', maxWidth: '88%',
+              }}>
+                <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14, color: 'var(--text)' }}>
+                  {voiceStreamText}
+                </p>
               </div>
             </div>
           )}
 
           {(loading || pendingAnswer) && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div className="chat-bubble assistant" style={{ color: 'var(--muted)', fontStyle: 'italic', fontSize: 13 }}>
+              <div style={{
+                background: 'var(--surface)', border: '1px solid var(--border)',
+                borderRadius: 14, borderBottomLeftRadius: 4,
+                padding: '10px 14px', color: 'var(--muted)', fontStyle: 'italic', fontSize: 13,
+              }}>
                 Thinking…
               </div>
             </div>
@@ -1262,45 +1412,59 @@ export default function LearnPage() {
         {error && <p className="feedback error" style={{ margin: 0, flexShrink: 0 }}>{error}</p>}
 
         {/* Input + voice */}
-        <div className="card" style={{ padding: '10px 14px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+        <div className="teacher-panel" style={{ padding: '14px 18px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
             <textarea
               rows={2}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={voiceState === 'recording' ? '🎙️ Recording… click Stop when done' : voiceState === 'processing' ? '⏳ Processing voice…' : 'Ask the tutor anything — or use the mic'}
+              placeholder={
+                voiceState === 'recording' ? '🎙️ Recording… click Stop when done'
+                : voiceState === 'processing' ? '⏳ Processing voice…'
+                : 'Ask the tutor anything — or use the mic'
+              }
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-              style={{ flex: 1, resize: 'none', fontSize: 13 }}
+              style={{
+                flex: 1, resize: 'none', fontSize: 14, padding: '10px 14px',
+                borderRadius: 8, border: '1px solid var(--border)',
+                background: 'var(--bg)', color: 'var(--text)',
+                fontFamily: 'inherit', outline: 'none',
+              }}
               disabled={loading || pendingAnswer || voiceState !== 'idle'}
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {/* Text send */}
-              <button type="button" className="btn small" onClick={handleSend}
-                disabled={!input.trim() || loading || pendingAnswer || voiceState !== 'idle'}>
+              <button type="button" className="teacher-action primary"
+                onClick={handleSend}
+                disabled={!input.trim() || loading || pendingAnswer || voiceState !== 'idle'}
+                style={{ minHeight: 'unset', padding: '10px 18px', fontSize: 14 }}>
                 Send
               </button>
 
               {/* Voice button */}
               {voiceState === 'idle' && (
-                <button type="button" className="btn small secondary" onClick={startVoiceRecording}
-                  title="Start voice input" style={{ fontSize: 16, padding: '4px 10px' }}>
+                <button type="button" className="teacher-action" onClick={startVoiceRecording}
+                  title="Start voice input"
+                  style={{ minHeight: 'unset', padding: '8px 14px', fontSize: 16, justifyContent: 'center' }}>
                   🎙️
                 </button>
               )}
               {voiceState === 'recording' && (
-                <button type="button" className="btn small danger" onClick={stopVoiceRecording}
-                  title="Stop recording and send" style={{ animation: 'pulse 1s infinite' }}>
+                <button type="button" className="teacher-action"
+                  onClick={stopVoiceRecording}
+                  style={{ minHeight: 'unset', padding: '8px 14px', fontSize: 13, color: '#A63D40', borderColor: '#A63D40', animation: 'pulse 1s infinite' }}>
                   ⏹ Stop
                 </button>
               )}
               {voiceState === 'processing' && (
-                <button type="button" className="btn small secondary" disabled style={{ opacity: 0.5 }}>
+                <button type="button" className="teacher-action" disabled
+                  style={{ minHeight: 'unset', padding: '8px 14px', fontSize: 13, opacity: 0.5 }}>
                   ⏳
                 </button>
               )}
             </div>
           </div>
-          <p className="meta" style={{ fontSize: 11, marginTop: 5 }}>
+          <p style={{ fontSize: 12, marginTop: 8, margin: '8px 0 0', color: 'var(--muted)' }}>
             {voiceState === 'recording'
               ? 'Speak now — click Stop when done · Cancel: refresh page'
               : 'Enter to send · 🎙️ for voice input (STT → LLM → TTS)'}

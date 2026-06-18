@@ -28,148 +28,135 @@ export default function StudentDashboard() {
     : Array.isArray(summary?.skill_states) ? summary.skill_states : []
 
   return (
-    <div className="grid">
-      <section className="card stack">
-        <div style={{ marginBottom: 16 }}>
-  <p
-    style={{
-      letterSpacing: '0.25em',
-      textTransform: 'uppercase',
-      fontSize: 12,
-      color: '#726A61',
-      marginBottom: 12
-    }}
-  >
-    Today's Learning Journey
-  </p>
-
-  <h1
-    className="editorial-title"
-    style={{
-      fontSize: '4rem',
-      lineHeight: 1,
-      margin: 0,
-      fontWeight: 500
-    }}
-  >
-    Good afternoon,
-    <span style={{ color: '#C85B43', fontStyle: 'italic' }}>
-      {' '}
-      {me?.full_name || me?.username || 'Student'}
-    </span>
-    .
-  </h1>
-
-  <p
-    className="meta"
-    style={{
-      marginTop: 18,
-      maxWidth: 600,
-      fontSize: 16
-    }}
-  >
-    Continue building mastery through personalized practice and AI-guided learning.
-  </p>
-</div>
-
-        {error && <p className="feedback error">{error}</p>}
-
-        <div className="kpi-grid" style={{marginTop: 24}}>
-          <div className="kpi-card">
-            <p className="kpi-label">Total skills</p>
-            <p className="kpi-value">{summary?.total_skills ?? '—'}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">Mastered</p>
-            <p className="kpi-value" style={{ color: '#4ade80' }}>{summary?.mastered_count ?? '—'}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">In ZPD</p>
-            <p className="kpi-value" style={{ color: '#7dd3fc' }}>{summary?.zpd_count ?? '—'}</p>
-          </div>
-        </div>
-
-        {/* Overall progress bar */}
+    <div className="teacher-dashboard">
+      <section className="teacher-hero">
         <div>
-          <div className="row" style={{ marginBottom: 6 }}>
-            <strong
-              style={{
-                fontSize: 26,
-                fontWeight: 500,
-                fontFamily: 'Playfair Display'
-              }}
-            >Overall mastery</strong>
-            <span className="meta">{masteredPct.toFixed(1)}%</span>
-          </div>
-          <div className="progress"><span style={{ width: `${masteredPct}%` }} /></div>
+          <p className="teacher-eyebrow">Today's Learning Journey</p>
+          <h2 className="editorial-title">
+            Good afternoon,
+            <span style={{ color: '#C85B43', fontStyle: 'italic' }}>
+              {' '}
+              {me?.full_name || me?.username || 'Student'}
+            </span>
+            .
+          </h2>
+          <p>
+            Continue building mastery through personalized practice and AI-guided learning.
+          </p>
         </div>
-
-        {/* Skill breakdown */}
-        {skillRows.length > 0 && (
-          <div className="stack">
-            <h4 style={{ margin: 0 }}>Skill breakdown</h4>
-            {skillRows.slice(0, 6).map((row: any, i: number) => {
-              const pct = Math.min(Math.round((row.mastery_probability ?? row.p_mastery ?? row.mastery ?? 0) * 100), 100)
-              return (
-                <div key={row.skill_id || i}>
-                  <div className="row" style={{ marginBottom: 4 }}>
-                    <p className="meta">{row.skill_name || row.name || `Skill ${i + 1}`}</p>
-                    <span style={{ fontSize: 12 }}>{pct}%</span>
-                  </div>
-                  <div className="progress"><span style={{ width: `${pct}%` }} /></div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+        <div className="teacher-hero-note">
+          <span>Overall mastery</span>
+          <strong>{masteredPct.toFixed(1)}%</strong>
+          <p>across all tracked skills</p>
+        </div>
       </section>
 
-      <aside className="card stack">
-        <h2 
-          className='editorial-title'
-          style={{ 
-            margin: 0,
-            fontSize: 42,
-            fontWeight: 500
-          }}>Atlas</h2>
-        <div className="list">
-          <div className="list-item">
-            <Link href="/practice" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
+      {error && <p className="feedback error">{error}</p>}
+
+      <div className="teacher-layout">
+        <section className="teacher-main">
+          <div className="teacher-kpi-grid">
+            <div className="teacher-kpi-card">
+              <p>Total skills</p>
+              <strong>{summary?.total_skills ?? '—'}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>Mastered</p>
+              <strong style={{ color: '#1F4D3A' }}>{summary?.mastered_count ?? '—'}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>In ZPD</p>
+              <strong style={{ color: '#C85B43' }}>{summary?.zpd_count ?? '—'}</strong>
+            </div>
+          </div>
+
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Mastery Progress</p>
+                <h3 className="editorial-title">Overall mastery</h3>
+              </div>
+              <Link href="/mastery" className="teacher-text-link">
+                View mastery map
+              </Link>
+            </div>
+
+            <div className="teacher-skill-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+              <div className="teacher-skill-topline">
+                <p>Across all tracked skills</p>
+                <span style={{ color: '#C85B43' }}>{masteredPct.toFixed(1)}%</span>
+              </div>
+              <div className="teacher-progress"><span style={{ width: `${masteredPct}%` }} /></div>
+            </div>
+          </section>
+
+          {skillRows.length > 0 && (
+            <section className="teacher-panel">
+              <div className="teacher-panel-header">
+                <div>
+                  <p className="teacher-eyebrow">Skill by Skill</p>
+                  <h3 className="editorial-title">Skill breakdown</h3>
+                </div>
+              </div>
+
+              <div className="teacher-skill-list">
+                {skillRows.slice(0, 6).map((row: any, i: number) => {
+                  const pct = Math.min(Math.round((row.mastery_probability ?? row.p_mastery ?? row.mastery ?? 0) * 100), 100)
+                  return (
+                    <div className="teacher-skill-row" key={row.skill_id || i}>
+                      <div className="teacher-skill-topline">
+                        <p>{row.skill_name || row.name || `Skill ${i + 1}`}</p>
+                        <span style={{ color: '#C85B43' }}>{pct}%</span>
+                      </div>
+                      <div className="teacher-progress"><span style={{ width: `${pct}%` }} /></div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+        </section>
+
+        <aside className="teacher-actions">
+          <p className="teacher-eyebrow">Workspace</p>
+          <h3 className="editorial-title">Atlas</h3>
+
+          <div className="teacher-action-list">
+            <Link href="/practice" className="teacher-action primary">
+              <span>01</span>
               Practice questions
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/mastery" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/mastery" className="teacher-action">
+              <span>02</span>
               View mastery map
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/tutor" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/tutor" className="teacher-action">
+              <span>03</span>
               Ask the tutor
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/history" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/history" className="teacher-action">
+              <span>04</span>
               View history
             </Link>
           </div>
-        </div>
 
-        {me && (
-          <div className="list-item">
-            <p 
-              style={{
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                fontSize: 11,
-                color: '#726A61',
-              }}  
-            >Account</p>
-            <strong>{me.full_name || me.username}</strong>
-            <p className="meta">{me.email}</p>
-          </div>
-        )}
-      </aside>
+          {me && (
+            <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
+              <p
+                style={{
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  fontSize: 11,
+                  color: '#726A61',
+                  margin: 0
+                }}
+              >Account</p>
+              <strong style={{ display: 'block', marginTop: 8 }}>{me.full_name || me.username}</strong>
+              <p className="meta" style={{ marginTop: 4 }}>{me.email}</p>
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   )
 }
