@@ -1,43 +1,44 @@
 /**
- * /teacher/students — Class roster with detailed BKT stats
+ * /teacher/students - Class roster with detailed BKT stats
  */
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getStudentsDetailed, StudentDetailed, scoreColor, statusColor, statusLabel } from '../../lib/teacher-api'
 
-// ── Status guide ───────────────────────────────────────────────────────────
-
 const STATUS_DESCRIPTIONS: Record<string, { short: string; action: string; color: string }> = {
-  mastered:     { short: 'P(mastery) ≥ 95% across all skills',    action: 'Ready to advance to harder topics.',                    color: '#4ade80' },
-  near_mastery: { short: 'Highest skill is 85–95%',               action: 'A few more correct answers will reach mastery.',        color: '#60a5fa' },
-  learning:     { short: 'Most skills are in the 30–85% range',   action: 'Normal progress. Continue current practice.',           color: '#fbbf24' },
-  struggling:   { short: 'At least one skill is below 30%',       action: 'Needs attention. Review struggling skills directly.',   color: '#f87171' },
-  not_started:  { short: 'No questions answered yet',             action: 'Encourage the student to start practicing.',            color: '#94a3b8' },
+  mastered:     { short: 'P(mastery) >= 95% across all skills',    action: 'Ready to advance to harder topics.',                    color: '#4ade80' },
+  near_mastery: { short: 'Highest skill is 85-95%',                action: 'A few more correct answers will reach mastery.',        color: '#60a5fa' },
+  learning:     { short: 'Most skills are in the 30-85% range',    action: 'Normal progress. Continue current practice.',           color: '#fbbf24' },
+  struggling:   { short: 'At least one skill is below 30%',        action: 'Needs attention. Review struggling skills directly.',   color: '#f87171' },
+  not_started:  { short: 'No questions answered yet',              action: 'Encourage the student to start practicing.',            color: '#94a3b8' },
 }
 
-// ── Collapsible info panel ─────────────────────────────────────────────────
 function InfoBox({ title, children, accent = '#60a5fa', defaultOpen = false }: {
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div style={{ borderRadius: 10, border: `1px solid ${accent}33`, overflow: 'hidden', fontSize: 13 }}>
+    <div className="teacher-info-box" style={{ borderColor: `${accent}33` }}>
       <button
+        type="button"
+        aria-expanded={open}
         onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', textAlign: 'left', padding: '10px 14px',
-          background: accent + '12', border: 'none', cursor: 'pointer',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          color: 'inherit',
-        }}>
-        <span style={{ fontWeight: 600, color: accent }}>ℹ {title}</span>
-        <span style={{ color: accent, fontSize: 11, opacity: 0.8 }}>{open ? '▲ close' : '▼ expand'}</span>
+        className="teacher-info-toggle"
+        style={{ background: accent + '12' }}>
+        <span style={{ color: accent }}>{title}</span>
+        <span style={{ color: accent }}>{open ? 'Close' : 'Expand'}</span>
       </button>
-      {open && (
-        <div style={{ padding: '12px 16px', background: accent + '0a', borderTop: `1px solid ${accent}22`, lineHeight: 1.75 }}>
-          {children}
+      <div
+        className={`teacher-info-body ${open ? 'open' : ''}`}
+        aria-hidden={!open}
+        style={{ borderTopColor: `${accent}22` }}
+      >
+        <div className="teacher-info-content">
+          <div className="teacher-info-content-inner">
+            {children}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -73,200 +74,192 @@ export default function TeacherStudents() {
     : null
 
   return (
-    <div className="stack" style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px' }}>
-
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+    <div className="teacher-roster-page">
+      <section className="teacher-hero teacher-roster-hero">
         <div>
-          <h2 style={{ margin: 0 }}>Student Roster</h2>
-          <p className="meta">Click a student row to view their full learning detail.</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Link href="/teacher/heatmap" className="btn secondary">Skill Heatmap</Link>
-          <Link href="/dashboard/teacher" className="btn secondary">← Dashboard</Link>
-        </div>
-      </div>
-
-      {/* KPI row */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <p className="kpi-label">Total students</p>
-          <p className="kpi-value">{students.length}</p>
-          <p className="meta" style={{ fontSize: 11, marginTop: 2 }}>All students in the system</p>
-        </div>
-        <div className="kpi-card">
-          <p className="kpi-label">Needs attention</p>
-          <p className="kpi-value" style={{ color: atRisk > 0 ? '#f87171' : undefined }}>{atRisk}</p>
-          <p className="meta" style={{ fontSize: 11, marginTop: 2 }}>Students with a skill below 30%</p>
-        </div>
-        <div className="kpi-card">
-          <p className="kpi-label">Fully mastered</p>
-          <p className="kpi-value" style={{ color: '#4ade80' }}>{mastered}</p>
-          <p className="meta" style={{ fontSize: 11, marginTop: 2 }}>All skills above 95%</p>
-        </div>
-        <div className="kpi-card">
-          <p className="kpi-label">Class avg mastery</p>
-          <p className="kpi-value" style={{ color: avgScore != null ? scoreColor(avgScore) : undefined }}>
-            {avgScore != null ? `${Math.round(avgScore * 100)}%` : '—'}
+          <p className="teacher-eyebrow">Class Roster</p>
+          <h2 className="editorial-title">Student Roster</h2>
+          <p>
+            Review mastery, recent activity, and individual learning status before
+            opening a full student profile.
           </p>
-          <p className="meta" style={{ fontSize: 11, marginTop: 2 }}>Average BKT P(mastery)</p>
         </div>
+        <div className="teacher-hero-note">
+          <span>Roster</span>
+          <strong>{students.length}</strong>
+          <p>students in view</p>
+        </div>
+      </section>
+
+      <div className="teacher-roster-nav">
+        <Link href="/teacher/heatmap" className="teacher-action primary">
+          <span>01</span>
+          Skill Heatmap
+        </Link>
+        <Link href="/dashboard/teacher" className="teacher-action">
+          <span>02</span>
+          Dashboard
+        </Link>
       </div>
 
-      {/* Status guide */}
-      <InfoBox title="What do the status labels mean?" accent="#a78bfa">
-        <p style={{ margin: '0 0 10px' }}>
-          Each student is assigned a <strong>ZPD Status</strong> (Zone of Proximal Development) based on
-          their Bayesian mastery estimates across all skills. This tells you at a glance where the student
-          is in their learning journey.
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 8 }}>
-          {Object.entries(STATUS_DESCRIPTIONS).map(([key, val]) => (
-            <div key={key} style={{
-              padding: '8px 12px', borderRadius: 8,
-              background: val.color + '12', border: `1px solid ${val.color}30`,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{
-                  background: val.color + '22', color: val.color,
-                  padding: '2px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600,
-                }}>{statusLabel(key)}</span>
-              </div>
-              <p style={{ margin: '2px 0', fontSize: 12 }}>{val.short}</p>
-              <p style={{ margin: 0, fontSize: 12, color: '#fbbf24' }}>→ {val.action}</p>
-            </div>
-          ))}
+      <section className="teacher-kpi-grid teacher-roster-kpis">
+        <div className="teacher-kpi-card">
+          <p>Total students</p>
+          <strong>{students.length}</strong>
+          <small>All students in the system</small>
         </div>
-      </InfoBox>
+        <div className="teacher-kpi-card">
+          <p>Needs attention</p>
+          <strong style={{ color: atRisk > 0 ? '#A63D40' : undefined }}>{atRisk}</strong>
+          <small>Students with a skill below 30%</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Fully mastered</p>
+          <strong style={{ color: '#1F4D3A' }}>{mastered}</strong>
+          <small>All skills above 95%</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Class avg mastery</p>
+          <strong style={{ color: avgScore != null ? scoreColor(avgScore) : undefined }}>
+            {avgScore != null ? `${Math.round(avgScore * 100)}%` : '-'}
+          </strong>
+          <small>Average BKT P(mastery)</small>
+        </div>
+      </section>
 
-      {/* Column guide */}
-      <InfoBox title="What do the columns mean?" accent="#60a5fa">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '6px 24px' }}>
-          <div><strong>Mastery %</strong> — Average BKT P(mastery) across all skills. Higher = better overall knowledge.</div>
-          <div><strong>Interactions</strong> — Total number of questions the student has answered.</div>
-          <div><strong>Mastered skills</strong> — Number of skills where P(mastery) ≥ 95%.</div>
-          <div><strong>Struggling</strong> — Number of skills where P(mastery) &lt; 30%. These need your attention.</div>
-          <div><strong>Last active</strong> — The date the student last answered a question.</div>
-        </div>
-      </InfoBox>
+      <section className="teacher-guide-grid">
+        <InfoBox title="What do the status labels mean?" accent="#C85B43">
+          <p>
+            Each student is assigned a <strong>ZPD Status</strong> based on their
+            Bayesian mastery estimates across all skills.
+          </p>
+          <div className="teacher-status-guide">
+            {Object.entries(STATUS_DESCRIPTIONS).map(([key, val], idx) => (
+              <div
+                key={key}
+                className="teacher-status-card"
+                style={{ borderColor: `${val.color}30`, animationDelay: `${idx * 45}ms` }}
+              >
+                <span style={{ background: val.color + '22', color: val.color }}>
+                  {statusLabel(key)}
+                </span>
+                <p>{val.short}</p>
+                <small>{val.action}</small>
+              </div>
+            ))}
+          </div>
+        </InfoBox>
+
+        <InfoBox title="What do the columns mean?" accent="#726A61">
+          <div className="teacher-column-guide">
+            <div><strong>Mastery %</strong> Average BKT P(mastery) across all skills.</div>
+            <div><strong>Interactions</strong> Total number of answered questions.</div>
+            <div><strong>Mastered skills</strong> Skills where P(mastery) >= 95%.</div>
+            <div><strong>Struggling</strong> Skills where P(mastery) is below 30%.</div>
+            <div><strong>Last active</strong> Most recent answered question date.</div>
+          </div>
+        </InfoBox>
+      </section>
 
       {error && <p className="feedback error">{error}</p>}
 
-      {/* Sort controls */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <span className="meta">Sort by:</span>
-        {(['score', 'name', 'active'] as const).map(k => (
-          <button key={k} className={`btn small ${sort === k ? '' : 'secondary'}`} onClick={() => setSort(k)}>
-            {k === 'score' ? 'Mastery' : k === 'name' ? 'Name' : 'Last Active'}
-          </button>
-        ))}
-      </div>
-
-      {/* Table */}
-      <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>
-                ZPD Status
-                <span className="meta" style={{ fontSize: 10, marginLeft: 4, fontWeight: 400 }}>
-                  (overall learning stage)
-                </span>
-              </th>
-              <th style={{ textAlign: 'right' }}>
-                Mastery
-                <span className="meta" style={{ fontSize: 10, display: 'block', fontWeight: 400 }}>
-                  avg P(mastery)
-                </span>
-              </th>
-              <th style={{ textAlign: 'right' }}>
-                Interactions
-                <span className="meta" style={{ fontSize: 10, display: 'block', fontWeight: 400 }}>
-                  questions answered
-                </span>
-              </th>
-              <th style={{ textAlign: 'right' }}>
-                Mastered
-                <span className="meta" style={{ fontSize: 10, display: 'block', fontWeight: 400 }}>
-                  skills ≥95%
-                </span>
-              </th>
-              <th style={{ textAlign: 'right' }}>
-                Struggling
-                <span className="meta" style={{ fontSize: 10, display: 'block', fontWeight: 400 }}>
-                  skills &lt;30%
-                </span>
-              </th>
-              <th>Last active</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)' }}>Loading…</td></tr>
-            ) : sorted.length === 0 ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)' }}>No students found</td></tr>
-            ) : sorted.map(s => (
-              <tr key={s.user_id} style={{ cursor: 'default' }}>
-                <td>
-                  <div style={{ fontWeight: 500 }}>{s.full_name}</div>
-                  <div className="meta">{s.username}</div>
-                </td>
-                <td>
-                  <span style={{
-                    background: statusColor(s.zpd_status) + '22',
-                    color: statusColor(s.zpd_status),
-                    padding: '2px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600,
-                  }}>
-                    {statusLabel(s.zpd_status)}
-                  </span>
-                  <div className="meta" style={{ fontSize: 11, marginTop: 2 }}>
-                    {STATUS_DESCRIPTIONS[s.zpd_status]?.action}
-                  </div>
-                </td>
-                <td style={{ textAlign: 'right', color: scoreColor(s.overall_score), fontWeight: 600 }}>
-                  {s.overall_score != null ? `${Math.round(s.overall_score * 100)}%` : '—'}
-                </td>
-                <td style={{ textAlign: 'right' }}>{s.total_interactions}</td>
-                <td style={{ textAlign: 'right', color: '#4ade80', fontWeight: s.mastered_skills > 0 ? 600 : 400 }}>
-                  {s.mastered_skills || '—'}
-                </td>
-                <td style={{ textAlign: 'right', color: s.struggling_skills > 0 ? '#f87171' : undefined, fontWeight: s.struggling_skills > 0 ? 700 : 400 }}>
-                  {s.struggling_skills > 0
-                    ? <span title="Click View to see which skills need attention">⚠ {s.struggling_skills}</span>
-                    : '—'}
-                </td>
-                <td className="meta">
-                  {s.last_active
-                    ? (() => {
-                        const days = Math.floor((Date.now() - new Date(s.last_active).getTime()) / 86400000)
-                        return (
-                          <span style={{ color: days > 7 ? '#f87171' : days > 3 ? '#fbbf24' : undefined }}>
-                            {new Date(s.last_active).toLocaleDateString()}
-                            {days > 7 && <span title="Inactive for over a week"> ⚠</span>}
-                          </span>
-                        )
-                      })()
-                    : <span style={{ color: '#94a3b8' }}>Never</span>}
-                </td>
-                <td>
-                  <Link href={`/teacher/students/${s.user_id}`} className="btn small secondary">
-                    Details →
-                  </Link>
-                </td>
-              </tr>
+      <section className="teacher-panel teacher-roster-panel">
+        <div className="teacher-panel-header">
+          <div>
+            <p className="teacher-eyebrow">Detailed View</p>
+            <h3 className="editorial-title">Learning roster</h3>
+          </div>
+          <div className="teacher-sort-control">
+            <span>Sort by</span>
+            {(['score', 'name', 'active'] as const).map(k => (
+              <button key={k} className={sort === k ? 'active' : ''} onClick={() => setSort(k)}>
+                {k === 'score' ? 'Mastery' : k === 'name' ? 'Name' : 'Last Active'}
+              </button>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
 
-      {/* Bottom hint */}
-      <p className="meta" style={{ fontSize: 12 }}>
-        ⚠ icons indicate students who have been inactive for over 7 days or have skills below 30%.
-        Click <strong>Details →</strong> to see the full breakdown including mastery timeline, response patterns, and engagement data.
+        <div className="teacher-table-wrap">
+          <table className="teacher-table teacher-roster-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>ZPD Status</th>
+                <th style={{ textAlign: 'right' }}>Mastery</th>
+                <th style={{ textAlign: 'right' }}>Interactions</th>
+                <th style={{ textAlign: 'right' }}>Mastered</th>
+                <th style={{ textAlign: 'right' }}>Struggling</th>
+                <th>Last active</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody key={sort}>
+              {loading ? (
+                <tr><td colSpan={8} className="teacher-empty-cell">Loading...</td></tr>
+              ) : sorted.length === 0 ? (
+                <tr><td colSpan={8} className="teacher-empty-cell">No students found</td></tr>
+              ) : sorted.map((s, idx) => (
+                <tr key={s.user_id} style={{ animationDelay: `${idx * 35}ms` }}>
+                  <td>
+                    <div className="teacher-student-name">{s.full_name}</div>
+                    <div className="teacher-student-meta">{s.username}</div>
+                  </td>
+                  <td>
+                    <span
+                      className="teacher-status-pill"
+                      style={{
+                        background: statusColor(s.zpd_status) + '22',
+                        color: statusColor(s.zpd_status),
+                      }}
+                    >
+                      {statusLabel(s.zpd_status)}
+                    </span>
+                    <div className="teacher-student-meta">
+                      {STATUS_DESCRIPTIONS[s.zpd_status]?.action}
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'right', color: scoreColor(s.overall_score), fontWeight: 700 }}>
+                    {s.overall_score != null ? `${Math.round(s.overall_score * 100)}%` : '-'}
+                  </td>
+                  <td style={{ textAlign: 'right' }}>{s.total_interactions}</td>
+                  <td style={{ textAlign: 'right', color: '#1F4D3A', fontWeight: s.mastered_skills > 0 ? 700 : 400 }}>
+                    {s.mastered_skills || '-'}
+                  </td>
+                  <td style={{ textAlign: 'right', color: s.struggling_skills > 0 ? '#A63D40' : undefined, fontWeight: s.struggling_skills > 0 ? 700 : 400 }}>
+                    {s.struggling_skills > 0
+                      ? <span title="Click View to see which skills need attention">Alert {s.struggling_skills}</span>
+                      : '-'}
+                  </td>
+                  <td>
+                    {s.last_active
+                      ? (() => {
+                          const days = Math.floor((Date.now() - new Date(s.last_active).getTime()) / 86400000)
+                          return (
+                            <span style={{ color: days > 7 ? '#A63D40' : days > 3 ? '#B8893C' : undefined }}>
+                              {new Date(s.last_active).toLocaleDateString()}
+                              {days > 7 && <span title="Inactive for over a week"> Alert</span>}
+                            </span>
+                          )
+                        })()
+                      : <span style={{ color: '#94a3b8' }}>Never</span>}
+                  </td>
+                  <td>
+                    <Link href={`/teacher/students/${s.user_id}`} className="teacher-detail-link">
+                      Details
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p className="teacher-roster-note">
+        Alerts indicate students who have been inactive for over 7 days or have
+        skills below 30%. Open details to see mastery timeline, response patterns,
+        and engagement data.
       </p>
-
     </div>
   )
 }

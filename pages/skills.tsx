@@ -254,46 +254,47 @@ export default function SkillsPage() {
   }, [skills])
 
   return (
-    <div className="stack">
+    <div className="skills-page">
       {/* ── Header ── */}
-      <section className="card stack">
-        <div className="section-title">
+      <section className="skills-hero">
+        <div className="skills-hero-top">
           <div>
-            <h2>Skills</h2>
-            <p className="meta">
+            <p className="teacher-eyebrow">Learning Map</p>
+            <h2 className="editorial-title">Skills</h2>
+            <p>
               Manage learning skills, BKT parameters, and prerequisite relationships.
               {canEdit ? ' Teachers can create and edit. Admins can also delete.' : ' Read-only view.'}
             </p>
           </div>
-          <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
-            <span className="badge">{skills.length} skills</span>
+          <div className="skills-hero-actions">
+            <span className="skills-count-pill">{skills.length} skills</span>
             <button
               type="button"
-              className={`btn small secondary`}
+              className="skills-action secondary"
               onClick={() => setShowGraph((v) => !v)}
             >
               {showGraph ? 'Hide graph' : 'Dependency graph'}
             </button>
             {canEdit && (
-              <button type="button" className="btn small" onClick={openCreate}>+ New skill</button>
+              <button type="button" className="skills-action primary" onClick={openCreate}>New skill</button>
             )}
           </div>
         </div>
 
         {/* Search + category filter */}
-        <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+        <div className="skills-search-row">
           <input
             type="search"
             placeholder="Search skills…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ flex: 1, minWidth: 180 }}
+            className="skills-search-input"
           />
         </div>
-        <div className="chip-row">
+        <div className="skills-chip-row">
           <button
             type="button"
-            className={`chip ${categoryFilter === 'all' ? 'active' : ''}`}
+            className={`skills-chip ${categoryFilter === 'all' ? 'active' : ''}`}
             onClick={() => setCategoryFilter('all')}
           >
             All categories
@@ -302,7 +303,7 @@ export default function SkillsPage() {
             <button
               key={c}
               type="button"
-              className={`chip ${categoryFilter === c ? 'active' : ''}`}
+              className={`skills-chip ${categoryFilter === c ? 'active' : ''}`}
               onClick={() => setCategoryFilter(c)}
             >
               {c}
@@ -315,19 +316,22 @@ export default function SkillsPage() {
 
       {/* ── Dependency Graph ── */}
       {showGraph && (
-        <section className="card stack">
-          <div className="section-title">
-            <h3>Prerequisite dependency graph</h3>
-            <span className="badge neutral">{graphNodes.length} nodes</span>
+        <section className="skills-panel">
+          <div className="skills-panel-header">
+            <div>
+              <p className="teacher-eyebrow">Dependencies</p>
+              <h3 className="editorial-title">Prerequisite graph</h3>
+            </div>
+            <span className="skills-count-pill subtle">{graphNodes.length} nodes</span>
           </div>
           {graphNodes.length === 0 ? (
             <div className="empty-state"><p className="meta">No prerequisites defined yet.</p></div>
           ) : (
-            <div className="list">
+            <div className="skills-graph-list">
               {graphNodes.map((node) => (
-                <div key={node.id} className="list-item">
-                  <div className="row">
-                    <strong style={{ flex: 1 }}>{node.name}</strong>
+                <div key={node.id} className="skills-graph-item">
+                  <div className="skills-graph-topline">
+                    <strong>{node.name}</strong>
                     <DiffBadge level={node.difficulty_level} />
                     {node.category && <span className="badge neutral" style={{ fontSize: 11 }}>{node.category}</span>}
                   </div>
@@ -352,10 +356,13 @@ export default function SkillsPage() {
       )}
 
       {/* ── Skills table ── */}
-      <section className="card stack">
-        <div className="section-title">
-          <h3>Skill list</h3>
-          <span className="badge neutral">{filtered.length} shown</span>
+      <section className="skills-panel">
+        <div className="skills-panel-header">
+          <div>
+            <p className="teacher-eyebrow">Catalogue</p>
+            <h3 className="editorial-title">Skill list</h3>
+          </div>
+          <span className="skills-count-pill subtle">{filtered.length} shown</span>
         </div>
 
         {loading ? (
@@ -363,8 +370,8 @@ export default function SkillsPage() {
         ) : filtered.length === 0 ? (
           <div className="empty-state"><p>No skills found.</p></div>
         ) : (
-          <div className="table-wrap">
-            <table className="data-table">
+          <div className="skills-table-wrap">
+            <table className="skills-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -382,7 +389,7 @@ export default function SkillsPage() {
                   return (
                     <tr key={s.id}>
                       <td>
-                        <strong>{s.name}</strong>
+                        <strong className="skills-name">{s.name}</strong>
                         {s.description && (
                           <p className="meta" style={{ fontSize: 11, margin: '2px 0 0' }}>{s.description}</p>
                         )}
@@ -390,7 +397,7 @@ export default function SkillsPage() {
                       <td>{s.category ? <span className="badge neutral">{s.category}</span> : '—'}</td>
                       <td><DiffBadge level={s.difficulty_level} /></td>
                       <td>
-                        <span className="badge" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        <span className="skills-question-pill">
                           {questionCounts[s.id] ?? 0}
                         </span>
                       </td>
@@ -404,22 +411,22 @@ export default function SkillsPage() {
                           )}
                       </td>
                       <td>
-                        <div className="row" style={{ gap: 4 }}>
+                        <div className="skills-row-actions">
                           <button
                             type="button"
-                            className="btn small secondary"
+                            className="skills-mini-action"
                             title="BKT parameters"
                             onClick={() => openBkt(s)}
                           >
                             BKT
                           </button>
                           {canEdit && (
-                            <button type="button" className="btn small secondary" onClick={() => openEdit(s)}>
+                            <button type="button" className="skills-mini-action" onClick={() => openEdit(s)}>
                               Edit
                             </button>
                           )}
                           {canDelete && (
-                            <button type="button" className="btn small danger" onClick={() => setDeleteTarget(s)}>
+                            <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(s)}>
                               Delete
                             </button>
                           )}
@@ -436,9 +443,11 @@ export default function SkillsPage() {
 
       {/* ── Create / Edit modal ── */}
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay skills-modal-overlay" onClick={() => setShowForm(false)}>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="skills-modal-kicker">{editId != null ? 'Skill Editor' : 'Skill Builder'}</p>
             <h3>{editId != null ? 'Edit skill' : 'New skill'}</h3>
+            <p className="skills-modal-subtitle">Define the skill details used across questions, mastery tracking, and prerequisite mapping.</p>
 
             <div className="field">
               <label>Name *</label>
@@ -485,11 +494,11 @@ export default function SkillsPage() {
 
             {formError && <p className="feedback error">{formError}</p>}
 
-            <div className="row">
-              <button type="button" className="btn" onClick={saveForm} disabled={saving}>
+            <div className="skills-modal-actions">
+              <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
                 {saving ? 'Saving…' : editId != null ? 'Update' : 'Create'}
               </button>
-              <button type="button" className="btn secondary" onClick={() => setShowForm(false)}>Cancel</button>
+              <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
             </div>
           </div>
         </div>
@@ -497,8 +506,8 @@ export default function SkillsPage() {
 
       {/* ── BKT parameters modal ── */}
       {bktSkill && (
-        <div className="modal-overlay" onClick={() => setBktSkill(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
+        <div className="modal-overlay skills-modal-overlay" onClick={() => setBktSkill(null)}>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
             <h3>BKT Parameters — {bktSkill.name}</h3>
             <p className="meta" style={{ marginBottom: 12 }}>
               Bayesian Knowledge Tracing parameters control how the model estimates student knowledge.
@@ -544,20 +553,20 @@ export default function SkillsPage() {
 
                 {bktError && <p className="feedback error">{bktError}</p>}
 
-                <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-                  <button type="button" className="btn" onClick={saveBkt} disabled={bktSaving}>
+                <div className="skills-modal-actions">
+                  <button type="button" className="skills-modal-button primary" onClick={saveBkt} disabled={bktSaving}>
                     {bktSaving ? 'Saving…' : 'Save parameters'}
                   </button>
                   <button
                     type="button"
-                    className="btn secondary"
+                    className="skills-modal-button"
                     onClick={runFitBkt}
                     disabled={bktFitting}
                     title="Auto-fit BKT parameters from interaction history"
                   >
                     {bktFitting ? 'Fitting…' : 'Auto-fit from data'}
                   </button>
-                  <button type="button" className="btn secondary" onClick={() => setBktSkill(null)}>Cancel</button>
+                  <button type="button" className="skills-modal-button" onClick={() => setBktSkill(null)}>Cancel</button>
                 </div>
               </>
             )}
@@ -567,16 +576,16 @@ export default function SkillsPage() {
 
       {/* ── Delete confirmation ── */}
       {deleteTarget && (
-        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
+        <div className="modal-overlay skills-modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
             <h3>Delete skill?</h3>
             <p className="meta">
               "<strong>{deleteTarget.name}</strong>" and all associated questions and interactions will be removed.
             </p>
             <p className="meta">This cannot be undone.</p>
-            <div className="row">
-              <button type="button" className="btn danger" onClick={confirmDelete}>Yes, delete</button>
-              <button type="button" className="btn secondary" onClick={() => setDeleteTarget(null)}>Cancel</button>
+            <div className="skills-modal-actions">
+              <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
+              <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
             </div>
           </div>
         </div>
