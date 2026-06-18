@@ -40,115 +40,145 @@ export default function TeacherDashboard() {
   const atRisk = students.filter((s) => { const sc = readScore(s); return sc != null && sc < 0.4 }).length
 
   return (
-    <div className="grid">
-      <section className="card stack">
-        <div className="section-title">
-          <div>
-            <h2>Teacher Dashboard</h2>
-            <p className="meta">Monitor class performance and skill trends.</p>
-          </div>
+    <div className="teacher-dashboard">
+      <section className="teacher-hero">
+        <div>
+          <p className="teacher-eyebrow">Class Studio</p>
+          <h2 className="editorial-title">Teacher Dashboard</h2>
+          <p>
+            Monitor class performance, spot learners who need support, and follow
+            skill movement across your classroom.
+          </p>
         </div>
-
-        {error && <p className="feedback error">{error}</p>}
-
-        <div className="kpi-grid">
-          <div className="kpi-card">
-            <p className="kpi-label">Students tracked</p>
-            <p className="kpi-value">{students.length}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">Average score</p>
-            <p className="kpi-value">{avgScore != null ? avgScore.toFixed(2) : '—'}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">At-risk</p>
-            <p className="kpi-value" style={{ color: atRisk > 0 ? '#f87171' : undefined }}>{atRisk}</p>
-          </div>
+        <div className="teacher-hero-note">
+          <span>Today</span>
+          <strong>{students.length}</strong>
+          <p>students tracked</p>
         </div>
-
-        <h4 style={{ margin: 0 }}>Students overview</h4>
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Email</th>
-                <th>Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.length === 0 ? (
-                <tr><td colSpan={3} style={{ textAlign: 'center', color: 'var(--muted)' }}>No students yet</td></tr>
-              ) : students.slice(0, 10).map((s: any, idx: number) => {
-                const score = readScore(s)
-                return (
-                  <tr key={s.user_id || s.id || idx}>
-                    <td>{s.name || s.username || s.full_name || `Student ${idx + 1}`}</td>
-                    <td>{s.email || '—'}</td>
-                    <td style={{ color: scoreColor(score) }}>{score != null ? score.toFixed(2) : '—'}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <h4 style={{ margin: 0 }}>Skill trends</h4>
-        {skills.slice(0, 6).map((k: any, i: number) => {
-          const score = typeof k.avg_score === 'number' ? k.avg_score : typeof k.average === 'number' ? k.average : null
-          const pct = score != null ? Math.round(score * 100) : null
-          return (
-            <div key={k.skill_id || i}>
-              <div className="row" style={{ marginBottom: 4 }}>
-                <p className="meta">{k.skill_name || k.name || `Skill ${i + 1}`}</p>
-                <span style={{ fontSize: 12, color: scoreColor(score) }}>{pct != null ? `${pct}%` : '—'}</span>
-              </div>
-              {pct != null && <div className="progress"><span style={{ width: `${pct}%` }} /></div>}
-            </div>
-          )
-        })}
       </section>
 
-      <aside className="card stack">
-        <h3 style={{ margin: 0 }}>Quick actions</h3>
-        <div className="list">
-          <div className="list-item">
-            <Link href="/teacher/students" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
-              📋 Student Roster
-            </Link>
+      {error && <p className="feedback error">{error}</p>}
+
+      <div className="teacher-layout">
+        <section className="teacher-main">
+          <div className="teacher-kpi-grid">
+            <div className="teacher-kpi-card">
+              <p>Students tracked</p>
+              <strong>{students.length}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>Average score</p>
+              <strong>{avgScore != null ? avgScore.toFixed(2) : '-'}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>At-risk</p>
+              <strong style={{ color: atRisk > 0 ? '#A63D40' : undefined }}>{atRisk}</strong>
+            </div>
           </div>
-          <div className="list-item">
-            <Link href="/teacher/heatmap" className="btn" style={{ width: '100%', justifyContent: 'center' }}>
-              🟩 Skill Heatmap
+
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Roster Snapshot</p>
+                <h3 className="editorial-title">Students overview</h3>
+              </div>
+              <Link href="/teacher/students" className="teacher-text-link">
+                View roster
+              </Link>
+            </div>
+
+            <div className="teacher-table-wrap">
+              <table className="teacher-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.length === 0 ? (
+                    <tr><td colSpan={3} className="teacher-empty-cell">No students yet</td></tr>
+                  ) : students.slice(0, 10).map((s: any, idx: number) => {
+                    const score = readScore(s)
+                    return (
+                      <tr key={s.user_id || s.id || idx}>
+                        <td>{s.name || s.username || s.full_name || `Student ${idx + 1}`}</td>
+                        <td>{s.email || '-'}</td>
+                        <td style={{ color: scoreColor(score) }}>{score != null ? score.toFixed(2) : '-'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Learning Movement</p>
+                <h3 className="editorial-title">Skill trends</h3>
+              </div>
+              <Link href="/teacher/heatmap" className="teacher-text-link">
+                Open heatmap
+              </Link>
+            </div>
+
+            <div className="teacher-skill-list">
+              {skills.slice(0, 6).map((k: any, i: number) => {
+                const score = typeof k.avg_score === 'number' ? k.avg_score : typeof k.average === 'number' ? k.average : null
+                const pct = score != null ? Math.round(score * 100) : null
+                return (
+                  <div className="teacher-skill-row" key={k.skill_id || i}>
+                    <div className="teacher-skill-topline">
+                      <p>{k.skill_name || k.name || `Skill ${i + 1}`}</p>
+                      <span style={{ color: scoreColor(score) }}>{pct != null ? `${pct}%` : '-'}</span>
+                    </div>
+                    {pct != null && <div className="teacher-progress"><span style={{ width: `${pct}%` }} /></div>}
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        </section>
+
+        <aside className="teacher-actions">
+          <p className="teacher-eyebrow">Workspace</p>
+          <h3 className="editorial-title">Quick actions</h3>
+
+          <div className="teacher-action-list">
+            <Link href="/teacher/students" className="teacher-action primary">
+              <span>01</span>
+              Student roster
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/skills" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/teacher/heatmap" className="teacher-action primary">
+              <span>02</span>
+              Skill heatmap
+            </Link>
+            <Link href="/skills" className="teacher-action">
+              <span>03</span>
               Manage skills
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/questions" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/questions" className="teacher-action">
+              <span>04</span>
               Manage questions
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/knowledge" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/knowledge" className="teacher-action">
+              <span>05</span>
               Knowledge base
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/history" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/history" className="teacher-action">
+              <span>06</span>
               View history
             </Link>
-          </div>
-          <div className="list-item">
-            <Link href="/analytics" className="btn secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/analytics" className="teacher-action">
+              <span>07</span>
               Full analytics
             </Link>
           </div>
-        </div>
-      </aside>
+        </aside>
+      </div>
     </div>
   )
 }
