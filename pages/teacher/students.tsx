@@ -154,7 +154,10 @@ export default function TeacherStudents() {
           <div className="teacher-column-guide">
             <div><strong>Mastery %</strong> Average BKT P(mastery) across all skills.</div>
             <div><strong>Interactions</strong> Total number of answered questions.</div>
-            <div><strong>Mastered skills</strong> Skills where P(mastery) >= 95%.</div>
+            <div>
+              <strong>Mastered skills</strong>
+              {" Skills where P(mastery) >= 95%."}
+            </div>
             <div><strong>Struggling</strong> Skills where P(mastery) is below 30%.</div>
             <div><strong>Last active</strong> Most recent answered question date.</div>
           </div>
