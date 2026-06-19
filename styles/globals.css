@@ -2675,3 +2675,364 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .analytics-student-main{flex-direction:column}
   .analytics-student-right{width:100%;justify-content:space-between}
 }
+
+/* ─── Self-learn page ─── */
+.selflearn-page{
+  max-width:1180px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.selflearn-session-hero{
+  align-items:flex-start;
+}
+.selflearn-session-title{
+  margin:10px 0 12px;
+  font-size:clamp(34px, 5vw, 56px);
+}
+.selflearn-session-status{
+  min-width:240px;
+  gap:0;
+}
+.selflearn-session-pct{
+  margin-top:10px;
+  color:#F8F4EE;
+  font-family:"Playfair Display", serif;
+  font-size:38px;
+  font-weight:500;
+  line-height:1;
+}
+.selflearn-report-btn{
+  margin-top:14px;
+  align-self:flex-start;
+  color:#D8C9BD !important;
+}
+
+/* New course form */
+.selflearn-form{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+.selflearn-form .field{
+  gap:8px;
+}
+.selflearn-form .field label{
+  color:var(--text);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+.selflearn-form .field input[type=text],
+.selflearn-form .field input:not([type]),
+.selflearn-form .field select{
+  min-height:52px;
+  padding:14px 16px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid #D8CFC5 !important;
+  border-radius:8px !important;
+  font-size:15px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.selflearn-form .field input[type=text]:focus,
+.selflearn-form .field input:not([type]):focus,
+.selflearn-form .field select:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px rgba(200,91,67,.12) !important;
+}
+.selflearn-form .field select{
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726A61' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 16px center !important;
+  padding-right:42px !important;
+  cursor:pointer;
+}
+.selflearn-form .field select option{
+  background:#FFF9F3;
+  color:var(--text);
+}
+
+/* File upload control */
+.selflearn-file-drop{
+  position:relative;
+  min-height:64px;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#F4F0EA;
+  border:1px dashed rgba(200,91,67,.38);
+  border-radius:8px;
+  cursor:pointer;
+  transition:background .2s ease, border-color .2s ease;
+}
+.selflearn-file-drop:hover{
+  background:#FBF3EB;
+  border-color:rgba(200,91,67,.6);
+}
+.selflearn-file-drop input[type=file]{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.selflearn-file-drop-icon{
+  font-size:18px;
+  flex-shrink:0;
+}
+.selflearn-file-drop-text{
+  color:var(--text);
+  font-size:14px;
+  font-weight:700;
+}
+
+/* Field hints */
+.selflearn-field-hint{
+  margin-top:2px;
+}
+.selflearn-pack-msg{
+  margin-top:-8px;
+  color:var(--accent);
+  font-weight:700;
+}
+.selflearn-start-btn{
+  align-self:flex-start;
+}
+
+/* Course cards (start view) */
+.selflearn-course-card{
+  display:flex;
+  flex-direction:column;
+}
+.selflearn-course-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.selflearn-course-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.selflearn-course-progress{
+  margin-top:14px;
+  max-width:360px;
+}
+.selflearn-course-detail{
+  margin-top:16px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.selflearn-detail-label{
+  margin-bottom:8px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-size:11px;
+}
+.selflearn-doc-list{
+  margin-bottom:14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.selflearn-doc-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:var(--text);
+}
+.selflearn-doc-name{
+  flex:1;
+}
+.selflearn-doc-meta{
+  font-size:11px;
+}
+.selflearn-concept-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.selflearn-concept-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.selflearn-concept-name{
+  flex:1;
+  font-size:13px;
+  color:var(--text);
+}
+.selflearn-concept-bar{
+  width:150px;
+  flex-shrink:0;
+}
+
+/* Mastery bar (shared mini component) */
+.selflearn-mastery-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.selflearn-mastery-label{
+  white-space:nowrap;
+  font-size:12px;
+}
+.selflearn-mastery-track{
+  flex:1;
+  height:6px;
+}
+.selflearn-mastery-pct{
+  font-size:12px;
+  min-width:34px;
+  text-align:right;
+  color:var(--muted);
+}
+
+/* Session / chat view */
+.selflearn-chat-window{
+  min-height:360px;
+  max-height:56vh;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  overflow-y:auto;
+  background:#F4F0EA;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.selflearn-msg-row{
+  display:flex;
+}
+.selflearn-msg-row.student{
+  justify-content:flex-end;
+}
+.selflearn-msg-row.tutor{
+  justify-content:flex-start;
+}
+.selflearn-bubble{
+  max-width:84%;
+  border-radius:8px;
+  color:var(--text);
+  background:#FFFDF9;
+  border:1px solid var(--border);
+}
+.selflearn-bubble.user{
+  color:#fff;
+  background:var(--accent);
+  border:1px solid var(--accent);
+}
+.selflearn-bubble.selflearn-feedback.correct{
+  background:rgba(31,77,58,.08);
+  border:1px solid rgba(31,77,58,.28);
+}
+.selflearn-bubble.selflearn-feedback.incorrect{
+  background:rgba(166,61,64,.08);
+  border:1px solid rgba(166,61,64,.28);
+}
+.selflearn-feedback-correct{
+  color:#1F4D3A;
+}
+.selflearn-feedback-incorrect{
+  color:#A63D40;
+}
+.selflearn-feedback-text{
+  margin:6px 0 10px;
+  font-size:14px;
+  line-height:1.55;
+  color:var(--text);
+}
+.selflearn-bubble.selflearn-check{
+  max-width:92%;
+  border-color:var(--accent);
+}
+.selflearn-check-text{
+  margin:0;
+  white-space:pre-wrap;
+  line-height:1.55;
+  font-size:14px;
+  font-weight:700;
+  color:var(--text);
+}
+.selflearn-teach-text{
+  margin:0;
+  white-space:pre-wrap;
+  line-height:1.65;
+  font-size:14px;
+  color:var(--text);
+}
+.selflearn-options{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:12px;
+}
+.selflearn-option-btn{
+  justify-content:flex-start;
+  text-align:left;
+}
+.selflearn-option-key{
+  margin-right:8px;
+}
+.selflearn-thinking{
+  align-self:flex-start;
+  color:var(--muted);
+  font-style:italic;
+  font-size:13px;
+}
+.selflearn-complete-row{
+  text-align:center;
+  margin-top:8px;
+}
+.selflearn-composer{
+  margin-top:18px;
+}
+.selflearn-pending-hint{
+  margin-bottom:8px;
+}
+.selflearn-composer-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+}
+.selflearn-composer-row textarea{
+  flex:1;
+  min-height:54px;
+  max-height:160px;
+  padding:14px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid #D8CFC5 !important;
+  border-radius:8px !important;
+  resize:vertical;
+}
+.selflearn-error{
+  margin-top:14px;
+}
+@media(max-width:960px){
+  .selflearn-session-hero{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:600px){
+  .selflearn-page > .history-hero,
+  .selflearn-page > .history-panel{padding:22px}
+  .selflearn-course-title,
+  .history-card-main.selflearn-course-title{flex-direction:column;align-items:flex-start}
+  .selflearn-composer-row{flex-direction:column;align-items:stretch}
+  .selflearn-concept-row{flex-direction:column;align-items:flex-start;gap:6px}
+  .selflearn-concept-bar{width:100%}
+}
