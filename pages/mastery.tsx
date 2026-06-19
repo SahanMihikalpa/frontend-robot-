@@ -2,16 +2,16 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { getConceptMap, getCurrentUser, getMasterySummary, getNextSkill, getUnlockedSkills } from '../lib/api'
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; badgeClass: string }> = {
-  mastered: { label: 'Mastered', color: '#4ade80', badgeClass: 'success' },
-  zpd:      { label: 'ZPD', color: '#7dd3fc', badgeClass: '' },
-  in_zpd:   { label: 'ZPD', color: '#7dd3fc', badgeClass: '' },
-  locked:   { label: 'Locked', color: '#64748b', badgeClass: 'neutral' },
-  struggling: { label: 'Struggling', color: '#f87171', badgeClass: 'danger' },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  mastered: { label: 'Mastered', color: '#1F4D3A' },
+  zpd:      { label: 'ZPD', color: '#C85B43' },
+  in_zpd:   { label: 'ZPD', color: '#C85B43' },
+  locked:   { label: 'Locked', color: '#726A61' },
+  struggling: { label: 'Struggling', color: '#A63D40' },
 }
 
 function statusCfg(status: string) {
-  return STATUS_CONFIG[status] || { label: status, color: '#94a3b8', badgeClass: 'neutral' }
+  return STATUS_CONFIG[status] || { label: status, color: '#726A61' }
 }
 
 export default function MasteryPage() {
@@ -56,122 +56,159 @@ export default function MasteryPage() {
     : conceptMap.filter((s) => s.status === filter)
 
   return (
-    <div className="stack">
-      {/* Summary row */}
-      <section className="card stack">
-        <div className="section-title">
-          <div>
-            <h2>Mastery</h2>
-            <p className="meta">BKT concept map and skill progress.</p>
-          </div>
-          <span className="badge">{user?.full_name || user?.username || 'Student'}</span>
-        </div>
-
-        <div className="kpi-grid">
-          <div className="kpi-card">
-            <p className="kpi-label">Mastered</p>
-            <p className="kpi-value" style={{ color: '#4ade80' }}>{summary?.mastered_count ?? 0}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">ZPD (ready)</p>
-            <p className="kpi-value" style={{ color: '#7dd3fc' }}>{summary?.zpd_count ?? 0}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">Struggling</p>
-            <p className="kpi-value" style={{ color: '#f87171' }}>{summary?.struggling_count ?? 0}</p>
-          </div>
-        </div>
-
+    <div className="teacher-dashboard">
+      <section className="teacher-hero">
         <div>
-          <div className="row" style={{ marginBottom: 6 }}>
-            <strong>Overall mastery</strong>
-            <span className="meta">
-              {masteredPct.toFixed(1)}%
-              {summary?.total_skills ? ` of ${summary.total_skills} skills` : ''}
-            </span>
-          </div>
-          <div className="progress">
-            <span style={{ width: `${masteredPct}%` }} />
-          </div>
+          <p className="teacher-eyebrow">BKT Concept Map</p>
+          <h2 className="editorial-title">Mastery</h2>
+          <p>
+            Track skill progress and mastery probability across your learning path.
+          </p>
+        </div>
+        <div className="teacher-hero-note">
+          <span>Overall mastery</span>
+          <strong>{masteredPct.toFixed(1)}%</strong>
+          <p>{summary?.total_skills ? `of ${summary.total_skills} skills` : 'across all skills'}</p>
         </div>
       </section>
 
-      <div className="grid-two" style={{ alignItems: 'start' }}>
-        <section className="card stack">
-          <div className="section-title">
-            <h3>Concept map</h3>
-            <span className="badge neutral">{filtered.length} skills</span>
-          </div>
-
-          {/* Status filter chips */}
-          <div className="chip-row">
-            {statuses.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className={`chip ${filter === s ? 'active' : ''}`}
-                onClick={() => setFilter(s)}
-              >
-                {s === 'all' ? 'All' : statusCfg(s).label}
-              </button>
-            ))}
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="empty-state"><p className="meta">No skills match this filter.</p></div>
-          ) : (
-            <div className="list">
-              {filtered.map((skill: any) => {
-                const cfg = statusCfg(skill.status)
-                const pct = Math.min(Math.round((skill.p_mastery || skill.mastery_probability || 0) * 100), 100)
-                return (
-                  <div key={skill.skill_id} className="list-item">
-                    <div className="row">
-                      <strong>{skill.skill_name || `Skill ${skill.skill_id}`}</strong>
-                      <span className={`badge ${cfg.badgeClass}`}>{cfg.label}</span>
-                    </div>
-                    <div className="row" style={{ marginTop: 8, marginBottom: 4 }}>
-                      <p className="meta">Mastery</p>
-                      <span style={{ fontSize: 12, color: cfg.color }}>{pct}%</span>
-                    </div>
-                    <div className="progress">
-                      <span style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${cfg.color}, ${cfg.color}88)` }} />
-                    </div>
-                  </div>
-                )
-              })}
+      <div className="teacher-layout">
+        <section className="teacher-main">
+          <div className="teacher-kpi-grid">
+            <div className="teacher-kpi-card">
+              <p>Mastered</p>
+              <strong style={{ color: '#1F4D3A' }}>{summary?.mastered_count ?? 0}</strong>
             </div>
-          )}
+            <div className="teacher-kpi-card">
+              <p>ZPD (ready)</p>
+              <strong style={{ color: '#C85B43' }}>{summary?.zpd_count ?? 0}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>Struggling</p>
+              <strong style={{ color: '#A63D40' }}>{summary?.struggling_count ?? 0}</strong>
+            </div>
+          </div>
+
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Concept Map</p>
+                <h3 className="editorial-title">Skill breakdown</h3>
+              </div>
+              <span className="teacher-text-link" style={{ cursor: 'default' }}>
+                {filtered.length} skills
+              </span>
+            </div>
+
+            {/* Status filter chips */}
+            <div className="skills-chip-row" style={{ marginBottom: 20 }}>
+              {statuses.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`skills-chip ${filter === s ? 'active' : ''}`}
+                  onClick={() => setFilter(s)}
+                  style={{ borderRadius: 8 }}
+                >
+                  {s === 'all' ? 'All' : statusCfg(s).label}
+                </button>
+              ))}
+            </div>
+
+            {filtered.length === 0 ? (
+              <div className="empty-state"><p style={{ color: 'var(--muted)', margin: 0 }}>No skills match this filter.</p></div>
+            ) : (
+              <div className="teacher-skill-list">
+                {filtered.map((skill: any) => {
+                  const cfg = statusCfg(skill.status)
+                  const pct = Math.min(Math.round((skill.p_mastery || skill.mastery_probability || 0) * 100), 100)
+                  return (
+                    <div key={skill.skill_id} className="teacher-skill-row">
+                      <div className="teacher-skill-topline">
+                        <p style={{ fontWeight: 600, color: 'var(--text)' }}>{skill.skill_name || `Skill ${skill.skill_id}`}</p>
+                        <span
+                          style={{
+                            fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                            color: cfg.color, background: `${cfg.color}1A`, border: `1px solid ${cfg.color}4D`,
+                          }}
+                        >
+                          {cfg.label}
+                        </span>
+                      </div>
+                      <div className="teacher-skill-topline" style={{ marginTop: 6 }}>
+                        <p>Mastery</p>
+                        <span style={{ fontSize: 12, color: cfg.color, fontWeight: 600 }}>{pct}%</span>
+                      </div>
+                      <div className="teacher-progress">
+                        <span style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${cfg.color}, ${cfg.color}cc)` }} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
         </section>
 
-        <aside className="card stack">
-          <h3 style={{ margin: 0 }}>Recommendations</h3>
+        <aside className="teacher-actions">
+          <p className="teacher-eyebrow">Recommendations</p>
+          <h3 className="editorial-title">What's next</h3>
 
           {nextSkill && (
-            <div className="list-item">
-              <p className="meta">Next skill to practise</p>
-              <strong style={{ fontSize: 15 }}>{nextSkill.skill_name || `Skill ${nextSkill.skill_id}`}</strong>
-              {nextSkill.reason && <p className="meta" style={{ marginTop: 4 }}>{nextSkill.reason}</p>}
-              <Link href="/practice" className="btn small" style={{ marginTop: 10, display: 'inline-flex' }}>
+            <div style={{ marginTop: 16, paddingBottom: 20, borderBottom: unlockedSkills.length > 0 ? '1px solid var(--border)' : 'none' }}>
+              <p
+                style={{
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  fontSize: 11,
+                  color: '#726A61',
+                  margin: 0
+                }}
+              >Next skill to practise</p>
+              <strong style={{ display: 'block', marginTop: 8, fontSize: 16 }}>
+                {nextSkill.skill_name || `Skill ${nextSkill.skill_id}`}
+              </strong>
+              {nextSkill.reason && (
+                <p className="meta" style={{ marginTop: 6 }}>{nextSkill.reason}</p>
+              )}
+              <Link
+                href="/practice"
+                className="teacher-action primary"
+                style={{ marginTop: 14, display: 'inline-flex', minHeight: 'unset', padding: '10px 20px' }}
+              >
                 Practice now →
               </Link>
             </div>
           )}
 
           {unlockedSkills.length > 0 && (
-            <div className="stack">
-              <h4 style={{ margin: 0 }}>Unlocked skills ({unlockedSkills.length})</h4>
-              <div className="list">
+            <div style={{ marginTop: nextSkill ? 20 : 16 }}>
+              <p
+                style={{
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  fontSize: 11,
+                  color: '#726A61',
+                  margin: '0 0 12px'
+                }}
+              >
+                Unlocked skills ({unlockedSkills.length})
+              </p>
+              <div className="teacher-action-list" style={{ gap: 0 }}>
                 {unlockedSkills.slice(0, 6).map((s: any, i: number) => (
-                  <div key={s.skill_id || i} className="list-item" style={{ padding: '8px 12px' }}>
-                    <div className="row">
-                      <span style={{ fontSize: 13 }}>{s.skill_name || `Skill ${s.skill_id}`}</span>
-                      {s.unlocked_at && (
-                        <span className="meta" style={{ fontSize: 11 }}>
-                          {new Date(s.unlocked_at).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
+                  <div
+                    key={s.skill_id || i}
+                    style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '10px 0', borderBottom: i < Math.min(unlockedSkills.length, 6) - 1 ? '1px solid var(--border)' : 'none',
+                    }}
+                  >
+                    <span style={{ fontSize: 13, color: 'var(--text)' }}>{s.skill_name || `Skill ${s.skill_id}`}</span>
+                    {s.unlocked_at && (
+                      <span className="meta" style={{ fontSize: 11 }}>
+                        {new Date(s.unlocked_at).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -179,8 +216,8 @@ export default function MasteryPage() {
           )}
 
           {!nextSkill && unlockedSkills.length === 0 && (
-            <div className="empty-state">
-              <p className="meta">Complete some practice sessions to unlock recommendations.</p>
+            <div className="empty-state" style={{ marginTop: 16 }}>
+              <p style={{ color: 'var(--muted)', margin: 0 }}>Complete some practice sessions to unlock recommendations.</p>
             </div>
           )}
         </aside>

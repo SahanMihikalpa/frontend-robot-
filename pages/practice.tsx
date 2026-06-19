@@ -100,126 +100,173 @@ export default function PracticePage() {
   const accuracy = sessionTotal > 0 ? Math.round((sessionCorrect / sessionTotal) * 100) : null
 
   function optionStyle(key: string): React.CSSProperties {
-    if (!submitted) {
-      return { textAlign: 'left', borderColor: selectedAnswer === key ? 'var(--accent)' : undefined }
+    const base: React.CSSProperties = {
+      textAlign: 'left', width: '100%', padding: '13px 16px',
+      borderRadius: 8, fontSize: 14, lineHeight: 1.5,
+      fontFamily: 'inherit', transition: 'all 0.15s',
+      border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)',
     }
-    if (key === correctAnswer) return { textAlign: 'left', borderColor: '#4ade80', background: 'rgba(74,222,128,0.1)' }
-    if (key === selectedAnswer && key !== correctAnswer) return { textAlign: 'left', borderColor: '#f87171', background: 'rgba(248,113,113,0.1)' }
-    return { textAlign: 'left', opacity: 0.5 }
+    if (!submitted) {
+      if (selectedAnswer === key) {
+        return { ...base, borderColor: 'var(--accent)', background: 'var(--accent-dim)', color: 'var(--accent)' }
+      }
+      return base
+    }
+    if (key === correctAnswer) {
+      return { ...base, borderColor: '#1F4D3A', background: 'rgba(31,77,58,0.08)', color: '#1F4D3A' }
+    }
+    if (key === selectedAnswer && key !== correctAnswer) {
+      return { ...base, borderColor: '#A63D40', background: 'rgba(166,61,64,0.08)', color: '#A63D40' }
+    }
+    return { ...base, color: 'var(--muted)' }
   }
 
   return (
-    <div className="grid-two" style={{ alignItems: 'start' }}>
-      <section className="card stack">
-        <div className="section-title">
-          <div>
-            <h2>Practice</h2>
-            <p className="meta">Adaptive questions via BKT/ZPD.</p>
-          </div>
-          <div className="row" style={{ gap: 8 }}>
-            <span className="badge neutral">⏱ {elapsed}s</span>
-            {accuracy != null && <span className="badge">{accuracy}% accuracy</span>}
-          </div>
+    <div className="teacher-dashboard">
+      <section className="teacher-hero">
+        <div>
+          <p className="teacher-eyebrow">Adaptive Practice</p>
+          <h2 className="editorial-title">Practice</h2>
+          <p>Adaptive questions via BKT/ZPD, tuned to your current mastery level.</p>
         </div>
-
-        {error && <p className="feedback error">{error}</p>}
-
-        {submitted && isCorrect != null && (
-          <p className={`feedback ${isCorrect ? 'success' : 'error'}`}>
-            {isCorrect ? '✓ Correct!' : `✗ Incorrect. The answer was ${correctAnswer}.`}
-          </p>
-        )}
-
-        <div className="list-item">
-          <p className="meta">
-            {question?.skill_name || (question?.skill_id ? `Skill ${question.skill_id}` : 'Loading…')}
-            {question?.difficulty != null && ` · Difficulty ${question.difficulty}`}
-          </p>
-          <h3 style={{ marginTop: 8, marginBottom: 0, lineHeight: 1.4 }}>
-            {question?.question_text || 'Loading next question…'}
-          </h3>
-        </div>
-
-        <div className="list">
-          {optionEntries.length > 0 ? optionEntries.map(([key, value]) => (
-            <button
-              key={key}
-              type="button"
-              className="list-item"
-              onClick={() => !submitted && setSelectedAnswer(key)}
-              disabled={submitted}
-              style={optionStyle(key)}
-            >
-              <strong>{key}.</strong> {value as string}
-            </button>
-          )) : (
-            <p className="meta">No options available.</p>
-          )}
-        </div>
-
-        <div className="row">
-          {!submitted ? (
-            <button type="button" className="btn" onClick={submitAnswer} disabled={busy || !selectedAnswer}>
-              {busy ? 'Submitting…' : 'Submit answer'}
-            </button>
-          ) : (
-            <button type="button" className="btn" onClick={loadNextQuestion} disabled={busy}>
-              Next question →
-            </button>
-          )}
-          <button type="button" className="btn secondary" onClick={loadNextQuestion} disabled={busy}>
-            Skip
-          </button>
+        <div className="teacher-hero-note">
+          <span>Session accuracy</span>
+          <strong>{accuracy != null ? `${accuracy}%` : '—'}</strong>
+          <p>⏱ {elapsed}s on this question</p>
         </div>
       </section>
 
-      <aside className="card stack">
-        <h3 style={{ margin: 0 }}>Session stats</h3>
-
-        <div className="kpi-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          <div className="kpi-card">
-            <p className="kpi-label">Answered</p>
-            <p className="kpi-value">{sessionTotal}</p>
-          </div>
-          <div className="kpi-card">
-            <p className="kpi-label">Correct</p>
-            <p className="kpi-value" style={{ color: '#4ade80' }}>{sessionCorrect}</p>
-          </div>
-        </div>
-
-        {accuracy != null && (
-          <div>
-            <div className="row" style={{ marginBottom: 6 }}>
-              <p className="meta">Session accuracy</p>
-              <strong style={{ fontSize: 13 }}>{accuracy}%</strong>
+      <div className="teacher-layout">
+        <section className="teacher-main">
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">
+                  {question?.skill_name || (question?.skill_id ? `Skill ${question.skill_id}` : 'Loading…')}
+                  {question?.difficulty != null && ` · Difficulty ${question.difficulty}`}
+                </p>
+                <h3 className="editorial-title" style={{ fontSize: 28 }}>
+                  {question?.question_text || 'Loading next question…'}
+                </h3>
+              </div>
             </div>
-            <div className="progress"><span style={{ width: `${accuracy}%` }} /></div>
-          </div>
-        )}
 
-        {summary && (
-          <div className="stack">
-            <h4 style={{ margin: 0 }}>Mastery overview</h4>
-            {(summary.skills || summary.skill_states || []).slice(0, 5).map((s: any, i: number) => {
-              const pct = Math.round((s.mastery_probability ?? s.p_mastery ?? 0) * 100)
-              return (
-                <div key={i}>
-                  <div className="row" style={{ marginBottom: 4 }}>
-                    <p className="meta">{s.skill_name || `Skill ${s.skill_id || i + 1}`}</p>
-                    <span style={{ fontSize: 12 }}>{pct}%</span>
-                  </div>
-                  <div className="progress"><span style={{ width: `${pct}%` }} /></div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+            {error && <p className="feedback error">{error}</p>}
 
-        <div className="list-item">
-          <p className="meta">Student</p>
-          <strong>{user?.full_name || user?.username || '—'}</strong>
-        </div>
-      </aside>
+            {submitted && isCorrect != null && (
+              <div style={{ marginBottom: 16 }}>
+                <span
+                  style={{
+                    fontSize: 13, fontWeight: 700, padding: '6px 14px',
+                    borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: isCorrect ? 'rgba(31,77,58,0.1)' : 'rgba(166,61,64,0.1)',
+                    color: isCorrect ? '#1F4D3A' : '#A63D40',
+                    border: `1px solid ${isCorrect ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+                  }}
+                >
+                  {isCorrect ? '✓ Correct!' : `✗ Incorrect. The answer was ${correctAnswer}.`}
+                </span>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+              {optionEntries.length > 0 ? optionEntries.map(([key, value]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => !submitted && setSelectedAnswer(key)}
+                  disabled={submitted}
+                  style={{ ...optionStyle(key), cursor: submitted ? 'default' : 'pointer' }}
+                >
+                  <strong style={{ marginRight: 8, opacity: 0.6 }}>{key}.</strong>{value as string}
+                </button>
+              )) : (
+                <p style={{ color: 'var(--muted)', margin: 0 }}>No options available.</p>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              {!submitted ? (
+                <button type="button" className="teacher-action primary"
+                  onClick={submitAnswer} disabled={busy || !selectedAnswer}
+                  style={{ minHeight: 'unset', padding: '12px 26px' }}>
+                  {busy ? 'Submitting…' : 'Submit answer'}
+                </button>
+              ) : (
+                <button type="button" className="teacher-action primary"
+                  onClick={loadNextQuestion} disabled={busy}
+                  style={{ minHeight: 'unset', padding: '12px 26px' }}>
+                  Next question →
+                </button>
+              )}
+              <button type="button" className="teacher-action"
+                onClick={loadNextQuestion} disabled={busy}
+                style={{ minHeight: 'unset', padding: '12px 26px' }}>
+                Skip
+              </button>
+            </div>
+          </section>
+        </section>
+
+        <aside className="teacher-actions">
+          <p className="teacher-eyebrow">This Session</p>
+          <h3 className="editorial-title">Session stats</h3>
+
+          <div className="teacher-kpi-grid" style={{ gridTemplateColumns: '1fr 1fr', marginTop: 16 }}>
+            <div className="teacher-kpi-card">
+              <p>Answered</p>
+              <strong>{sessionTotal}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>Correct</p>
+              <strong style={{ color: '#1F4D3A' }}>{sessionCorrect}</strong>
+            </div>
+          </div>
+
+          {accuracy != null && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <p className="teacher-eyebrow" style={{ margin: 0 }}>Session accuracy</p>
+                <strong style={{ fontSize: 13 }}>{accuracy}%</strong>
+              </div>
+              <div className="teacher-progress"><span style={{ width: `${accuracy}%` }} /></div>
+            </div>
+          )}
+
+          {summary && (summary.skills || summary.skill_states || []).length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <p className="teacher-eyebrow" style={{ margin: '0 0 10px' }}>Mastery overview</p>
+              <div className="teacher-skill-list">
+                {(summary.skills || summary.skill_states || []).slice(0, 5).map((s: any, i: number) => {
+                  const pct = Math.round((s.mastery_probability ?? s.p_mastery ?? 0) * 100)
+                  return (
+                    <div className="teacher-skill-row" key={i}>
+                      <div className="teacher-skill-topline">
+                        <p>{s.skill_name || `Skill ${s.skill_id || i + 1}`}</p>
+                        <span style={{ color: '#C85B43' }}>{pct}%</span>
+                      </div>
+                      <div className="teacher-progress"><span style={{ width: `${pct}%` }} /></div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
+            <p
+              style={{
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                fontSize: 11,
+                color: '#726A61',
+                margin: 0
+              }}
+            >Student</p>
+            <strong style={{ display: 'block', marginTop: 8 }}>{user?.full_name || user?.username || '—'}</strong>
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }
