@@ -4,26 +4,42 @@ import {
   startMicrophone, stopMicrophone,
 } from '../lib/api'
 
-function StatusBadge({ active }: { active: boolean | undefined }) {
-  if (active == null) return <span className="badge neutral">Unknown</span>
+function StatusPill({ active }: { active: boolean | undefined }) {
+  if (active == null) {
+    return (
+      <span style={{
+        fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+        color: '#726A61', background: 'rgba(114,106,97,0.1)', border: '1px solid rgba(114,106,97,0.3)',
+      }}>Unknown</span>
+    )
+  }
   return active
-    ? <span className="badge success">Online</span>
-    : <span className="badge danger">Offline</span>
+    ? <span style={{
+        fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+        color: '#1F4D3A', background: 'rgba(31,77,58,0.1)', border: '1px solid rgba(31,77,58,0.3)',
+      }}>Online</span>
+    : <span style={{
+        fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+        color: '#A63D40', background: 'rgba(166,61,64,0.1)', border: '1px solid rgba(166,61,64,0.3)',
+      }}>Offline</span>
 }
 
 function ComponentCard({
   title, active, children,
 }: { title: string; active: boolean | undefined; children?: React.ReactNode }) {
+  const dotColor = active == null ? '#726A61' : active ? '#1F4D3A' : '#A63D40'
   return (
-    <div className="list-item">
-      <div className="row">
+    <div className="teacher-skill-row">
+      <div className="teacher-skill-topline">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className={`status-dot ${active ? 'online' : 'offline'}`} />
-          <strong>{title}</strong>
+          <span style={{
+            width: 8, height: 8, borderRadius: '50%', background: dotColor, display: 'inline-block',
+          }} />
+          <strong style={{ color: 'var(--text)' }}>{title}</strong>
         </div>
-        <StatusBadge active={active} />
+        <StatusPill active={active} />
       </div>
-      {children && <div style={{ marginTop: 10 }}>{children}</div>}
+      {children && <div style={{ marginTop: 12 }}>{children}</div>}
     </div>
   )
 }
@@ -77,101 +93,139 @@ export default function HardwarePage() {
   const spkActive = status?.speaker_active ?? status?.speaker?.active
 
   return (
-    <div className="grid-two" style={{ alignItems: 'start' }}>
-      <section className="card stack">
-        <div className="section-title">
-          <div>
-            <h2>Hardware</h2>
-            <p className="meta">Control robot hardware components.</p>
-          </div>
-          <button type="button" className="btn secondary small" onClick={refresh} disabled={busy}>
+    <div className="teacher-dashboard">
+      <section className="teacher-hero">
+        <div>
+          <p className="teacher-eyebrow">Robot Control</p>
+          <h2 className="editorial-title">Hardware</h2>
+          <p>Monitor and control camera, microphone, and speaker components.</p>
+        </div>
+        <div className="teacher-hero-note">
+          <button type="button" className="teacher-action primary" onClick={refresh} disabled={busy}
+            style={{ minHeight: 'unset', padding: '10px 22px' }}>
             Refresh
           </button>
         </div>
-
-        {error && <p className="feedback error">{error}</p>}
-
-        <div className="list">
-          <ComponentCard title="Camera" active={camActive}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                type="button"
-                className="btn small"
-                disabled={busy || camActive === true}
-                onClick={() => act(startCamera, 'Start camera')}
-              >
-                Start
-              </button>
-              <button
-                type="button"
-                className="btn small secondary"
-                disabled={busy || camActive === false}
-                onClick={() => act(stopCamera, 'Stop camera')}
-              >
-                Stop
-              </button>
-              <button
-                type="button"
-                className="btn small secondary"
-                disabled={busy || !camActive}
-                onClick={grabSnapshot}
-              >
-                Snapshot
-              </button>
-            </div>
-          </ComponentCard>
-
-          <ComponentCard title="Microphone" active={micActive}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                type="button"
-                className="btn small"
-                disabled={busy || micActive === true}
-                onClick={() => act(() => startMicrophone(), 'Start microphone')}
-              >
-                Start
-              </button>
-              <button
-                type="button"
-                className="btn small secondary"
-                disabled={busy || micActive === false}
-                onClick={() => act(stopMicrophone, 'Stop microphone')}
-              >
-                Stop
-              </button>
-            </div>
-          </ComponentCard>
-
-          <ComponentCard title="Speaker" active={spkActive} />
-        </div>
       </section>
 
-      <aside className="card stack">
-        <h3 style={{ margin: 0 }}>Camera snapshot</h3>
-        {snapshot ? (
-          <div className="video-wrap">
-            <img
-              src={`data:image/jpeg;base64,${snapshot}`}
-              alt="Camera snapshot"
-              style={{ width: '100%', display: 'block' }}
-            />
-          </div>
-        ) : (
-          <div className="empty-state">
-            <p>No snapshot.</p>
-            <p className="meta">Start the camera then click Snapshot.</p>
-          </div>
-        )}
-
-        {status && (
-          <div className="stack" style={{ marginTop: 8 }}>
-            <h4 style={{ margin: 0 }}>Status details</h4>
-            <div className="list-item" style={{ padding: '10px 12px' }}>
-              <pre style={{ margin: 0, fontSize: 11 }}>{JSON.stringify(status, null, 2)}</pre>
+      <div className="teacher-layout">
+        <section className="teacher-main">
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Components</p>
+                <h3 className="editorial-title">Hardware status</h3>
+              </div>
             </div>
-          </div>
-        )}
-      </aside>
+
+            {error && <p className="feedback error">{error}</p>}
+
+            <div className="teacher-skill-list">
+              <ComponentCard title="Camera" active={camActive}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    type="button"
+                    className="teacher-action primary"
+                    disabled={busy || camActive === true}
+                    onClick={() => act(startCamera, 'Start camera')}
+                    style={{ minHeight: 'unset', padding: '8px 16px', fontSize: 13 }}
+                  >
+                    Start
+                  </button>
+                  <button
+                    type="button"
+                    className="teacher-action"
+                    disabled={busy || camActive === false}
+                    onClick={() => act(stopCamera, 'Stop camera')}
+                    style={{ minHeight: 'unset', padding: '8px 16px', fontSize: 13 }}
+                  >
+                    Stop
+                  </button>
+                  <button
+                    type="button"
+                    className="teacher-action"
+                    disabled={busy || !camActive}
+                    onClick={grabSnapshot}
+                    style={{ minHeight: 'unset', padding: '8px 16px', fontSize: 13 }}
+                  >
+                    Snapshot
+                  </button>
+                </div>
+              </ComponentCard>
+
+              <ComponentCard title="Microphone" active={micActive}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    type="button"
+                    className="teacher-action primary"
+                    disabled={busy || micActive === true}
+                    onClick={() => act(() => startMicrophone(), 'Start microphone')}
+                    style={{ minHeight: 'unset', padding: '8px 16px', fontSize: 13 }}
+                  >
+                    Start
+                  </button>
+                  <button
+                    type="button"
+                    className="teacher-action"
+                    disabled={busy || micActive === false}
+                    onClick={() => act(stopMicrophone, 'Stop microphone')}
+                    style={{ minHeight: 'unset', padding: '8px 16px', fontSize: 13 }}
+                  >
+                    Stop
+                  </button>
+                </div>
+              </ComponentCard>
+
+              <ComponentCard title="Speaker" active={spkActive} />
+            </div>
+          </section>
+        </section>
+
+        <aside className="teacher-actions">
+          <p className="teacher-eyebrow">Live View</p>
+          <h3 className="editorial-title">Camera snapshot</h3>
+
+          {snapshot ? (
+            <div style={{ marginTop: 16, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <img
+                src={`data:image/jpeg;base64,${snapshot}`}
+                alt="Camera snapshot"
+                style={{ width: '100%', display: 'block' }}
+              />
+            </div>
+          ) : (
+            <div className="empty-state" style={{ marginTop: 16 }}>
+              <p style={{ color: 'var(--text)', margin: 0 }}>No snapshot.</p>
+              <p style={{ color: 'var(--muted)', fontSize: 13, margin: '4px 0 0' }}>
+                Start the camera then click Snapshot.
+              </p>
+            </div>
+          )}
+
+          {status && (
+            <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
+              <p
+                style={{
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  fontSize: 11,
+                  color: '#726A61',
+                  margin: '0 0 10px'
+                }}
+              >Status details</p>
+              <div style={{
+                padding: '12px 14px', borderRadius: 8,
+                background: 'var(--bg)', border: '1px solid var(--border)',
+                maxHeight: 280, overflow: 'auto',
+              }}>
+                <pre style={{ margin: 0, fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap' }}>
+                  {JSON.stringify(status, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   )
 }

@@ -110,95 +110,167 @@ export default function VoicePage() {
   }
 
   return (
-    <div className="grid-two" style={{ alignItems: 'start' }}>
-      <section className="card stack">
-        <div className="section-title">
-          <div>
-            <h2>Voice Pipeline</h2>
-            <p className="meta">WebSocket STT → LLM → TTS. Streams PCM16 audio frames.</p>
-          </div>
-          <div className="row" style={{ gap: 6 }}>
-            <span className={`status-dot ${connected ? 'online' : 'offline'}`} />
-            <span className="meta">{connected ? 'Connected' : 'Disconnected'}</span>
-          </div>
+    <div className="teacher-dashboard">
+      <section className="teacher-hero">
+        <div>
+          <p className="teacher-eyebrow">Realtime Audio</p>
+          <h2 className="editorial-title">Voice Pipeline</h2>
+          <p>WebSocket STT → LLM → TTS. Streams PCM16 audio frames.</p>
         </div>
-
-        <div className="row">
-          <button type="button" className="btn" onClick={connect} disabled={connected}>
-            Connect WS
-          </button>
-          <button type="button" className="btn secondary" onClick={disconnect} disabled={!connected}>
-            Disconnect
-          </button>
+        <div className="teacher-hero-note">
+          <span>Connection</span>
+          <strong style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 22 }}>
+            <span style={{
+              width: 9, height: 9, borderRadius: '50%',
+              background: connected ? '#4ade80' : '#A63D40', display: 'inline-block',
+            }} />
+            {connected ? 'Connected' : 'Disconnected'}
+          </strong>
+          {userId > 0 && <p>User ID: {userId}</p>}
         </div>
-
-        <div className="row">
-          <button type="button" className="btn" onClick={startStreaming} disabled={!connected || streaming}>
-            Start microphone
-          </button>
-          <button type="button" className="btn secondary" onClick={stopStreaming} disabled={!streaming}>
-            Stop microphone
-          </button>
-        </div>
-
-        {streaming && (
-          <p className="feedback info">Streaming PCM16 audio to server…</p>
-        )}
-
-        <div className="stack">
-          <h4 style={{ margin: 0 }}>Live transcript</h4>
-          <div className="list-item" style={{ minHeight: 48 }}>
-            {transcript ? (
-              <p style={{ margin: 0 }}>{transcript}</p>
-            ) : (
-              <p className="meta" style={{ margin: 0 }}>Waiting for speech…</p>
-            )}
-          </div>
-        </div>
-
-        {finalTranscripts.length > 0 && (
-          <div className="stack">
-            <h4 style={{ margin: 0 }}>Previous transcripts</h4>
-            <div className="logs">
-              {finalTranscripts.map((t, i) => (
-                <div key={i} className="log-item">{t}</div>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
 
-      <aside className="card stack">
-        <div className="section-title">
-          <h3>Event log</h3>
-          {logs.length > 0 && (
-            <button type="button" className="btn ghost small" onClick={() => setLogs([])}>Clear</button>
-          )}
-        </div>
+      <div className="teacher-layout">
+        <section className="teacher-main">
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Controls</p>
+                <h3 className="editorial-title">Connection &amp; mic</h3>
+              </div>
+            </div>
 
-        <div className="logs">
-          {logs.length === 0 ? (
-            <p className="meta">Events will appear here after connecting.</p>
-          ) : (
-            logs.map((l, i) => <div key={i} className="log-item">{l}</div>)
-          )}
-        </div>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+              <button type="button" className="teacher-action primary" onClick={connect} disabled={connected}
+                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+                Connect WS
+              </button>
+              <button type="button" className="teacher-action" onClick={disconnect} disabled={!connected}
+                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+                Disconnect
+              </button>
+            </div>
 
-        <div className="stack" style={{ marginTop: 8 }}>
-          <h4 style={{ margin: 0 }}>How it works</h4>
-          <div className="list-item" style={{ padding: '10px 14px' }}>
-            <ol className="meta" style={{ margin: 0, paddingLeft: 16, lineHeight: 1.8 }}>
-              <li>Click <strong>Connect WS</strong> to open a WebSocket to the backend voice endpoint.</li>
-              <li>Click <strong>Start microphone</strong> to capture audio from your browser mic.</li>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="button" className="teacher-action primary" onClick={startStreaming} disabled={!connected || streaming}
+                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+                Start microphone
+              </button>
+              <button type="button" className="teacher-action" onClick={stopStreaming} disabled={!streaming}
+                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+                Stop microphone
+              </button>
+            </div>
+
+            {streaming && (
+              <p style={{
+                marginTop: 16, marginBottom: 0, fontSize: 13, fontWeight: 600,
+                color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                🎙️ Streaming PCM16 audio to server…
+              </p>
+            )}
+          </section>
+
+          <section className="teacher-panel">
+            <div className="teacher-panel-header">
+              <div>
+                <p className="teacher-eyebrow">Live</p>
+                <h3 className="editorial-title">Live transcript</h3>
+              </div>
+            </div>
+            <div style={{
+              padding: '14px 18px', borderRadius: 8, minHeight: 48,
+              background: 'var(--bg)', border: '1px solid var(--border)',
+            }}>
+              {transcript ? (
+                <p style={{ margin: 0, color: 'var(--text)', fontSize: 15, lineHeight: 1.6 }}>{transcript}</p>
+              ) : (
+                <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>Waiting for speech…</p>
+              )}
+            </div>
+          </section>
+
+          {finalTranscripts.length > 0 && (
+            <section className="teacher-panel">
+              <div className="teacher-panel-header">
+                <div>
+                  <p className="teacher-eyebrow">History</p>
+                  <h3 className="editorial-title">Previous transcripts</h3>
+                </div>
+              </div>
+              <div style={{
+                display: 'flex', flexDirection: 'column', gap: 8,
+                maxHeight: 260, overflowY: 'auto',
+              }}>
+                {finalTranscripts.map((t, i) => (
+                  <div key={i} style={{
+                    padding: '10px 14px', borderRadius: 8,
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    fontSize: 13, color: 'var(--text)', lineHeight: 1.5,
+                  }}>
+                    {t}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </section>
+
+        <aside className="teacher-actions">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p className="teacher-eyebrow" style={{ margin: 0 }}>Diagnostics</p>
+              <h3 className="editorial-title" style={{ margin: 0 }}>Event log</h3>
+            </div>
+            {logs.length > 0 && (
+              <button type="button" className="teacher-action" onClick={() => setLogs([])}
+                style={{ minHeight: 'unset', padding: '6px 14px', fontSize: 12 }}>
+                Clear
+              </button>
+            )}
+          </div>
+
+          <div style={{
+            marginTop: 16, display: 'flex', flexDirection: 'column', gap: 6,
+            maxHeight: 280, overflowY: 'auto',
+          }}>
+            {logs.length === 0 ? (
+              <p style={{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>
+                Events will appear here after connecting.
+              </p>
+            ) : (
+              logs.map((l, i) => (
+                <div key={i} style={{
+                  padding: '8px 12px', borderRadius: 6,
+                  background: 'var(--bg)', border: '1px solid var(--border)',
+                  fontSize: 12, color: 'var(--muted)', fontFamily: 'monospace', lineHeight: 1.5,
+                }}>
+                  {l}
+                </div>
+              ))
+            )}
+          </div>
+
+          <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
+            <p
+              style={{
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                fontSize: 11,
+                color: '#726A61',
+                margin: '0 0 10px'
+              }}
+            >How it works</p>
+            <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.8, fontSize: 13, color: 'var(--muted)' }}>
+              <li>Click <strong style={{ color: 'var(--text)' }}>Connect WS</strong> to open a WebSocket to the backend voice endpoint.</li>
+              <li>Click <strong style={{ color: 'var(--text)' }}>Start microphone</strong> to capture audio from your browser mic.</li>
               <li>Audio is converted to PCM16 and streamed frame-by-frame over WebSocket.</li>
               <li>The server performs STT, passes through the LLM, and streams TTS audio back.</li>
             </ol>
           </div>
-          {userId > 0 && (
-            <p className="meta">Session bound to user ID: <strong>{userId}</strong></p>
-          )}
-        </div>
-      </aside>
+        </aside>
+      </div>
     </div>
   )
 }

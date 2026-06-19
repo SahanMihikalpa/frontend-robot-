@@ -39,10 +39,10 @@ function errDetail(e: any): string {
 function MasteryBar({ pct, label }: { pct: number; label?: string }) {
   const c = Math.max(0, Math.min(100, pct))
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      {label && <span className="meta" style={{ whiteSpace: 'nowrap', fontSize: 12 }}>{label}</span>}
-      <div className="progress" style={{ flex: 1, height: 6 }}><span style={{ width: `${c}%` }} /></div>
-      <span style={{ fontSize: 12, minWidth: 34, textAlign: 'right' }}>{c.toFixed(0)}%</span>
+    <div className="selflearn-mastery-bar">
+      {label && <span className="meta selflearn-mastery-label">{label}</span>}
+      <div className="teacher-progress selflearn-mastery-track"><span style={{ width: `${c}%` }} /></div>
+      <span className="selflearn-mastery-pct">{c.toFixed(0)}%</span>
     </div>
   )
 }
@@ -173,91 +173,120 @@ export default function SelfLearn() {
   // ── START VIEW ──────────────────────────────────────────────────────────────
   if (view === 'start') {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <h2 style={{ marginBottom: 4 }}>Learn Anything</h2>
-        <p className="meta" style={{ marginTop: 0 }}>
-          Tell the tutor what you want to learn. It teaches you in a back-and-forth conversation —
-          ask questions any time — and quietly checks your understanding to track your mastery.
-        </p>
+      <div className="selflearn-page">
+        <section className="history-hero">
+          <div>
+            <p className="teacher-eyebrow">Self-Paced Learning</p>
+            <h2 className="editorial-title">Learn Anything</h2>
+            <p>
+              Tell the tutor what you want to learn. It teaches you in a back-and-forth conversation —
+              ask questions any time — and quietly checks your understanding to track your mastery.
+            </p>
+          </div>
+          <div className="history-subject-card">
+            <span>Courses</span>
+            <strong>{courses.length}</strong>
+          </div>
+        </section>
 
         {error && (
-          <div className="card" style={{ marginTop: 12, borderColor: 'rgba(239,68,68,0.4)' }}>
-            <span style={{ color: '#dc2626', fontSize: 13 }}>{error}</span>
-            {error.includes('sign in') && (
-              <a href="/login" className="btn small" style={{ marginLeft: 12 }}>Sign in</a>
-            )}
-          </div>
+          <p className="feedback error">
+            {error}
+            {error.includes('sign in') && <a href="/login" style={{ marginLeft: 8 }}>Sign in</a>}
+          </p>
         )}
 
-        <div className="card" style={{ marginTop: 16 }}>
-          <div className="field">
-            <label>What do you want to learn?</label>
-            <input
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') start() }}
-              placeholder="e.g. Cloud Computing, Neural Networks, Photosynthesis…"
-            />
-          </div>
-
-          <div className="field" style={{ marginTop: 12 }}>
-            <label>Course material <span className="meta" style={{ fontWeight: 400 }}>(optional — PDF, TXT, MD)</span></label>
-            <input
-              type="file"
-              multiple
-              accept=".pdf,.txt,.md"
-              onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            />
-            <div className="meta" style={{ fontSize: 12, marginTop: 4 }}>
-              {files.length > 0
-                ? `${files.length} file${files.length === 1 ? '' : 's'} selected — the tutor will follow your material and teach within its scope.`
-                : 'Upload your slides/notes to scope the course to your syllabus. Leave empty to learn from a generated course.'}
+        <section className="history-panel">
+          <div className="skills-panel-header">
+            <div>
+              <p className="teacher-eyebrow">New Course</p>
+              <h3 className="editorial-title">What do you want to learn?</h3>
             </div>
           </div>
 
-          {packMsg && (
-            <div className="meta" style={{ fontSize: 12, marginTop: 8, color: 'var(--accent, #6366f1)' }}>{packMsg}</div>
-          )}
-
-          {providers && providers.available.length > 1 && (
-            <div className="field" style={{ marginTop: 12 }}>
-              <label>Teaching voice</label>
-              <select value={provider} onChange={(e) => setProvider(e.target.value)}>
-                {providers.available.map((p) => (
-                  <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
-                ))}
-              </select>
+          <div className="selflearn-form">
+            <div className="field">
+              <label>Topic</label>
+              <input
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') start() }}
+                placeholder="e.g. Cloud Computing, Neural Networks, Photosynthesis…"
+              />
             </div>
-          )}
 
-          <button className="btn" style={{ marginTop: 14 }} onClick={() => start()} disabled={loading || !topic.trim()}>
-            {loading ? 'Building your course…' : 'Start learning'}
-          </button>
-        </div>
+            <div className="field">
+              <label>Course material <span className="meta" style={{ fontWeight: 400 }}>(optional — PDF, TXT, MD)</span></label>
+              <label className="selflearn-file-drop">
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.txt,.md"
+                  onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                />
+                <span className="selflearn-file-drop-icon">📎</span>
+                <span className="selflearn-file-drop-text">
+                  {files.length > 0
+                    ? `${files.length} file${files.length === 1 ? '' : 's'} selected`
+                    : 'Choose files or drag them here'}
+                </span>
+              </label>
+              <p className="meta selflearn-field-hint">
+                {files.length > 0
+                  ? 'The tutor will follow your material and teach within its scope.'
+                  : 'Upload your slides/notes to scope the course to your syllabus. Leave empty to learn from a generated course.'}
+              </p>
+            </div>
 
-        {courses.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <h3 style={{ marginBottom: 8 }}>Your learning</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {packMsg && (
+              <p className="meta selflearn-pack-msg">{packMsg}</p>
+            )}
+
+            {providers && providers.available.length > 1 && (
+              <div className="field">
+                <label>Teaching voice</label>
+                <select value={provider} onChange={(e) => setProvider(e.target.value)}>
+                  {providers.available.map((p) => (
+                    <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <button className="btn selflearn-start-btn" onClick={() => start()} disabled={loading || !topic.trim()}>
+              {loading ? 'Building your course…' : 'Start learning'}
+            </button>
+          </div>
+        </section>
+
+        <section className="history-panel">
+          <div className="skills-panel-header">
+            <div>
+              <p className="teacher-eyebrow">In Progress</p>
+              <h3 className="editorial-title">Your learning</h3>
+            </div>
+            <span className="skills-count-pill subtle">{courses.length} course{courses.length === 1 ? '' : 's'}</span>
+          </div>
+
+          {courses.length === 0 ? (
+            <div className="empty-state">
+              <p>No courses yet.</p>
+              <p className="meta">Start a new topic above to begin your first course.</p>
+            </div>
+          ) : (
+            <div className="history-list">
               {courses.map((c) => {
                 const rep = breakdown[c.session_id]
                 const isOpen = expanded === c.session_id
                 return (
-                  <div key={c.session_id} className="card" style={{ padding: 14 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <strong>{c.topic}</strong>
-                        {c.is_private && <span className="badge" style={{ marginLeft: 8, fontSize: 11 }}>your material</span>}
-                        <div className="meta" style={{ fontSize: 12, marginTop: 2 }}>
-                          {c.phase === 'complete' ? 'Completed' : `In progress · ${c.current_level}`}
-                          {' · '}{c.concepts_mastered}/{c.concepts_total} concepts mastered
-                        </div>
-                        <div style={{ marginTop: 8, maxWidth: 320 }}>
-                          <MasteryBar pct={c.overall_mastery * 100} label="Overall" />
-                        </div>
+                  <article key={c.session_id} className="history-card selflearn-course-card">
+                    <div className="history-card-main">
+                      <div className="selflearn-course-title">
+                        <h4>{c.topic}</h4>
+                        {c.is_private && <span className="history-result-pill success">your material</span>}
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <button className="btn small secondary" onClick={() => resume(c.session_id)} disabled={loading}>
+                      <div className="selflearn-course-actions">
+                        <button className="skills-chip" onClick={() => resume(c.session_id)} disabled={loading}>
                           {resumingId === c.session_id ? 'Loading…' : (c.phase === 'complete' ? 'Review' : 'Continue')}
                         </button>
                         <button className="btn ghost small" onClick={() => toggleExpand(c)}>
@@ -266,174 +295,195 @@ export default function SelfLearn() {
                       </div>
                     </div>
 
+                    <p>
+                      {c.phase === 'complete' ? 'Completed' : `In progress · ${c.current_level}`}
+                      {' · '}{c.concepts_mastered}/{c.concepts_total} concepts mastered
+                    </p>
+
+                    <div className="selflearn-course-progress">
+                      <MasteryBar pct={c.overall_mastery * 100} label="Overall" />
+                    </div>
+
                     {isOpen && (
-                      <div style={{ marginTop: 12, borderTop: '1px solid var(--border, rgba(0,0,0,0.08))', paddingTop: 12 }}>
+                      <div className="selflearn-course-detail">
                         {c.documents.length > 0 && (
-                          <div style={{ marginBottom: 10 }}>
-                            <div className="meta" style={{ fontSize: 12, marginBottom: 4 }}>Course material</div>
+                          <div className="selflearn-doc-list">
+                            <p className="meta selflearn-detail-label">Course material</p>
                             {c.documents.map((d, i) => (
-                              <div key={i} style={{ fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
+                              <div key={i} className="selflearn-doc-row">
                                 <span>{d.status === 'ingested' ? '📄' : '⚠️'}</span>
-                                <span style={{ flex: 1 }}>{d.filename}</span>
-                                <span className="meta" style={{ fontSize: 11 }}>
+                                <span className="selflearn-doc-name">{d.filename}</span>
+                                <span className="meta selflearn-doc-meta">
                                   {d.status === 'ingested' ? `${d.chunk_count} chunks` : (d.warning || d.status)}
                                 </span>
                               </div>
                             ))}
                           </div>
                         )}
-                        <div className="meta" style={{ fontSize: 12, marginBottom: 4 }}>Concepts</div>
+                        <p className="meta selflearn-detail-label">Concepts</p>
                         {rep ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <div className="selflearn-concept-list">
                             {(rep.concepts || []).map((cc: any, i: number) => (
-                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <span style={{ flex: 1, fontSize: 13 }}>
+                              <div key={i} className="selflearn-concept-row">
+                                <span className="selflearn-concept-name">
                                   {cc.mastered ? '✅' : '•'} {cc.concept} <span className="meta">({cc.level})</span>
                                 </span>
-                                <div style={{ width: 130 }}><MasteryBar pct={cc.mastery * 100} /></div>
+                                <div className="selflearn-concept-bar"><MasteryBar pct={cc.mastery * 100} /></div>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="meta" style={{ fontSize: 13 }}>Loading concepts…</div>
+                          <p className="meta">Loading concepts…</p>
                         )}
                       </div>
                     )}
-                  </div>
+                  </article>
                 )
               })}
             </div>
-          </div>
-        )}
+          )}
+        </section>
       </div>
     )
   }
 
   // ── SESSION VIEW ────────────────────────────────────────────────────────────
   return (
-    <div style={{ maxWidth: 820, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+    <div className="selflearn-page selflearn-session-page">
+      <section className="history-hero selflearn-session-hero">
         <div>
           <button className="btn ghost small" onClick={() => { setView('start'); loadCourses() }}>← New topic</button>
-          <h2 style={{ margin: '4px 0 0' }}>{skill?.canonical_name || 'Learning'}</h2>
-          {level && <span className="badge">{level}</span>}
+          <h2 className="editorial-title selflearn-session-title">{skill?.canonical_name || 'Learning'}</h2>
+          {level && <span className="history-result-pill success">{level}</span>}
         </div>
-        <div style={{ minWidth: 200 }}>
-          {conceptMastery != null && <MasteryBar pct={conceptMastery * 100} label="Concept" />}
-          <button className="btn ghost small" style={{ marginTop: 6 }} onClick={openReport}>📊 Mastery report</button>
+        <div className="history-subject-card selflearn-session-status">
+          <span>Concept Mastery</span>
+          {conceptMastery != null && (
+            <strong className="selflearn-session-pct">{Math.round(conceptMastery * 100)}%</strong>
+          )}
+          <button className="btn ghost small selflearn-report-btn" onClick={openReport}>📊 Mastery report</button>
         </div>
-      </div>
+      </section>
 
       {report && (
-        <div className="card" style={{ marginTop: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <strong>Mastery report — overall {(report.overall_mastery * 100).toFixed(0)}%</strong>
+        <section className="history-panel">
+          <div className="skills-panel-header">
+            <div>
+              <p className="teacher-eyebrow">Report</p>
+              <h3 className="editorial-title">Mastery report — {(report.overall_mastery * 100).toFixed(0)}%</h3>
+            </div>
             <button className="btn ghost small" onClick={() => setReport(null)}>✕</button>
           </div>
-          <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="selflearn-concept-list">
             {(report.concepts || []).map((c: any, i: number) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ flex: 1, fontSize: 13 }}>{c.mastered ? '✅' : '•'} {c.concept} <span className="meta">({c.level})</span></span>
-                <div style={{ width: 140 }}><MasteryBar pct={c.mastery * 100} /></div>
+              <div key={i} className="selflearn-concept-row">
+                <span className="selflearn-concept-name">{c.mastered ? '✅' : '•'} {c.concept} <span className="meta">({c.level})</span></span>
+                <div className="selflearn-concept-bar"><MasteryBar pct={c.mastery * 100} /></div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      <div ref={scrollRef} className="card" style={{ marginTop: 12, maxHeight: '56vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {messages.length === 0 && !loading && (
-          <div className="meta" style={{ textAlign: 'center', fontSize: 13 }}>The lesson will appear here.</div>
-        )}
-        {messages.map((m) => {
-          // Student turns (their messages and submitted answers).
-          if (m.sender === 'STUDENT') {
-            return (
-              <div key={m.id} style={{ alignSelf: 'flex-end', maxWidth: '88%' }}>
-                <div className="chat-bubble user">{m.content}</div>
-              </div>
-            )
-          }
-          // Graded feedback on a check.
-          if (m.type === 'FEEDBACK') {
-            const correct = !!m.metadata?.is_correct
-            const mastery = typeof m.metadata?.mastery === 'number' ? m.metadata.mastery : null
-            return (
-              <div key={m.id} style={{ alignSelf: 'flex-start', maxWidth: '92%' }}>
-                <div className="chat-bubble assistant" style={{
-                  background: correct ? 'rgba(74,222,128,0.10)' : 'rgba(239,68,68,0.08)',
-                  border: `1px solid ${correct ? 'rgba(74,222,128,0.35)' : 'rgba(239,68,68,0.3)'}`,
-                }}>
-                  <strong style={{ color: correct ? '#16a34a' : '#dc2626' }}>{correct ? '✓ Correct' : '✗ Not quite'}</strong>
-                  {m.content && <p style={{ margin: '4px 0 8px', fontSize: 14, lineHeight: 1.5 }}>{m.content}</p>}
-                  {mastery != null && <MasteryBar pct={mastery * 100} label="Mastery" />}
-                </div>
-              </div>
-            )
-          }
-          // A comprehension check posed by the tutor.
-          if (m.type === 'CHECK') {
-            const isActive = pendingCheck?.question_id === m.metadata?.question_id
-            return (
-              <div key={m.id} className="chat-bubble assistant" style={{ maxWidth: '92%', borderColor: 'var(--accent, #6366f1)' }}>
-                <div className="meta" style={{ fontSize: 11, marginBottom: 4 }}>Quick check</div>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.5, fontSize: 14, fontWeight: 600 }}>{m.content}</p>
-                {isActive && m.metadata?.qtype === 'mcq' && m.metadata?.options && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
-                    {Object.entries(m.metadata.options as Record<string, string>).map(([k, v]) => (
-                      <button key={k} type="button" className="btn secondary"
-                        style={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                        onClick={() => send(k)} disabled={loading}>
-                        <strong style={{ marginRight: 8 }}>{k}.</strong> {v}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          }
-          // Default tutor teaching / chat message.
-          return (
-            <div key={m.id} className="chat-bubble assistant" style={{ maxWidth: '92%' }}>
-              {m.metadata?.concept && <div className="meta" style={{ fontSize: 11, marginBottom: 4 }}>Tutor · {m.metadata.concept}</div>}
-              <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14 }}>{m.content}</p>
-            </div>
-          )
-        })}
-
-        {loading && <div className="chat-bubble assistant" style={{ color: 'var(--muted)', fontStyle: 'italic', fontSize: 13 }}>Thinking…</div>}
-        {done && <div style={{ textAlign: 'center', marginTop: 8 }}><span className="badge">Topic complete 🎉</span></div>}
-      </div>
-
-      {/* Always-on chat input: ask anything, or type your answer to a check. */}
-      {!done && (
-        <div className="card" style={{ marginTop: 12 }}>
-          {pendingCheck && (
-            <div className="meta" style={{ fontSize: 12, marginBottom: 6 }}>
-              {pendingCheck.qtype === 'mcq'
-                ? 'Pick an option above, or type the letter (A/B/C/D).'
-                : 'Answer the check above, or keep the conversation going.'}
-            </div>
-          )}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(draft) } }}
-              placeholder={pendingCheck ? 'Type your answer…' : 'Ask a question, or say "go on"…'}
-              style={{ flex: 1, minHeight: 46, maxHeight: 140, resize: 'vertical' }}
-              disabled={loading}
-            />
-            <button className="btn" onClick={() => send(draft)} disabled={loading || !draft.trim()}>Send</button>
+      <section className="history-panel">
+        <div className="skills-panel-header">
+          <div>
+            <p className="teacher-eyebrow">Conversation</p>
+            <h3 className="editorial-title">Lesson</h3>
           </div>
         </div>
-      )}
 
-      {error && (
-        <p style={{ color: '#ef4444', fontSize: 13, marginTop: 8 }}>
-          {error}{error.includes('sign in') && <a href="/login" style={{ marginLeft: 8 }}>Sign in</a>}
-        </p>
-      )}
+        <div ref={scrollRef} className="selflearn-chat-window">
+          {messages.length === 0 && !loading && (
+            <div className="empty-state"><p className="meta">The lesson will appear here.</p></div>
+          )}
+          {messages.map((m) => {
+            // Student turns (their messages and submitted answers).
+            if (m.sender === 'STUDENT') {
+              return (
+                <div key={m.id} className="selflearn-msg-row student">
+                  <div className="chat-bubble user selflearn-bubble">{m.content}</div>
+                </div>
+              )
+            }
+            // Graded feedback on a check.
+            if (m.type === 'FEEDBACK') {
+              const correct = !!m.metadata?.is_correct
+              const mastery = typeof m.metadata?.mastery === 'number' ? m.metadata.mastery : null
+              return (
+                <div key={m.id} className="selflearn-msg-row tutor">
+                  <div className={`chat-bubble assistant selflearn-bubble selflearn-feedback ${correct ? 'correct' : 'incorrect'}`}>
+                    <strong className={correct ? 'selflearn-feedback-correct' : 'selflearn-feedback-incorrect'}>
+                      {correct ? '✓ Correct' : '✗ Not quite'}
+                    </strong>
+                    {m.content && <p className="selflearn-feedback-text">{m.content}</p>}
+                    {mastery != null && <MasteryBar pct={mastery * 100} label="Mastery" />}
+                  </div>
+                </div>
+              )
+            }
+            // A comprehension check posed by the tutor.
+            if (m.type === 'CHECK') {
+              const isActive = pendingCheck?.question_id === m.metadata?.question_id
+              return (
+                <div key={m.id} className="chat-bubble assistant selflearn-bubble selflearn-check">
+                  <p className="meta selflearn-detail-label">Quick check</p>
+                  <p className="selflearn-check-text">{m.content}</p>
+                  {isActive && m.metadata?.qtype === 'mcq' && m.metadata?.options && (
+                    <div className="selflearn-options">
+                      {Object.entries(m.metadata.options as Record<string, string>).map(([k, v]) => (
+                        <button key={k} type="button" className="btn secondary selflearn-option-btn"
+                          onClick={() => send(k)} disabled={loading}>
+                          <strong className="selflearn-option-key">{k}.</strong> {v}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+            // Default tutor teaching / chat message.
+            return (
+              <div key={m.id} className="chat-bubble assistant selflearn-bubble">
+                {m.metadata?.concept && <p className="meta selflearn-detail-label">Tutor · {m.metadata.concept}</p>}
+                <p className="selflearn-teach-text">{m.content}</p>
+              </div>
+            )
+          })}
+
+          {loading && <div className="chat-bubble assistant selflearn-bubble selflearn-thinking">Thinking…</div>}
+          {done && <div className="selflearn-complete-row"><span className="history-result-pill success">Topic complete 🎉</span></div>}
+        </div>
+
+        {/* Always-on chat input: ask anything, or type your answer to a check. */}
+        {!done && (
+          <div className="selflearn-composer">
+            {pendingCheck && (
+              <p className="meta selflearn-pending-hint">
+                {pendingCheck.qtype === 'mcq'
+                  ? 'Pick an option above, or type the letter (A/B/C/D).'
+                  : 'Answer the check above, or keep the conversation going.'}
+              </p>
+            )}
+            <div className="selflearn-composer-row">
+              <textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(draft) } }}
+                placeholder={pendingCheck ? 'Type your answer…' : 'Ask a question, or say "go on"…'}
+                disabled={loading}
+              />
+              <button className="btn" onClick={() => send(draft)} disabled={loading || !draft.trim()}>Send</button>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <p className="feedback error selflearn-error">
+            {error}{error.includes('sign in') && <a href="/login" style={{ marginLeft: 8 }}>Sign in</a>}
+          </p>
+        )}
+      </section>
     </div>
   )
 }
