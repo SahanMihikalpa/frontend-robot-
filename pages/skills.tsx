@@ -44,7 +44,7 @@ const DIFF_LABELS: Record<number, string> = { 1: 'Beginner', 2: 'Easy', 3: 'Medi
 function DiffBadge({ level }: { level?: number }) {
   if (!level) return <span className="badge neutral">—</span>
   const colors: Record<number, string> = {
-    1: '#4ade80', 2: '#86efac', 3: '#fbbf24', 4: '#fb923c', 5: '#f87171',
+    1: 'var(--success)', 2: '#86efac', 3: 'var(--warning)', 4: '#fb923c', 5: 'var(--danger)',
   }
   return (
     <span className="badge" style={{ background: colors[level] + '22', color: colors[level], border: `1px solid ${colors[level]}44` }}>

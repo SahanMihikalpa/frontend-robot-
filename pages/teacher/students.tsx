@@ -6,14 +6,14 @@ import { useEffect, useState } from 'react'
 import { getStudentsDetailed, StudentDetailed, scoreColor, statusColor, statusLabel } from '../../lib/teacher-api'
 
 const STATUS_DESCRIPTIONS: Record<string, { short: string; action: string; color: string }> = {
-  mastered:     { short: 'P(mastery) >= 95% across all skills',    action: 'Ready to advance to harder topics.',                    color: '#4ade80' },
-  near_mastery: { short: 'Highest skill is 85-95%',                action: 'A few more correct answers will reach mastery.',        color: '#60a5fa' },
-  learning:     { short: 'Most skills are in the 30-85% range',    action: 'Normal progress. Continue current practice.',           color: '#fbbf24' },
-  struggling:   { short: 'At least one skill is below 30%',        action: 'Needs attention. Review struggling skills directly.',   color: '#f87171' },
-  not_started:  { short: 'No questions answered yet',              action: 'Encourage the student to start practicing.',            color: '#94a3b8' },
+  mastered:     { short: 'P(mastery) >= 95% across all skills',    action: 'Ready to advance to harder topics.',                    color: 'var(--success)' },
+  near_mastery: { short: 'Highest skill is 85-95%',                action: 'A few more correct answers will reach mastery.',        color: 'var(--accent-secondary)' },
+  learning:     { short: 'Most skills are in the 30-85% range',    action: 'Normal progress. Continue current practice.',           color: 'var(--warning)' },
+  struggling:   { short: 'At least one skill is below 30%',        action: 'Needs attention. Review struggling skills directly.',   color: 'var(--danger)' },
+  not_started:  { short: 'No questions answered yet',              action: 'Encourage the student to start practicing.',            color: 'var(--muted)' },
 }
 
-function InfoBox({ title, children, accent = '#60a5fa', defaultOpen = false }: {
+function InfoBox({ title, children, accent = 'var(--accent-secondary)', defaultOpen = false }: {
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -244,7 +244,7 @@ export default function TeacherStudents() {
                             </span>
                           )
                         })()
-                      : <span style={{ color: '#94a3b8' }}>Never</span>}
+                      : <span style={{ color: 'var(--muted)' }}>Never</span>}
                   </td>
                   <td>
                     <Link href={`/teacher/students/${s.user_id}`} className="teacher-detail-link">

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { listStudentsAnalytics, getStudentAnalytics, getSkillsAnalytics } from '../lib/api'
 
 function scoreColor(score: number | null) {
-  if (score == null) return '#94a3b8'
+  if (score == null) return 'var(--muted)'
   if (score >= 0.7) return 'var(--success)'
   if (score >= 0.4) return 'var(--warning)'
   return 'var(--danger)'

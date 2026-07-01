@@ -8,10 +8,10 @@ import { getClassHeatmap, HeatmapData, statusColor, statusLabel } from '../../li
 function cellBg(status: string): string {
   switch (status) {
     case 'mastered':     return 'var(--success)'
-    case 'near_mastery': return '#3F5F88'
+    case 'near_mastery': return 'var(--accent-secondary)'
     case 'learning':     return 'var(--warning)'
     case 'struggling':   return 'var(--danger)'
-    default:             return '#D8CFC5'
+    default:             return 'var(--border-strong)'
   }
 }
 
