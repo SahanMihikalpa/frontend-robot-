@@ -37,7 +37,7 @@ export default function Home() {
             way{' '}
             <span
               style={{
-                color: '#C85B43',
+                color: 'var(--accent)',
                 fontStyle: 'italic'
               }}
             >
@@ -63,7 +63,7 @@ export default function Home() {
                   Sign in
                 </Link>
 
-                <Link href="/register" className="btn">
+                <Link href="/register" className="btn home-btn-outline">
                   Create account
                 </Link>
               </>
@@ -74,7 +74,7 @@ export default function Home() {
               <div className="editorial-title" style={{ fontSize: 36 }}>
                 AI
               </div>
-              <div style={{ color: '#726A61' }}>
+              <div style={{ color: 'var(--muted)' }}>
                 Tutoring
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function Home() {
               <div className="editorial-title" style={{ fontSize: 36 }}>
                 BKT
               </div>
-              <div style={{ color: '#726A61' }}>
+              <div style={{ color: 'var(--muted)' }}>
                 Knowledge Tracking
               </div>
             </div>
@@ -92,7 +92,7 @@ export default function Home() {
               <div className="editorial-title" style={{ fontSize: 36 }}>
                 DKT
               </div>
-              <div style={{ color: '#726A61' }}>
+              <div style={{ color: 'var(--muted)' }}>
                 Deep Learning Models
               </div>
             </div>
@@ -117,9 +117,11 @@ export default function Home() {
     <div className="stack" style={{ gap: 32 }}>
 
       {/* Role cards */}
-      <div className="grid-three">
-        <div className="card stack">
+      <section className="home-roles-section">
+      <div className="home-roles-inner grid-three">
+        <div className="card stack home-role-card-outer">
           <div className="home-role-card">
+            <div className="home-role-icon home-role-icon-student">S</div>
             <div className="home-role-eyebrow">
               I AM A
             </div>
@@ -136,7 +138,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -145,8 +147,9 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <div className="card stack">
+        <div className="card stack home-role-card-outer">
           <div className="home-role-card">
+            <div className="home-role-icon home-role-icon-teacher">T</div>
             <div className="home-role-eyebrow">
               I AM A
             </div>
@@ -163,7 +166,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -172,8 +175,9 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <div className="card stack">
+        <div className="card stack home-role-card-outer">
           <div className="home-role-card">
+            <div className="home-role-icon home-role-icon-admin">A</div>
             <div className="home-role-eyebrow">
               I AM AN
             </div>
@@ -190,7 +194,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -200,6 +204,50 @@ export default function Home() {
           </div>
         </div>
       </div>
+      </section>
+
+      {/* Product preview */}
+      <section className="home-preview-section">
+        <div className="home-preview-copy">
+          <p className="home-eyebrow">Under The Hood</p>
+          <h2 className="editorial-title home-preview-title">
+            See the classroom, at a glance.
+          </h2>
+          <p className="home-hero-desc" style={{ marginBottom: 0 }}>
+            Live mastery tracking, engagement signals, and skill heatmaps —
+            built for teachers who want the full picture without digging for it.
+          </p>
+        </div>
+
+        <div className="home-preview-mockup" aria-hidden="true">
+          <div className="home-preview-mockup-bar">
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="home-preview-mockup-body">
+            <div className="home-preview-kpis">
+              <div className="home-preview-kpi">
+                <p>Mastery</p>
+                <strong>92%</strong>
+              </div>
+              <div className="home-preview-kpi">
+                <p>Active</p>
+                <strong>128</strong>
+              </div>
+            </div>
+            <div className="home-preview-chart">
+              <i style={{ height: '38%' }} />
+              <i style={{ height: '62%' }} />
+              <i style={{ height: '48%' }} />
+              <i style={{ height: '80%' }} />
+              <i style={{ height: '58%' }} />
+              <i style={{ height: '94%' }} />
+              <i style={{ height: '70%' }} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* How It Works */}
       <section className="home-how-section">
@@ -210,14 +258,8 @@ export default function Home() {
         <div className="home-how-grid">
           {/* Step 01 */}
 
-          <div>
-            <div
-              style={{
-                fontSize: 64,
-                color: '#C85B43',
-                fontFamily: 'serif'
-              }}
-            >
+          <div className="home-step">
+            <div className="home-step-number">
               01
             </div>
 
@@ -234,7 +276,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -244,14 +286,8 @@ export default function Home() {
 
           {/* Step 02 */}
 
-          <div>
-            <div
-              style={{
-                fontSize: 64,
-                color: '#C85B43',
-                fontFamily: 'serif'
-              }}
-            >
+          <div className="home-step">
+            <div className="home-step-number">
               02
             </div>
 
@@ -268,7 +304,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -278,14 +314,8 @@ export default function Home() {
 
           {/* Step 03 */}
 
-          <div>
-            <div
-              style={{
-                fontSize: 64,
-                color: '#C85B43',
-                fontFamily: 'serif'
-              }}
-            >
+          <div className="home-step">
+            <div className="home-step-number">
               03
             </div>
 
@@ -302,7 +332,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -312,6 +342,8 @@ export default function Home() {
         </div>
       </section>
     </div>
+
+    
     </>
   )
 }

@@ -130,7 +130,7 @@ export default function HistoryPage() {
           </div>
           <div className="teacher-kpi-card">
             <p>Correct</p>
-            <strong style={{ color: '#1F4D3A' }}>{correctCount}</strong>
+            <strong style={{ color: 'var(--success)' }}>{correctCount}</strong>
           </div>
           <div className="teacher-kpi-card">
             <p>Accuracy</p>

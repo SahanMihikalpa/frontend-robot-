@@ -113,10 +113,10 @@ export default function PracticePage() {
       return base
     }
     if (key === correctAnswer) {
-      return { ...base, borderColor: '#1F4D3A', background: 'rgba(31,77,58,0.08)', color: '#1F4D3A' }
+      return { ...base, borderColor: 'var(--success)', background: 'rgba(22,163,74,0.08)', color: 'var(--success)' }
     }
     if (key === selectedAnswer && key !== correctAnswer) {
-      return { ...base, borderColor: '#A63D40', background: 'rgba(166,61,64,0.08)', color: '#A63D40' }
+      return { ...base, borderColor: 'var(--danger)', background: 'rgba(239,68,68,0.08)', color: 'var(--danger)' }
     }
     return { ...base, color: 'var(--muted)' }
   }
@@ -159,9 +159,9 @@ export default function PracticePage() {
                   style={{
                     fontSize: 13, fontWeight: 700, padding: '6px 14px',
                     borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: isCorrect ? 'rgba(31,77,58,0.1)' : 'rgba(166,61,64,0.1)',
-                    color: isCorrect ? '#1F4D3A' : '#A63D40',
-                    border: `1px solid ${isCorrect ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+                    background: isCorrect ? 'var(--success-dim)' : 'var(--danger-dim)',
+                    color: isCorrect ? 'var(--success)' : 'var(--danger)',
+                    border: `1px solid ${isCorrect ? 'rgba(22,163,74,0.3)' : 'rgba(239,68,68,0.3)'}`,
                   }}
                 >
                   {isCorrect ? '✓ Correct!' : `✗ Incorrect. The answer was ${correctAnswer}.`}
@@ -219,7 +219,7 @@ export default function PracticePage() {
             </div>
             <div className="teacher-kpi-card">
               <p>Correct</p>
-              <strong style={{ color: '#1F4D3A' }}>{sessionCorrect}</strong>
+              <strong style={{ color: 'var(--success)' }}>{sessionCorrect}</strong>
             </div>
           </div>
 
@@ -243,7 +243,7 @@ export default function PracticePage() {
                     <div className="teacher-skill-row" key={i}>
                       <div className="teacher-skill-topline">
                         <p>{s.skill_name || `Skill ${s.skill_id || i + 1}`}</p>
-                        <span style={{ color: '#C85B43' }}>{pct}%</span>
+                        <span style={{ color: 'var(--accent)' }}>{pct}%</span>
                       </div>
                       <div className="teacher-progress"><span style={{ width: `${pct}%` }} /></div>
                     </div>
@@ -259,7 +259,7 @@ export default function PracticePage() {
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
                 fontSize: 11,
-                color: '#726A61',
+                color: 'var(--muted)',
                 margin: 0
               }}
             >Student</p>

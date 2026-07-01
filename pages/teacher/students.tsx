@@ -6,14 +6,14 @@ import { useEffect, useState } from 'react'
 import { getStudentsDetailed, StudentDetailed, scoreColor, statusColor, statusLabel } from '../../lib/teacher-api'
 
 const STATUS_DESCRIPTIONS: Record<string, { short: string; action: string; color: string }> = {
-  mastered:     { short: 'P(mastery) >= 95% across all skills',    action: 'Ready to advance to harder topics.',                    color: '#4ade80' },
-  near_mastery: { short: 'Highest skill is 85-95%',                action: 'A few more correct answers will reach mastery.',        color: '#60a5fa' },
-  learning:     { short: 'Most skills are in the 30-85% range',    action: 'Normal progress. Continue current practice.',           color: '#fbbf24' },
-  struggling:   { short: 'At least one skill is below 30%',        action: 'Needs attention. Review struggling skills directly.',   color: '#f87171' },
-  not_started:  { short: 'No questions answered yet',              action: 'Encourage the student to start practicing.',            color: '#94a3b8' },
+  mastered:     { short: 'P(mastery) >= 95% across all skills',    action: 'Ready to advance to harder topics.',                    color: 'var(--success)' },
+  near_mastery: { short: 'Highest skill is 85-95%',                action: 'A few more correct answers will reach mastery.',        color: 'var(--accent-secondary)' },
+  learning:     { short: 'Most skills are in the 30-85% range',    action: 'Normal progress. Continue current practice.',           color: 'var(--warning)' },
+  struggling:   { short: 'At least one skill is below 30%',        action: 'Needs attention. Review struggling skills directly.',   color: 'var(--danger)' },
+  not_started:  { short: 'No questions answered yet',              action: 'Encourage the student to start practicing.',            color: 'var(--muted)' },
 }
 
-function InfoBox({ title, children, accent = '#60a5fa', defaultOpen = false }: {
+function InfoBox({ title, children, accent = 'var(--accent-secondary)', defaultOpen = false }: {
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -110,12 +110,12 @@ export default function TeacherStudents() {
         </div>
         <div className="teacher-kpi-card">
           <p>Needs attention</p>
-          <strong style={{ color: atRisk > 0 ? '#A63D40' : undefined }}>{atRisk}</strong>
+          <strong style={{ color: atRisk > 0 ? 'var(--danger)' : undefined }}>{atRisk}</strong>
           <small>Students with a skill below 30%</small>
         </div>
         <div className="teacher-kpi-card">
           <p>Fully mastered</p>
-          <strong style={{ color: '#1F4D3A' }}>{mastered}</strong>
+          <strong style={{ color: 'var(--success)' }}>{mastered}</strong>
           <small>All skills above 95%</small>
         </div>
         <div className="teacher-kpi-card">
@@ -128,7 +128,7 @@ export default function TeacherStudents() {
       </section>
 
       <section className="teacher-guide-grid">
-        <InfoBox title="What do the status labels mean?" accent="#C85B43">
+        <InfoBox title="What do the status labels mean?" accent="var(--accent)">
           <p>
             Each student is assigned a <strong>ZPD Status</strong> based on their
             Bayesian mastery estimates across all skills.
@@ -150,7 +150,7 @@ export default function TeacherStudents() {
           </div>
         </InfoBox>
 
-        <InfoBox title="What do the columns mean?" accent="#726A61">
+        <InfoBox title="What do the columns mean?" accent="var(--muted)">
           <div className="teacher-column-guide">
             <div><strong>Mastery %</strong> Average BKT P(mastery) across all skills.</div>
             <div><strong>Interactions</strong> Total number of answered questions.</div>
@@ -225,10 +225,10 @@ export default function TeacherStudents() {
                     {s.overall_score != null ? `${Math.round(s.overall_score * 100)}%` : '-'}
                   </td>
                   <td style={{ textAlign: 'right' }}>{s.total_interactions}</td>
-                  <td style={{ textAlign: 'right', color: '#1F4D3A', fontWeight: s.mastered_skills > 0 ? 700 : 400 }}>
+                  <td style={{ textAlign: 'right', color: 'var(--success)', fontWeight: s.mastered_skills > 0 ? 700 : 400 }}>
                     {s.mastered_skills || '-'}
                   </td>
-                  <td style={{ textAlign: 'right', color: s.struggling_skills > 0 ? '#A63D40' : undefined, fontWeight: s.struggling_skills > 0 ? 700 : 400 }}>
+                  <td style={{ textAlign: 'right', color: s.struggling_skills > 0 ? 'var(--danger)' : undefined, fontWeight: s.struggling_skills > 0 ? 700 : 400 }}>
                     {s.struggling_skills > 0
                       ? <span title="Click View to see which skills need attention">Alert {s.struggling_skills}</span>
                       : '-'}
@@ -238,13 +238,13 @@ export default function TeacherStudents() {
                       ? (() => {
                           const days = Math.floor((Date.now() - new Date(s.last_active).getTime()) / 86400000)
                           return (
-                            <span style={{ color: days > 7 ? '#A63D40' : days > 3 ? '#B8893C' : undefined }}>
+                            <span style={{ color: days > 7 ? 'var(--danger)' : days > 3 ? 'var(--warning)' : undefined }}>
                               {new Date(s.last_active).toLocaleDateString()}
                               {days > 7 && <span title="Inactive for over a week"> Alert</span>}
                             </span>
                           )
                         })()
-                      : <span style={{ color: '#94a3b8' }}>Never</span>}
+                      : <span style={{ color: 'var(--muted)' }}>Never</span>}
                   </td>
                   <td>
                     <Link href={`/teacher/students/${s.user_id}`} className="teacher-detail-link">

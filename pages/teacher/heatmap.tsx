@@ -7,21 +7,21 @@ import { getClassHeatmap, HeatmapData, statusColor, statusLabel } from '../../li
 
 function cellBg(status: string): string {
   switch (status) {
-    case 'mastered':     return '#1F4D3A'
-    case 'near_mastery': return '#3F5F88'
-    case 'learning':     return '#B8893C'
-    case 'struggling':   return '#A63D40'
-    default:             return '#D8CFC5'
+    case 'mastered':     return 'var(--success)'
+    case 'near_mastery': return 'var(--accent-secondary)'
+    case 'learning':     return 'var(--warning)'
+    case 'struggling':   return 'var(--danger)'
+    default:             return 'var(--border-strong)'
   }
 }
 
 function cellText(status: string): string {
   switch (status) {
-    case 'mastered':     return '#F8F4EE'
-    case 'near_mastery': return '#F8F4EE'
-    case 'learning':     return '#171411'
-    case 'struggling':   return '#F8F4EE'
-    default:             return '#726A61'
+    case 'mastered':     return 'var(--surface)'
+    case 'near_mastery': return 'var(--surface)'
+    case 'learning':     return 'var(--text)'
+    case 'struggling':   return 'var(--surface)'
+    default:             return 'var(--muted)'
   }
 }
 
@@ -53,7 +53,7 @@ const ACTION_GUIDE: Record<string, { label: string; description: string; teacher
   },
 }
 
-function InfoBox({ title, children, accent = '#C85B43', defaultOpen = false }: {
+function InfoBox({ title, children, accent = 'var(--accent)', defaultOpen = false }: {
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -147,7 +147,7 @@ export default function TeacherHeatmap() {
         </Link>
       </div>
 
-      <InfoBox title="How to read this heatmap" accent="#C85B43" defaultOpen>
+      <InfoBox title="How to read this heatmap" accent="var(--accent)" defaultOpen>
         <p>
           Each row is a student. Each column is a skill. Each cell shows the
           student's current BKT mastery probability for that skill.

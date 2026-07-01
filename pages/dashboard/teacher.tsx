@@ -10,10 +10,10 @@ function readScore(row: any) {
 }
 
 function scoreColor(score: number | null) {
-  if (score == null) return '#94a3b8'
-  if (score >= 0.7) return '#4ade80'
-  if (score >= 0.4) return '#fbbf24'
-  return '#f87171'
+  if (score == null) return 'var(--muted)'
+  if (score >= 0.7) return 'var(--success)'
+  if (score >= 0.4) return 'var(--warning)'
+  return 'var(--danger)'
 }
 
 export default function TeacherDashboard() {
@@ -72,7 +72,7 @@ export default function TeacherDashboard() {
             </div>
             <div className="teacher-kpi-card">
               <p>At-risk</p>
-              <strong style={{ color: atRisk > 0 ? '#A63D40' : undefined }}>{atRisk}</strong>
+              <strong style={{ color: atRisk > 0 ? 'var(--danger)' : undefined }}>{atRisk}</strong>
             </div>
           </div>
 

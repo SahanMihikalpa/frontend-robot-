@@ -122,7 +122,7 @@ export default function VoicePage() {
           <strong style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 22 }}>
             <span style={{
               width: 9, height: 9, borderRadius: '50%',
-              background: connected ? '#4ade80' : '#A63D40', display: 'inline-block',
+              background: connected ? 'var(--success)' : 'var(--danger)', display: 'inline-block',
             }} />
             {connected ? 'Connected' : 'Disconnected'}
           </strong>
@@ -258,7 +258,7 @@ export default function VoicePage() {
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
                 fontSize: 11,
-                color: '#726A61',
+                color: 'var(--muted)',
                 margin: '0 0 10px'
               }}
             >How it works</p>

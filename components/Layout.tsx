@@ -1,4 +1,5 @@
 import Nav from './Nav'
+import Link from 'next/link'
 import React from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
@@ -26,10 +27,10 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <div>
       <header className="site-header">
-        <div className="brand">
+        <Link href="/" className="brand">
           <div className="logo" />
           <h1>ATLAS</h1>
-        </div>
+        </Link>
 
         <div className="header-right">
           <Nav />

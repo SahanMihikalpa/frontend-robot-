@@ -245,7 +245,7 @@ export default function StudentDetail() {
   const totalSkills     = mastery?.skills.length ?? 0
 
   return (
-    <div className="stack" style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 16px' }}>
+    <div className="stack teacher-student-detail-page" style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 16px' }}>
 
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
