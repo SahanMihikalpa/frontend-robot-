@@ -58,7 +58,8 @@ body{
   top:0;
   z-index:100;
 }
-.brand{display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .2s ease}
+.brand:hover{opacity:.75}
 .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
 .brand .logo{
   width:14px;
