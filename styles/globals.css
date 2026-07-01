@@ -35,6 +35,7 @@
 
 *{box-sizing:border-box}
 html,body,#__next{height:100%}
+button,input,textarea,select{font-family:inherit}
 body{
   margin:0;
   font-family: Kodchasan, sans-serif;
