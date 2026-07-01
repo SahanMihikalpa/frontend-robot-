@@ -113,10 +113,10 @@ export default function PracticePage() {
       return base
     }
     if (key === correctAnswer) {
-      return { ...base, borderColor: 'var(--success)', background: 'rgba(31,77,58,0.08)', color: 'var(--success)' }
+      return { ...base, borderColor: 'var(--success)', background: 'rgba(30,107,78,0.08)', color: 'var(--success)' }
     }
     if (key === selectedAnswer && key !== correctAnswer) {
-      return { ...base, borderColor: 'var(--danger)', background: 'rgba(166,61,64,0.08)', color: 'var(--danger)' }
+      return { ...base, borderColor: 'var(--danger)', background: 'rgba(193,68,63,0.08)', color: 'var(--danger)' }
     }
     return { ...base, color: 'var(--muted)' }
   }
@@ -159,9 +159,9 @@ export default function PracticePage() {
                   style={{
                     fontSize: 13, fontWeight: 700, padding: '6px 14px',
                     borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: isCorrect ? 'rgba(31,77,58,0.1)' : 'rgba(166,61,64,0.1)',
+                    background: isCorrect ? 'var(--success-dim)' : 'var(--danger-dim)',
                     color: isCorrect ? 'var(--success)' : 'var(--danger)',
-                    border: `1px solid ${isCorrect ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+                    border: `1px solid ${isCorrect ? 'rgba(30,107,78,0.3)' : 'rgba(193,68,63,0.3)'}`,
                   }}
                 >
                   {isCorrect ? '✓ Correct!' : `✗ Incorrect. The answer was ${correctAnswer}.`}

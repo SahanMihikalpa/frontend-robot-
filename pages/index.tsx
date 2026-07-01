@@ -138,7 +138,7 @@ export default function Home() {
 
             <p
               style={{
-                color: 'var(--muted)',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -166,7 +166,7 @@ export default function Home() {
 
             <p
               style={{
-                color: 'var(--muted)',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -194,7 +194,7 @@ export default function Home() {
 
             <p
               style={{
-                color: 'var(--muted)',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -276,7 +276,7 @@ export default function Home() {
 
             <p
               style={{
-                color: 'var(--muted)',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -304,7 +304,7 @@ export default function Home() {
 
             <p
               style={{
-                color: 'var(--muted)',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >
@@ -332,7 +332,7 @@ export default function Home() {
 
             <p
               style={{
-                color: 'var(--muted)',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.8
               }}
             >

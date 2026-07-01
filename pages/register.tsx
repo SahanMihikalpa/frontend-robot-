@@ -213,11 +213,11 @@ export default function Register() {
                     border:
                       form.role === item.value
                         ? '1px solid var(--accent)'
-                        : '1px solid rgba(114,106,97,0.18)',
+                        : '1px solid rgba(101,92,82,0.18)',
 
                     background:
                       form.role === item.value
-                        ? 'rgba(200,91,67,.04)'
+                        ? 'rgba(189,81,56,.04)'
                         : 'transparent',
                   }}
                 >

@@ -216,9 +216,9 @@ function QuestionPanel({
 
                   if (answered && k === question.selectedAnswer) {
                     if (answerCorrect === true) {
-                      borderColor = 'var(--success)'; bg = 'rgba(31,77,58,0.08)'; color = 'var(--success)'
+                      borderColor = 'var(--success)'; bg = 'rgba(30,107,78,0.08)'; color = 'var(--success)'
                     } else if (answerCorrect === false) {
-                      borderColor = 'var(--danger)'; bg = 'rgba(166,61,64,0.08)'; color = 'var(--danger)'
+                      borderColor = 'var(--danger)'; bg = 'rgba(193,68,63,0.08)'; color = 'var(--danger)'
                     } else {
                       borderColor = 'var(--accent)'; bg = 'var(--accent-dim)'; color = 'var(--accent)'
                     }
@@ -259,9 +259,9 @@ function QuestionPanel({
                   style={{
                     fontSize: 13, fontWeight: 700, padding: '6px 14px',
                     borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: answerCorrect === true ? 'rgba(31,77,58,0.1)' : answerCorrect === false ? 'rgba(166,61,64,0.1)' : 'var(--accent-dim)',
+                    background: answerCorrect === true ? 'var(--success-dim)' : answerCorrect === false ? 'var(--danger-dim)' : 'var(--accent-dim)',
                     color: answerCorrect === true ? 'var(--success)' : answerCorrect === false ? 'var(--danger)' : 'var(--accent)',
-                    border: `1px solid ${answerCorrect === true ? 'rgba(31,77,58,0.3)' : answerCorrect === false ? 'rgba(166,61,64,0.3)' : 'rgba(200,91,67,0.3)'}`,
+                    border: `1px solid ${answerCorrect === true ? 'rgba(30,107,78,0.3)' : answerCorrect === false ? 'rgba(193,68,63,0.3)' : 'rgba(189,81,56,0.3)'}`,
                   }}
                 >
                   {answerCorrect === true ? '✓ Correct! Next question loading…' : answerCorrect === false ? '✗ Wrong — next question loading…' : 'Submitted…'}
@@ -282,8 +282,8 @@ function ChatBubble({ msg }: { msg: ChatMsg }) {
   let bubbleExtra: React.CSSProperties = {}
   if (msg.type === 'FEEDBACK') {
     bubbleExtra = {
-      background: msg.isCorrect ? 'rgba(31,77,58,0.08)' : 'rgba(166,61,64,0.08)',
-      border: `1px solid ${msg.isCorrect ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+      background: msg.isCorrect ? 'rgba(30,107,78,0.08)' : 'rgba(193,68,63,0.08)',
+      border: `1px solid ${msg.isCorrect ? 'rgba(30,107,78,0.3)' : 'rgba(193,68,63,0.3)'}`,
     }
   }
 
@@ -361,9 +361,9 @@ function ChatBubble({ msg }: { msg: ChatMsg }) {
             style={{
               marginTop: 6, display: 'inline-flex', fontSize: 11,
               padding: '3px 10px', borderRadius: 999, fontWeight: 700,
-              background: msg.isCorrect ? 'rgba(31,77,58,0.12)' : 'rgba(166,61,64,0.12)',
+              background: msg.isCorrect ? 'rgba(30,107,78,0.12)' : 'rgba(193,68,63,0.12)',
               color: msg.isCorrect ? 'var(--success)' : 'var(--danger)',
-              border: `1px solid ${msg.isCorrect ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+              border: `1px solid ${msg.isCorrect ? 'rgba(30,107,78,0.3)' : 'rgba(193,68,63,0.3)'}`,
             }}
           >
             {msg.isCorrect ? '✓ Correct' : '✗ Incorrect'}
@@ -1020,10 +1020,10 @@ export default function LearnPage() {
                   let color = 'var(--text)'
 
                   if (assessmentSelected === k) {
-                    if (assessmentFeedback === true)  { borderColor = 'var(--success)'; bg = 'rgba(31,77,58,0.08)'; color = 'var(--success)' }
-                    if (assessmentFeedback === false)  { borderColor = 'var(--danger)'; bg = 'rgba(166,61,64,0.08)'; color = 'var(--danger)' }
+                    if (assessmentFeedback === true)  { borderColor = 'var(--success)'; bg = 'rgba(30,107,78,0.08)'; color = 'var(--success)' }
+                    if (assessmentFeedback === false)  { borderColor = 'var(--danger)'; bg = 'rgba(193,68,63,0.08)'; color = 'var(--danger)' }
                   } else if (assessmentSelected && k === q.correct_answer) {
-                    borderColor = 'var(--success)'; bg = 'rgba(31,77,58,0.06)'; color = 'var(--success)'
+                    borderColor = 'var(--success)'; bg = 'rgba(30,107,78,0.06)'; color = 'var(--success)'
                   } else if (assessmentSelected) {
                     color = 'var(--muted)'
                   }
@@ -1053,9 +1053,9 @@ export default function LearnPage() {
                 <span
                   style={{
                     fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 6,
-                    background: assessmentFeedback ? 'rgba(31,77,58,0.1)' : 'rgba(166,61,64,0.1)',
+                    background: assessmentFeedback ? 'var(--success-dim)' : 'var(--danger-dim)',
                     color: assessmentFeedback ? 'var(--success)' : 'var(--danger)',
-                    border: `1px solid ${assessmentFeedback ? 'rgba(31,77,58,0.3)' : 'rgba(166,61,64,0.3)'}`,
+                    border: `1px solid ${assessmentFeedback ? 'rgba(30,107,78,0.3)' : 'rgba(193,68,63,0.3)'}`,
                   }}
                 >
                   {assessmentFeedback ? '✓ Correct!' : '✗ Incorrect'}

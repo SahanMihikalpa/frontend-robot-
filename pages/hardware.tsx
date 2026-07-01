@@ -9,18 +9,18 @@ function StatusPill({ active }: { active: boolean | undefined }) {
     return (
       <span style={{
         fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-        color: 'var(--muted)', background: 'rgba(114,106,97,0.1)', border: '1px solid rgba(114,106,97,0.3)',
+        color: 'var(--muted)', background: 'rgba(101,92,82,0.1)', border: '1px solid rgba(101,92,82,0.3)',
       }}>Unknown</span>
     )
   }
   return active
     ? <span style={{
         fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-        color: 'var(--success)', background: 'rgba(31,77,58,0.1)', border: '1px solid rgba(31,77,58,0.3)',
+        color: 'var(--success)', background: 'var(--success-dim)', border: '1px solid rgba(30,107,78,0.3)',
       }}>Online</span>
     : <span style={{
         fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-        color: 'var(--danger)', background: 'rgba(166,61,64,0.1)', border: '1px solid rgba(166,61,64,0.3)',
+        color: 'var(--danger)', background: 'var(--danger-dim)', border: '1px solid rgba(193,68,63,0.3)',
       }}>Offline</span>
 }
 
