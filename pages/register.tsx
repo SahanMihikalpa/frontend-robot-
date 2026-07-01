@@ -63,7 +63,7 @@ export default function Register() {
                 <br />
                 <span
                   style={{
-                    color: '#C85B43',
+                    color: 'var(--accent)',
                     fontStyle: 'italic'
                   }}
                 >
@@ -212,7 +212,7 @@ export default function Register() {
                   style={{
                     border:
                       form.role === item.value
-                        ? '1px solid #C85B43'
+                        ? '1px solid var(--accent)'
                         : '1px solid rgba(114,106,97,0.18)',
 
                     background:
@@ -226,7 +226,7 @@ export default function Register() {
                       fontSize: 11,
                       letterSpacing: '.18em',
                       textTransform: 'uppercase',
-                      color: '#726A61'
+                      color: 'var(--muted)'
                     }}
                   >
                     I AM A
@@ -237,7 +237,7 @@ export default function Register() {
                       marginTop: 8,
                       fontSize: 18,
                       fontWeight: 600,
-                      color: '#171411'
+                      color: 'var(--text)'
                     }}
                   >
                     {item.label}

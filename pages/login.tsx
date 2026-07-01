@@ -45,7 +45,7 @@ export default function Login() {
           <br />
           <span
             style={{
-              color: '#C85B43',
+              color: 'var(--accent)',
               fontStyle: 'italic'
             }}
           >
@@ -133,7 +133,7 @@ export default function Login() {
           
 
           {error && (
-            <p style={{ color: '#C85B43', marginTop: 12 }}>
+            <p style={{ color: 'var(--accent)', marginTop: 12 }}>
               {error}
             </p>
           )}
@@ -163,7 +163,7 @@ export default function Login() {
             <Link
               href="/register"
               style={{
-                color: '#C85B43',
+                color: 'var(--accent)',
                 textDecoration: 'none'
               }}
             >

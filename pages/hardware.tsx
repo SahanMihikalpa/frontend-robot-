@@ -9,25 +9,25 @@ function StatusPill({ active }: { active: boolean | undefined }) {
     return (
       <span style={{
         fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-        color: '#726A61', background: 'rgba(114,106,97,0.1)', border: '1px solid rgba(114,106,97,0.3)',
+        color: 'var(--muted)', background: 'rgba(114,106,97,0.1)', border: '1px solid rgba(114,106,97,0.3)',
       }}>Unknown</span>
     )
   }
   return active
     ? <span style={{
         fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-        color: '#1F4D3A', background: 'rgba(31,77,58,0.1)', border: '1px solid rgba(31,77,58,0.3)',
+        color: 'var(--success)', background: 'rgba(31,77,58,0.1)', border: '1px solid rgba(31,77,58,0.3)',
       }}>Online</span>
     : <span style={{
         fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-        color: '#A63D40', background: 'rgba(166,61,64,0.1)', border: '1px solid rgba(166,61,64,0.3)',
+        color: 'var(--danger)', background: 'rgba(166,61,64,0.1)', border: '1px solid rgba(166,61,64,0.3)',
       }}>Offline</span>
 }
 
 function ComponentCard({
   title, active, children,
 }: { title: string; active: boolean | undefined; children?: React.ReactNode }) {
-  const dotColor = active == null ? '#726A61' : active ? '#1F4D3A' : '#A63D40'
+  const dotColor = active == null ? 'var(--muted)' : active ? 'var(--success)' : 'var(--danger)'
   return (
     <div className="teacher-skill-row">
       <div className="teacher-skill-topline">
@@ -209,7 +209,7 @@ export default function HardwarePage() {
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   fontSize: 11,
-                  color: '#726A61',
+                  color: 'var(--muted)',
                   margin: '0 0 10px'
                 }}
               >Status details</p>

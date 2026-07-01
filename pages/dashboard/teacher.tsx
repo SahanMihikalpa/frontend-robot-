@@ -72,7 +72,7 @@ export default function TeacherDashboard() {
             </div>
             <div className="teacher-kpi-card">
               <p>At-risk</p>
-              <strong style={{ color: atRisk > 0 ? '#A63D40' : undefined }}>{atRisk}</strong>
+              <strong style={{ color: atRisk > 0 ? 'var(--danger)' : undefined }}>{atRisk}</strong>
             </div>
           </div>
 

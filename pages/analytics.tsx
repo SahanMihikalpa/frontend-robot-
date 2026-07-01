@@ -3,9 +3,9 @@ import { listStudentsAnalytics, getStudentAnalytics, getSkillsAnalytics } from '
 
 function scoreColor(score: number | null) {
   if (score == null) return '#94a3b8'
-  if (score >= 0.7) return '#1F4D3A'
-  if (score >= 0.4) return '#B8893C'
-  return '#A63D40'
+  if (score >= 0.7) return 'var(--success)'
+  if (score >= 0.4) return 'var(--warning)'
+  return 'var(--danger)'
 }
 
 function readScore(row: any) {
@@ -87,11 +87,11 @@ export default function AnalyticsPage() {
           </div>
           <div>
             <span>At Risk</span>
-            <strong style={{ color: atRisk > 0 ? '#C85B43' : undefined }}>{atRisk}</strong>
+            <strong style={{ color: atRisk > 0 ? 'var(--accent)' : undefined }}>{atRisk}</strong>
           </div>
           <div>
             <span>Strong</span>
-            <strong style={{ color: '#1F4D3A' }}>{strong}</strong>
+            <strong style={{ color: 'var(--success)' }}>{strong}</strong>
           </div>
         </div>
       </section>
@@ -118,7 +118,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="teacher-kpi-card">
             <p>Need Attention</p>
-            <strong style={{ color: atRisk > 0 ? '#A63D40' : undefined }}>{atRisk}</strong>
+            <strong style={{ color: atRisk > 0 ? 'var(--danger)' : undefined }}>{atRisk}</strong>
           </div>
         </div>
 

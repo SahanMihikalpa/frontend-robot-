@@ -37,7 +37,7 @@ export default function Home() {
             way{' '}
             <span
               style={{
-                color: '#C85B43',
+                color: 'var(--accent)',
                 fontStyle: 'italic'
               }}
             >
@@ -74,7 +74,7 @@ export default function Home() {
               <div className="editorial-title" style={{ fontSize: 36 }}>
                 AI
               </div>
-              <div style={{ color: '#726A61' }}>
+              <div style={{ color: 'var(--muted)' }}>
                 Tutoring
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function Home() {
               <div className="editorial-title" style={{ fontSize: 36 }}>
                 BKT
               </div>
-              <div style={{ color: '#726A61' }}>
+              <div style={{ color: 'var(--muted)' }}>
                 Knowledge Tracking
               </div>
             </div>
@@ -92,7 +92,7 @@ export default function Home() {
               <div className="editorial-title" style={{ fontSize: 36 }}>
                 DKT
               </div>
-              <div style={{ color: '#726A61' }}>
+              <div style={{ color: 'var(--muted)' }}>
                 Deep Learning Models
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--muted)',
                 lineHeight: 1.8
               }}
             >
@@ -166,7 +166,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--muted)',
                 lineHeight: 1.8
               }}
             >
@@ -194,7 +194,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--muted)',
                 lineHeight: 1.8
               }}
             >
@@ -276,7 +276,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--muted)',
                 lineHeight: 1.8
               }}
             >
@@ -304,7 +304,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--muted)',
                 lineHeight: 1.8
               }}
             >
@@ -332,7 +332,7 @@ export default function Home() {
 
             <p
               style={{
-                color: '#726A61',
+                color: 'var(--muted)',
                 lineHeight: 1.8
               }}
             >

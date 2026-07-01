@@ -34,7 +34,7 @@ export default function StudentDashboard() {
           <p className="teacher-eyebrow">Today's Learning Journey</p>
           <h2 className="editorial-title">
             Good afternoon,
-            <span style={{ color: '#C85B43', fontStyle: 'italic' }}>
+            <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>
               {' '}
               {me?.full_name || me?.username || 'Student'}
             </span>
@@ -62,11 +62,11 @@ export default function StudentDashboard() {
             </div>
             <div className="teacher-kpi-card">
               <p>Mastered</p>
-              <strong style={{ color: '#1F4D3A' }}>{summary?.mastered_count ?? '—'}</strong>
+              <strong style={{ color: 'var(--success)' }}>{summary?.mastered_count ?? '—'}</strong>
             </div>
             <div className="teacher-kpi-card">
               <p>In ZPD</p>
-              <strong style={{ color: '#C85B43' }}>{summary?.zpd_count ?? '—'}</strong>
+              <strong style={{ color: 'var(--accent)' }}>{summary?.zpd_count ?? '—'}</strong>
             </div>
           </div>
 
@@ -84,7 +84,7 @@ export default function StudentDashboard() {
             <div className="teacher-skill-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
               <div className="teacher-skill-topline">
                 <p>Across all tracked skills</p>
-                <span style={{ color: '#C85B43' }}>{masteredPct.toFixed(1)}%</span>
+                <span style={{ color: 'var(--accent)' }}>{masteredPct.toFixed(1)}%</span>
               </div>
               <div className="teacher-progress"><span style={{ width: `${masteredPct}%` }} /></div>
             </div>
@@ -106,7 +106,7 @@ export default function StudentDashboard() {
                     <div className="teacher-skill-row" key={row.skill_id || i}>
                       <div className="teacher-skill-topline">
                         <p>{row.skill_name || row.name || `Skill ${i + 1}`}</p>
-                        <span style={{ color: '#C85B43' }}>{pct}%</span>
+                        <span style={{ color: 'var(--accent)' }}>{pct}%</span>
                       </div>
                       <div className="teacher-progress"><span style={{ width: `${pct}%` }} /></div>
                     </div>
@@ -147,7 +147,7 @@ export default function StudentDashboard() {
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   fontSize: 11,
-                  color: '#726A61',
+                  color: 'var(--muted)',
                   margin: 0
                 }}
               >Account</p>

@@ -3,15 +3,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { getConceptMap, getCurrentUser, getMasterySummary, getNextSkill, getUnlockedSkills } from '../lib/api'
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  mastered: { label: 'Mastered', color: '#1F4D3A' },
-  zpd:      { label: 'ZPD', color: '#C85B43' },
-  in_zpd:   { label: 'ZPD', color: '#C85B43' },
-  locked:   { label: 'Locked', color: '#726A61' },
-  struggling: { label: 'Struggling', color: '#A63D40' },
+  mastered: { label: 'Mastered', color: 'var(--success)' },
+  zpd:      { label: 'ZPD', color: 'var(--accent)' },
+  in_zpd:   { label: 'ZPD', color: 'var(--accent)' },
+  locked:   { label: 'Locked', color: 'var(--muted)' },
+  struggling: { label: 'Struggling', color: 'var(--danger)' },
 }
 
 function statusCfg(status: string) {
-  return STATUS_CONFIG[status] || { label: status, color: '#726A61' }
+  return STATUS_CONFIG[status] || { label: status, color: 'var(--muted)' }
 }
 
 export default function MasteryPage() {
@@ -77,15 +77,15 @@ export default function MasteryPage() {
           <div className="teacher-kpi-grid">
             <div className="teacher-kpi-card">
               <p>Mastered</p>
-              <strong style={{ color: '#1F4D3A' }}>{summary?.mastered_count ?? 0}</strong>
+              <strong style={{ color: 'var(--success)' }}>{summary?.mastered_count ?? 0}</strong>
             </div>
             <div className="teacher-kpi-card">
               <p>ZPD (ready)</p>
-              <strong style={{ color: '#C85B43' }}>{summary?.zpd_count ?? 0}</strong>
+              <strong style={{ color: 'var(--accent)' }}>{summary?.zpd_count ?? 0}</strong>
             </div>
             <div className="teacher-kpi-card">
               <p>Struggling</p>
-              <strong style={{ color: '#A63D40' }}>{summary?.struggling_count ?? 0}</strong>
+              <strong style={{ color: 'var(--danger)' }}>{summary?.struggling_count ?? 0}</strong>
             </div>
           </div>
 
@@ -161,7 +161,7 @@ export default function MasteryPage() {
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   fontSize: 11,
-                  color: '#726A61',
+                  color: 'var(--muted)',
                   margin: 0
                 }}
               >Next skill to practise</p>
@@ -188,7 +188,7 @@ export default function MasteryPage() {
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   fontSize: 11,
-                  color: '#726A61',
+                  color: 'var(--muted)',
                   margin: '0 0 12px'
                 }}
               >
