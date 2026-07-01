@@ -63,7 +63,7 @@ export default function Home() {
                   Sign in
                 </Link>
 
-                <Link href="/register" className="btn">
+                <Link href="/register" className="btn home-btn-outline">
                   Create account
                 </Link>
               </>
