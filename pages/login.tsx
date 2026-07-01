@@ -29,53 +29,16 @@ export default function Login() {
   }
 
   return (
-  <div
-    style={{
-      minHeight: 'calc(100vh - 90px)',
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      marginTop: 0,
-      border: '1px solid var(--border)',
-      overflow: 'hidden'
-    }}
-  >
+  <div className="auth-split">
     {/* LEFT PANEL */}
 
-    <div
-      style={{
-        padding: '20px 60px 40px',
-        borderRight: '1px solid rgba(114,106,97,0.12)',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%'
-      }}
-    >
-      <div
-        style={{
-          paddingLeft: '60px'
-        }}
-      >
-        <p
-          style={{
-            letterSpacing: '.35em',
-            textTransform: 'uppercase',
-            fontSize: 12,
-            color: '#726A61'
-          }}
-        >
+    <div className="auth-left">
+      <div className="auth-left-content">
+        <p className="home-eyebrow">
           Returning To Learn
         </p>
 
-        <h1
-          className="editorial-title"
-          style={{
-            fontSize: '4.8rem',
-            lineHeight: '1',
-            marginTop: 30,
-            marginBottom: 30,
-            fontWeight: 500
-          }}
-        >
+        <h1 className="editorial-title auth-title">
           "Pick up exactly
           <br />
           where you
@@ -91,56 +54,24 @@ export default function Login() {
           "
         </h1>
 
-        <p
-          style={{
-            maxWidth: 500,
-            color: '#726A61',
-            lineHeight: 1.8,
-            fontSize: 18
-          }}
-        >
+        <p className="auth-desc">
           Your knowledge model, conversation history, and mastery map
           travel with you across every device.
         </p>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 30,
-          marginLeft: '140px'
-        }}
-      >
-      <div
-        style={{
-          position: 'relative',
-          width: 220,
-          height: 220
-        }}
-      >
+      <div className="auth-mascot-col">
+      <div className="auth-mascot-wrap">
         {/* Glow */}
 
-        <div
-          style={{
-            position: 'relative',
-            inset: 0,
-            borderRadius: '50%',
-            background:
-              'radial-gradient(circle, rgba(200,91,67,.12) 0%, rgba(200,91,67,.05) 45%, transparent 75%)',
-            transform: 'scale(1.15)'
-          }}
-        />
+        <div className="auth-glow" />
 
         <Image
           src="/robot.svg"
           alt="Atlas Robot"
           width={220}
           height={220}
-          style={{
-            zIndex: 2
-          }}
+          className="auth-mascot-image"
         />
       </div>
 
@@ -149,37 +80,13 @@ export default function Login() {
 
     {/* RIGHT PANEL */}
 
-    <div
-      style={{
-        padding: '10px 60px 40px',
-        display: 'flex',
-        alignItems: 'center'
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
-        <p
-          style={{
-            letterSpacing: '.35em',
-            textTransform: 'uppercase',
-            fontSize: 12,
-            color: '#726A61'
-          }}
-        >
+    <div className="auth-right">
+      <div className="auth-right-inner">
+        <p className="home-eyebrow">
           Sign In
-        
         </p>
 
-        
-
-        <h2
-          className="editorial-title"
-          style={{
-            fontSize: '4rem',
-            fontWeight: 500,
-            marginTop: 12,
-            marginBottom: 50
-          }}
-        >
+        <h2 className="editorial-title auth-heading">
           Continue your session.
         </h2>
 

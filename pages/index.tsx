@@ -20,56 +20,16 @@ export default function Home() {
     <>
     {/* Hero */}
 
-      <section
-        style={{
-          width: '100vw',
-          marginLeft: 'calc(50% - 50vw)',
-          minHeight: '75vh',
-          display: 'grid',
-          gridTemplateColumns: '44% 56%',
-          background: '#F4F0EA'
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 800,
-            width: '100%',
-            margin: '0 auto'
-          }}
-        >
+      <section className="home-hero">
+        <div className="home-hero-left-wrap">
           {/* LEFT PANEL */}
 
-        <div
-          style={{
-            padding: '90px 80px',
-            borderRight: '1px solid rgba(114,106,97,0.12)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center'
-          }}
-        >
-          <p
-            style={{
-              letterSpacing: '.35em',
-              textTransform: 'uppercase',
-              fontSize: 12,
-              color: '#726A61'
-            }}
-          >
+        <div className="home-hero-left">
+          <p className="home-eyebrow">
             Personalized Learning
           </p>
 
-          <h1
-            className="editorial-title"
-            style={{
-              fontSize: '5rem',
-              lineHeight: '1',
-              marginTop: 30,
-              marginBottom: 30,
-              fontWeight: 500,
-              color: '#171411'
-            }}
-          >
+          <h1 className="editorial-title home-hero-title">
             A tutor that
             <br />
             learns the
@@ -86,27 +46,13 @@ export default function Home() {
             learn.
           </h1>
 
-          <p
-            style={{
-              maxWidth: 550,
-              color: '#726A61',
-              lineHeight: 1.8,
-              fontSize: 18,
-              marginBottom: 40
-            }}
-          >
+          <p className="home-hero-desc">
             Adaptive learning driven by BKT & DKT, with AI tutoring,
             visual engagement sensing, and real-time analytics.
           </p>
 
-          <div
-            style={{
-              display: 'flex',
-              gap: 16,
-              flexWrap: 'wrap'
-            }}
-          >
-          
+          <div className="home-hero-actions">
+
             {authed ? (
               <Link href={dashboardHref} className="btn">
                 Go to my dashboard
@@ -123,13 +69,7 @@ export default function Home() {
               </>
             )}
           </div>
-          <div
-            style={{
-              display: 'flex',
-              gap: 40,
-              marginTop: 60
-            }}
-          >
+          <div className="home-hero-stats">
             <div>
               <div className="editorial-title" style={{ fontSize: 36 }}>
                 AI
@@ -162,64 +102,25 @@ export default function Home() {
 
         {/* RIGHT PANEL */}
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            background:
-            'radial-gradient(circle, rgba(200,91,67,.18) 0%, rgba(200,91,67,.08) 45%, transparent 75%)'
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: `
-                linear-gradient(rgba(114,106,97,0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(114,106,97,0.08) 1px, transparent 1px)
-              `,
-              backgroundSize: '38px 38px',
-              animation: 'meshScroll 2s linear infinite',
-              opacity: 1.0,
-              zIndex: 0
-            }}
-          />
+        <div className="home-hero-right">
+          <div className="home-hero-mesh" />
           <Image
             src="/Hero.svg"
             alt="Atlas Robot"
             width={400}
             height={400}
-            style={{
-              position: 'relative',
-              zIndex: 2
-            }}
+            className="home-hero-image"
           />
         </div>
       </section>
-    
+
     <div className="stack" style={{ gap: 32 }}>
 
       {/* Role cards */}
       <div className="grid-three">
         <div className="card stack">
-          <div
-            style={{
-              border: '1px solid rgba(114,106,97,.18)',
-              borderRadius: 30,
-              padding: 40,
-              background: '#F4F0EA'
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: '.25em',
-                textTransform: 'uppercase',
-                color: '#726A61'
-              }}
-            >
+          <div className="home-role-card">
+            <div className="home-role-eyebrow">
               I AM A
             </div>
 
@@ -245,22 +146,8 @@ export default function Home() {
           </div>
         </div>
         <div className="card stack">
-          <div
-            style={{
-              border: '1px solid rgba(114,106,97,.18)',
-              borderRadius: 30,
-              padding: 40,
-              background: '#F4F0EA'
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: '.25em',
-                textTransform: 'uppercase',
-                color: '#726A61'
-              }}
-            >
+          <div className="home-role-card">
+            <div className="home-role-eyebrow">
               I AM A
             </div>
 
@@ -286,22 +173,8 @@ export default function Home() {
           </div>
         </div>
         <div className="card stack">
-          <div
-            style={{
-              border: '1px solid rgba(114,106,97,.18)',
-              borderRadius: 30,
-              padding: 40,
-              background: '#F4F0EA'
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: '.25em',
-                textTransform: 'uppercase',
-                color: '#726A61'
-              }}
-            >
+          <div className="home-role-card">
+            <div className="home-role-eyebrow">
               I AM AN
             </div>
 
@@ -329,32 +202,12 @@ export default function Home() {
       </div>
 
       {/* How It Works */}
-      <section
-        style={{
-          padding: '40px 80px 120px',
-          background: '#F4F0EA'
-        }}
-      >
-        <p
-          style={{
-            letterSpacing: '.35em',
-            textTransform: 'uppercase',
-            fontSize: 12,
-            color: '#726A61',
-            textAlign: 'center'
-          }}
-        >
+      <section className="home-how-section">
+        <p className="home-eyebrow" style={{ textAlign: 'center' }}>
           How It Works
         </p>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3,1fr)',
-            gap: 50,
-            marginTop: 60
-          }}
-        >
+        <div className="home-how-grid">
           {/* Step 01 */}
 
           <div>
