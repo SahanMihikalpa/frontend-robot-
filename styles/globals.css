@@ -2647,7 +2647,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .grid-three{grid-template-columns:repeat(2,1fr)}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
   .teacher-hero,
-  .teacher-layout{grid-template-columns:1fr}
+  .teacher-layout{grid-template-columns:minmax(0,1fr)}
   .teacher-actions{position:static}
   .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .teacher-roster-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -2658,12 +2658,12 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .questions-hero{flex-direction:column}
   .questions-hero-actions{justify-content:flex-start}
   .knowledge-hero,
-  .knowledge-layout{grid-template-columns:1fr}
+  .knowledge-layout{grid-template-columns:minmax(0,1fr)}
   .knowledge-hero{flex-direction:column;align-items:flex-start}
   .knowledge-results{position:static}
   .admin-device-grid{grid-template-columns:1fr}
   .tutor-hero,
-  .tutor-layout{grid-template-columns:1fr}
+  .tutor-layout{grid-template-columns:minmax(0,1fr)}
   .tutor-hero{flex-direction:column;align-items:flex-start}
   .tutor-side-panel{position:static}
   .history-hero{flex-direction:column;align-items:flex-start}
