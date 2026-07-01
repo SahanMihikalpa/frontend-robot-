@@ -47,53 +47,16 @@ export default function Register() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: 'calc(100vh - 90px)',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        marginTop: 0,
-        overflow: 'hidden',
-        paddingTop: '10px',
-      }}
-    >
+    <div className="auth-split">
           {/* LEFT PANEL */}
-      
-          <div
-            style={{
-              padding: '10px 60px 40px',
-              borderRight: '1px solid rgba(114,106,97,0.12)',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%'
-            }}
-          >
-            <div
-              style={{
-                paddingLeft: '60px'
-              }}
-            >
-              <p
-                style={{
-                  letterSpacing: '.35em',
-                  textTransform: 'uppercase',
-                  fontSize: 12,
-                  color: '#726A61'
-                }}
-              >
+
+          <div className="auth-left">
+            <div className="auth-left-content">
+              <p className="home-eyebrow">
                 Returning To Learn
               </p>
-      
-              <h1
-                className="editorial-title"
-                style={{
-                  fontSize: '4.8rem',
-                  lineHeight: '1',
-                  marginTop: 30,
-                  marginBottom: 30,
-                  fontWeight: 500
-                }}
-              >
+
+              <h1 className="editorial-title auth-title">
                 "Your Next
                 <br />
                 Chapter Starts
@@ -108,98 +71,39 @@ export default function Register() {
                 </span>
                 "
               </h1>
-      
-              <p
-                style={{
-                  maxWidth: 500,
-                  color: '#726A61',
-                  lineHeight: 1.8,
-                  fontSize: 18
-                }}
-              >
+
+              <p className="auth-desc">
                 Your knowledge model, conversation history, and mastery map
                 travel with you across every device.
               </p>
             </div>
-      
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 30,
-                marginLeft: '140px'
-              }}
-            >
-            <div
-              style={{
-                position: 'relative',
-                width: 220,
-                height: 220
-              }}
-            >
+
+            <div className="auth-mascot-col">
+            <div className="auth-mascot-wrap">
               {/* Glow */}
-      
-              <div
-                style={{
-                  position: 'relative',
-                  inset: 0,
-                  borderRadius: '50%',
-                  background:
-                    'radial-gradient(circle, rgba(200,91,67,.12) 0%, rgba(200,91,67,.05) 45%, transparent 75%)',
-                  transform: 'scale(1.15)'
-                }}
-              />
-      
+
+              <div className="auth-glow" />
+
               <Image
                 src="/robot.svg"
                 alt="Atlas Robot"
                 width={220}
                 height={220}
-                style={{
-                  zIndex: 2
-                }}
+                className="auth-mascot-image"
               />
             </div>
-      
+
           </div>
           </div>
 
           {/* RIGHT PANEL */}
 
-          <div
-            style={{
-              padding: '10px 60px 40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <div
-              style={{
-                width: '100%',
-                maxWidth: '620px'
-              }}
-            >
-              <p
-          style={{
-            letterSpacing: '.35em',
-            textTransform: 'uppercase',
-            fontSize: 12,
-            color: '#726A61'
-          }}
-        >
+          <div className="auth-right">
+            <div className="auth-right-inner auth-right-inner-wide">
+              <p className="home-eyebrow">
           Create Account
         </p>
-        <h2
-          className="editorial-title"
-          style={{
-            fontSize: '4rem',
-            fontWeight: 500,
-            marginTop: 12,
-            marginBottom: 30
-          }}
-        >
+        <h2 className="editorial-title auth-heading" style={{ marginBottom: 30 }}>
           Begin your learning journey.
         </h2>
         <form onSubmit={handleSubmit}>
@@ -294,14 +198,7 @@ export default function Register() {
             >
               Select Role
             </label>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3,1fr)',
-                gap: 18,
-                marginTop: 16
-              }}
-            >
+            <div className="auth-role-grid">
               {[
                 { value: 'student', label: 'Student' },
                 { value: 'teacher', label: 'Teacher' },
@@ -311,8 +208,8 @@ export default function Register() {
                   key={item.value}
                   type="button"
                   onClick={() => update('role', item.value as 'student' | 'teacher' | 'admin')}
+                  className="auth-role-option"
                   style={{
-                    padding: '18px 20px',
                     border:
                       form.role === item.value
                         ? '1px solid #C85B43'
@@ -322,18 +219,6 @@ export default function Register() {
                       form.role === item.value
                         ? 'rgba(200,91,67,.04)'
                         : 'transparent',
-
-                    borderRadius: 18,
-
-                    cursor: 'pointer',
-
-                    transition: '.2s',
-
-                    textAlign: 'left',
-                    minHeight: '92px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
                   }}
                 >
                   <div
@@ -364,7 +249,7 @@ export default function Register() {
 
           {error && <p style={{ color: '#ff7a7a' }}>{error}</p>}
 
-          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
             <button className="btn" type="submit" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}
             </button>

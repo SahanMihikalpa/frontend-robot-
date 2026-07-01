@@ -7,6 +7,7 @@ export default function Nav() {
   const router = useRouter()
   const [role, setRole] = useState<string | null>(null)
   const [authed, setAuthed] = useState(false)
+  const [open, setOpen] = useState(false)
   const currentPath = router.pathname
 
   useEffect(() => {
@@ -14,6 +15,10 @@ export default function Nav() {
     const me = getStoredUser()
     setAuthed(!!token)
     setRole(me?.role || null)
+  }, [router.pathname])
+
+  useEffect(() => {
+    setOpen(false)
   }, [router.pathname])
 
   const links = useMemo(() => {
@@ -71,21 +76,35 @@ export default function Nav() {
   }
 
   return (
-    <div className="nav-links">
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={currentPath === link.href ? 'active' : ''}
-        >
-          {link.label}
-        </Link>
-      ))}
-      {authed && (
-        <button type="button" className="nav-button" onClick={logout}>
-          Sign out
-        </button>
-      )}
-    </div>
+    <>
+      <button
+        type="button"
+        className={`nav-toggle${open ? ' open' : ''}`}
+        aria-label="Toggle menu"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <div className={`nav-links${open ? ' open' : ''}`}>
+        {links.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={currentPath === link.href ? 'active' : ''}
+          >
+            {link.label}
+          </Link>
+        ))}
+        {authed && (
+          <button type="button" className="nav-button" onClick={logout}>
+            Sign out
+          </button>
+        )}
+      </div>
+    </>
   )
 }
