@@ -207,7 +207,7 @@ export default function Register() {
             <button className="btn" type="submit" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}
             </button>
-            <Link className="btn secondary" href="/login">Back to sign in</Link>
+            <Link className="btn auth-secondary-btn" href="/login">Back to sign in</Link>
           </div>
         </form>
             </div>
