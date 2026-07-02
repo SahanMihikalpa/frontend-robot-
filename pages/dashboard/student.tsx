@@ -24,6 +24,9 @@ export default function StudentDashboard() {
   }, [])
 
   const masteredPct = Math.min(Number(summary?.mastered_pct || 0), 100)
+  // Drop the decimal at exactly 100% so "100%" (4 chars) fits the fixed-width hero
+  // card — "100.0%" (6 chars) overflows the 220px column at the 68px hero font size.
+  const masteredLabel = masteredPct >= 100 ? '100' : masteredPct.toFixed(1)
   const skillRows: any[] = Array.isArray(summary?.skills) ? summary.skills
     : Array.isArray(summary?.skill_states) ? summary.skill_states : []
 
@@ -46,7 +49,7 @@ export default function StudentDashboard() {
         </div>
         <div className="teacher-hero-note">
           <span>Overall mastery</span>
-          <strong>{masteredPct.toFixed(1)}%</strong>
+          <strong>{masteredLabel}%</strong>
           <p>across all tracked skills</p>
         </div>
       </section>
@@ -84,7 +87,7 @@ export default function StudentDashboard() {
             <div className="teacher-skill-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
               <div className="teacher-skill-topline">
                 <p>Across all tracked skills</p>
-                <span style={{ color: 'var(--accent)' }}>{masteredPct.toFixed(1)}%</span>
+                <span style={{ color: 'var(--accent)' }}>{masteredLabel}%</span>
               </div>
               <div className="teacher-progress"><span style={{ width: `${masteredPct}%` }} /></div>
             </div>
@@ -122,17 +125,17 @@ export default function StudentDashboard() {
           <h3 className="editorial-title">Atlas</h3>
 
           <div className="teacher-action-list">
-            <Link href="/practice" className="teacher-action primary">
+            <Link href="/learn" className="teacher-action primary">
               <span>01</span>
-              Practice questions
+              Learn with AI
             </Link>
-            <Link href="/mastery" className="teacher-action">
+            <Link href="/selflearn" className="teacher-action">
               <span>02</span>
-              View mastery map
+              Self Learn Anything
             </Link>
-            <Link href="/tutor" className="teacher-action">
+             <Link href="/mastery" className="teacher-action">
               <span>03</span>
-              Ask the tutor
+              View mastery map
             </Link>
             <Link href="/history" className="teacher-action">
               <span>04</span>
