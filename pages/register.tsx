@@ -108,78 +108,50 @@ export default function Register() {
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="form-row">
-            <label>Full name</label>
+            <label className="form-label" htmlFor="register-full-name">Full name</label>
             <input
+              id="register-full-name"
+              className="editorial-input"
               type="text"
               value={form.full_name}
               onChange={(e) => update('full_name', e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                border: '2px solid rgba(6, 6, 6, 0.18)',
-                borderRadius: '14px',
-                background: 'transparent',
-                fontSize: '16px',
-                outline: 'none' 
-              }}
             />
           </div>
 
-          <div className="form-row">
-            <label>Username</label>
+          <div className="form-row" style={{ marginTop: 24 }}>
+            <label className="form-label" htmlFor="register-username">Username</label>
             <input
+              id="register-username"
+              className="editorial-input"
               type="text"
               value={form.username}
               onChange={(e) => update('username', e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                border: '2px solid rgba(6, 6, 6, 0.18)',
-                borderRadius: '14px',
-                background: 'transparent',
-                fontSize: '16px',
-                outline: 'none' 
-              }}
             />
           </div>
 
-          <div className="form-row">
-            <label>Email</label>
+          <div className="form-row" style={{ marginTop: 24 }}>
+            <label className="form-label" htmlFor="register-email">Email</label>
             <input
+              id="register-email"
+              className="editorial-input"
               type="email"
               value={form.email}
               onChange={(e) => update('email', e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                border: '2px solid rgba(6, 6, 6, 0.18)',
-                borderRadius: '14px',
-                background: 'transparent',
-                fontSize: '16px',
-                outline: 'none' 
-              }}
             />
           </div>
 
-          <div className="form-row">
-            <label>Password</label>
+          <div className="form-row" style={{ marginTop: 24 }}>
+            <label className="form-label" htmlFor="register-password">Password</label>
             <input
+              id="register-password"
+              className="editorial-input"
               type="password"
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                border: '2px solid rgba(6, 6, 6, 0.18)',
-                borderRadius: '14px',
-                background: 'transparent',
-                fontSize: '16px',
-                outline: 'none' 
-              }}
             />
           </div>
 
@@ -188,14 +160,7 @@ export default function Register() {
               marginTop: 24
             }}
           >
-            <label
-              style={{
-                letterSpacing: '.25em',
-                textTransform: 'uppercase',
-                fontSize: 12,
-                fontWeight: 600
-              }}
-            >
+            <label className="form-label">
               Select Role
             </label>
             <div className="auth-role-grid">
@@ -208,18 +173,7 @@ export default function Register() {
                   key={item.value}
                   type="button"
                   onClick={() => update('role', item.value as 'student' | 'teacher' | 'admin')}
-                  className="auth-role-option"
-                  style={{
-                    border:
-                      form.role === item.value
-                        ? '1px solid var(--accent)'
-                        : '1px solid rgba(107,107,104,0.18)',
-
-                    background:
-                      form.role === item.value
-                        ? 'rgba(221,82,50,.04)'
-                        : 'transparent',
-                  }}
+                  className={`auth-role-option${form.role === item.value ? ' selected' : ''}`}
                 >
                   <div
                     style={{
@@ -247,13 +201,13 @@ export default function Register() {
             </div>
           </div>
 
-          {error && <p style={{ color: '#ff7a7a' }}>{error}</p>}
+          {error && <p className="form-error">{error}</p>}
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
             <button className="btn" type="submit" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}
             </button>
-            <Link className="btn secondary" href="/login">Back to sign in</Link>
+            <Link className="btn auth-secondary-btn" href="/login">Back to sign in</Link>
           </div>
         </form>
             </div>
