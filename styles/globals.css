@@ -322,6 +322,18 @@ body{
 
 /* ─── Forms ─── */
 .form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.form-label{
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  font-size:12px;
+  font-weight:600;
+  color:var(--muted);
+}
+.form-error{
+  color:var(--danger);
+  font-size:14px;
+  margin-top:12px;
+}
 .field{display:flex;flex-direction:column;gap:8px}
 .field textarea{min-height:120px;resize:vertical}
 .field textarea,.field input,.field select{width:100%}
@@ -2961,12 +2973,23 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   padding:18px 20px;
   border-radius:18px;
   cursor:pointer;
-  transition:.2s;
+  border:1px solid rgba(107,107,104,0.18);
+  background:transparent;
+  transition:border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
   text-align:left;
   min-height:92px;
   display:flex;
   flex-direction:column;
   justify-content:center;
+}
+.auth-role-option:hover{
+  transform:translateY(-3px);
+  border-color:var(--ink);
+  box-shadow:0 12px 26px rgba(21,19,19,.1);
+}
+.auth-role-option.selected{
+  border-color:var(--accent);
+  background:rgba(221,82,50,.04);
 }
 
 .home-footer{
