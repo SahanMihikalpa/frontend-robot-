@@ -603,8 +603,10 @@ export default function LearnPage() {
           activeQuestionRef.current = lastRestoredQ
           setLastAnswerCorrect(null)
         }
-        // Restore mastery from BKT state returned from backend
-        if (res.mastery_start != null) setMastery(res.mastery_start * 100)
+        // Restore mastery from current BKT state — mastery_start is frozen at
+        // session creation, so only use it if the backend didn't send the live value
+        const resumedMastery = res.mastery_current ?? res.mastery_start
+        if (resumedMastery != null) setMastery(resumedMastery * 100)
       } else {
         setMessages([])
         const firstMsg = res.first_message || res.message || res
