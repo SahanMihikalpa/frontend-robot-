@@ -44,6 +44,9 @@ export default function MasteryPage() {
   }, [])
 
   const masteredPct = Math.min(Number(summary?.mastered_pct || 0), 100)
+  // Drop the decimal at exactly 100% so "100%" fits the fixed-width hero card
+  // ("100.0%" overflows the 220px column at the 68px hero font size).
+  const masteredLabel = masteredPct >= 100 ? '100' : masteredPct.toFixed(1)
 
   const statuses = useMemo(() => {
     const set = new Set<string>()
@@ -67,7 +70,7 @@ export default function MasteryPage() {
         </div>
         <div className="teacher-hero-note">
           <span>Overall mastery</span>
-          <strong>{masteredPct.toFixed(1)}%</strong>
+          <strong>{masteredLabel}%</strong>
           <p>{summary?.total_skills ? `of ${summary.total_skills} skills` : 'across all skills'}</p>
         </div>
       </section>

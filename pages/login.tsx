@@ -92,8 +92,15 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-row">
-            <label className="form-label" htmlFor="login-email">
-              Email
+            <label
+              style={{
+                letterSpacing: '.25em',
+                textTransform: 'uppercase',
+                fontSize: 12,
+                fontWeight: 600
+              }}
+            >
+              Username
             </label>
             <input
               id="login-email"
