@@ -100,7 +100,7 @@ export default function Login() {
                 fontWeight: 600
               }}
             >
-              Email
+              Username
             </label>
             <input
               className="editorial-input"
