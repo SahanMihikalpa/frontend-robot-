@@ -103,6 +103,7 @@ export default function Login() {
               Username
             </label>
             <input
+              id="login-email"
               className="editorial-input"
               type="text"
               value={username}
@@ -112,17 +113,11 @@ export default function Login() {
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
-            <label
-              style={{
-                letterSpacing: '.25em',
-                textTransform: 'uppercase',
-                fontSize: 12,
-                fontWeight: 600
-              }}
-            >
+            <label className="form-label" htmlFor="login-password">
               Password
             </label>
             <input
+              id="login-password"
               className="editorial-input"
               type="password"
               value={password}
@@ -130,13 +125,8 @@ export default function Login() {
               required
             />
           </div>
-          
 
-          {error && (
-            <p style={{ color: 'var(--accent)', marginTop: 12 }}>
-              {error}
-            </p>
-          )}
+          {error && <p className="form-error">{error}</p>}
 
           <button
             className="btn"
