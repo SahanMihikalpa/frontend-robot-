@@ -195,6 +195,52 @@ export async function deleteQuestion(id: number) {
   return data
 }
 
+// ── CSV bulk import ──────────────────────────────────────────────────────────
+
+export type BulkImportResult = {
+  total_rows: number
+  created: number
+  skipped: number
+  errors: { row: number; error: string }[]
+}
+
+async function downloadCsv(path: string, filename: string) {
+  const { data } = await apiClient.get(path, { responseType: 'blob' })
+  const url = URL.createObjectURL(data)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+export function downloadSkillsCsvTemplate() {
+  return downloadCsv('/api/v1/skills/bulk-template', 'skills_template.csv')
+}
+
+export function downloadQuestionsCsvTemplate() {
+  return downloadCsv('/api/v1/questions/bulk-template', 'questions_template.csv')
+}
+
+async function uploadCsv(path: string, file: File): Promise<BulkImportResult> {
+  const form = new FormData()
+  form.append('file', file)
+  const { data } = await apiClient.post(path, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return data
+}
+
+export function bulkImportSkills(file: File) {
+  return uploadCsv('/api/v1/skills/bulk-import', file)
+}
+
+export function bulkImportQuestions(file: File) {
+  return uploadCsv('/api/v1/questions/bulk-import', file)
+}
+
 export async function createInteraction(payload: {
   question_id: number
   skill_id: number

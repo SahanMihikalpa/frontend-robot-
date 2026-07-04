@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   listQuestions, listSkills, createQuestion, updateQuestion, deleteQuestion,
+  bulkImportQuestions, downloadQuestionsCsvTemplate,
 } from '../lib/api'
 import { getStoredUser } from '../lib/session'
+import CsvImportModal from '../components/CsvImportModal'
 
 type Question = {
   id: number
@@ -44,6 +46,7 @@ export default function QuestionsPage() {
   const [form, setForm] = useState(BLANK_FORM)
   const [saving, setSaving] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null)
+  const [showImport, setShowImport] = useState(false)
 
   const role = getStoredUser()?.role || ''
   const canEdit = role === 'teacher' || role === 'admin'
@@ -148,6 +151,11 @@ export default function QuestionsPage() {
         </div>
         <div className="questions-hero-actions">
           <span className="skills-count-pill">{questions.length} total</span>
+          {canEdit && (
+            <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
+              Import CSV
+            </button>
+          )}
           {canEdit && (
             <button type="button" className="skills-action primary" onClick={openCreate}>New question</button>
           )}
@@ -297,6 +305,18 @@ export default function QuestionsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showImport && (
+        <CsvImportModal
+          title="Import questions from CSV"
+          subtitle="Create many questions at once. Download the template, fill one question per row, then upload it. Rows that duplicate an existing question (same skill + text) are skipped."
+          columnsHint="skill_name, question_text, question_type (multiple_choice | true_false | open), option_a–option_d, correct_answer, difficulty (1–5)"
+          onDownloadTemplate={downloadQuestionsCsvTemplate}
+          onImport={bulkImportQuestions}
+          onImported={load}
+          onClose={() => setShowImport(false)}
+        />
       )}
 
       {deleteTarget && (

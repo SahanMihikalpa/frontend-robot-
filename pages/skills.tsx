@@ -3,8 +3,10 @@ import {
   listSkills, createSkill, updateSkill, deleteSkill,
   getSkillGraph, getBktParameters, setBktParameters, fitBktParameters,
   listQuestions,
+  bulkImportSkills, downloadSkillsCsvTemplate,
 } from '../lib/api'
 import { getStoredUser } from '../lib/session'
+import CsvImportModal from '../components/CsvImportModal'
 
 type Skill = {
   id: number
@@ -67,6 +69,7 @@ export default function SkillsPage() {
   const [formError, setFormError] = useState('')
 
   const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null)
+  const [showImport, setShowImport] = useState(false)
 
   const [bktSkill, setBktSkill] = useState<Skill | null>(null)
   const [bktParams, setBktParams] = useState<BktParams>(BLANK_BKT)
@@ -275,6 +278,11 @@ export default function SkillsPage() {
             >
               {showGraph ? 'Hide graph' : 'Dependency graph'}
             </button>
+            {canEdit && (
+              <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
+                Import CSV
+              </button>
+            )}
             {canEdit && (
               <button type="button" className="skills-action primary" onClick={openCreate}>New skill</button>
             )}
@@ -572,6 +580,19 @@ export default function SkillsPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ── CSV bulk import ── */}
+      {showImport && (
+        <CsvImportModal
+          title="Import skills from CSV"
+          subtitle="Create many skills at once. Download the template, fill one skill per row, then upload it. Existing skill names are skipped automatically."
+          columnsHint="name (required), description, category, difficulty_level (1–5)"
+          onDownloadTemplate={downloadSkillsCsvTemplate}
+          onImport={bulkImportSkills}
+          onImported={load}
+          onClose={() => setShowImport(false)}
+        />
       )}
 
       {/* ── Delete confirmation ── */}
