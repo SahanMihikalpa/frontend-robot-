@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   listQuestions, listSkills, createQuestion, updateQuestion, deleteQuestion,
+  bulkImportQuestions, downloadQuestionsCsvTemplate,
 } from '../lib/api'
 import { getStoredUser } from '../lib/session'
+import CsvImportModal from '../components/CsvImportModal'
 
 type Question = {
   id: number
@@ -25,6 +27,9 @@ const BLANK_FORM = {
 }
 
 function buildOptions(f: typeof BLANK_FORM) {
+  if (f.question_type === 'true_false') {
+    return { A: 'True', B: 'False' }
+  }
   const opts: Record<string, string> = {}
   if (f.optA) opts.A = f.optA
   if (f.optB) opts.B = f.optB
@@ -44,6 +49,7 @@ export default function QuestionsPage() {
   const [form, setForm] = useState(BLANK_FORM)
   const [saving, setSaving] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null)
+  const [showImport, setShowImport] = useState(false)
 
   const role = getStoredUser()?.role || ''
   const canEdit = role === 'teacher' || role === 'admin'
@@ -93,6 +99,17 @@ export default function QuestionsPage() {
 
   async function saveForm() {
     if (!form.skill_id || !form.question_text) return
+    if (form.question_type === 'multiple_choice') {
+      const opts = buildOptions(form)
+      if (Object.keys(opts).length < 2) {
+        setError('Add at least 2 options')
+        return
+      }
+      if (!opts[form.correct_answer]) {
+        setError('The correct answer must be one of the filled options')
+        return
+      }
+    }
     setSaving(true)
     setError('')
     try {
@@ -134,6 +151,19 @@ export default function QuestionsPage() {
     setForm((prev) => ({ ...prev, [key]: val }))
   }
 
+  function handleTypeChange(type: string) {
+    setForm((prev) => ({
+      ...prev,
+      question_type: type,
+      // True/False only has answers A (True) and B (False)
+      correct_answer:
+        type === 'true_false' && !['A', 'B'].includes(prev.correct_answer)
+          ? 'A'
+          : prev.correct_answer,
+    }))
+    setError('')
+  }
+
   return (
     <div className="questions-page">
       <section className="questions-hero">
@@ -148,6 +178,11 @@ export default function QuestionsPage() {
         </div>
         <div className="questions-hero-actions">
           <span className="skills-count-pill">{questions.length} total</span>
+          {canEdit && (
+            <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
+              Import CSV
+            </button>
+          )}
           {canEdit && (
             <button type="button" className="skills-action primary" onClick={openCreate}>New question</button>
           )}
@@ -247,10 +282,10 @@ export default function QuestionsPage() {
 
               <div className="field">
                 <label>Question type</label>
-                <select value={form.question_type} onChange={(e) => setF('question_type', e.target.value)}>
+                <select value={form.question_type} onChange={(e) => handleTypeChange(e.target.value)}>
                   <option value="multiple_choice">Multiple choice</option>
                   <option value="true_false">True / False</option>
-                  <option value="open">Open</option>
+                  {/* <option value="open">Open</option> */}
                 </select>
               </div>
             </div>
@@ -260,25 +295,34 @@ export default function QuestionsPage() {
               <textarea rows={3} value={form.question_text} onChange={(e) => setF('question_text', e.target.value)} />
             </div>
 
-            <div className="questions-options-grid">
-              {(['A', 'B', 'C', 'D'] as const).map((letter) => (
-                <div className="field" key={letter}>
-                  <label>Option {letter}</label>
-                  <input
-                    type="text"
-                    value={form[`opt${letter}` as keyof typeof form]}
-                    onChange={(e) => setF(`opt${letter}` as keyof typeof BLANK_FORM, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
+            {form.question_type === 'multiple_choice' && (
+              <div className="questions-options-grid">
+                {(['A', 'B', 'C', 'D'] as const).map((letter) => (
+                  <div className="field" key={letter}>
+                    <label>Option {letter}</label>
+                    <input
+                      type="text"
+                      value={form[`opt${letter}` as keyof typeof form]}
+                      onChange={(e) => setF(`opt${letter}` as keyof typeof BLANK_FORM, e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="questions-modal-grid">
               <div className="field">
                 <label>Correct answer</label>
-                <select value={form.correct_answer} onChange={(e) => setF('correct_answer', e.target.value)}>
-                  {['A', 'B', 'C', 'D'].map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
+                {form.question_type === 'true_false' ? (
+                  <select value={form.correct_answer} onChange={(e) => setF('correct_answer', e.target.value)}>
+                    <option value="A">True</option>
+                    <option value="B">False</option>
+                  </select>
+                ) : (
+                  <select value={form.correct_answer} onChange={(e) => setF('correct_answer', e.target.value)}>
+                    {['A', 'B', 'C', 'D'].map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                )}
               </div>
 
               <div className="field">
@@ -297,6 +341,18 @@ export default function QuestionsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showImport && (
+        <CsvImportModal
+          title="Import questions from CSV"
+          subtitle="Create many questions at once. Download the template, fill one question per row, then upload it. Rows that duplicate an existing question (same skill + text) are skipped."
+          columnsHint="skill_name, question_text, question_type (multiple_choice | true_false ), option_a–option_d, correct_answer, difficulty (1–5)"
+          onDownloadTemplate={downloadQuestionsCsvTemplate}
+          onImport={bulkImportQuestions}
+          onImported={load}
+          onClose={() => setShowImport(false)}
+        />
       )}
 
       {deleteTarget && (
