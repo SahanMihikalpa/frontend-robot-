@@ -546,20 +546,21 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:16px;
 }
 .teacher-kpi-card{
-  padding:22px;
+  padding:24px;
   min-height:148px;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
   background:var(--surface);
-  border:1px solid var(--border-strong);
-  border-radius:8px;
+  border:1px solid rgba(21,19,19,.06);
+  border-radius:20px;
+  box-shadow:0 1px 2px rgba(21,19,19,.04), 0 12px 28px -18px rgba(21,19,19,.16);
   transition:transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .28s ease;
 }
 .teacher-kpi-card:hover{
   transform:translateY(-5px);
-  border-color:var(--ink);
-  box-shadow:0 16px 34px rgba(21,19,19,.11);
+  border-color:var(--border-strong);
+  box-shadow:0 1px 2px rgba(21,19,19,.05), 0 20px 40px -16px rgba(21,19,19,.18);
 }
 .teacher-kpi-card p{
   margin:0;
@@ -577,17 +578,18 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-panel,
 .teacher-actions{
-  padding:28px;
+  padding:34px;
   background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
+  border:1px solid rgba(21,19,19,.06);
+  border-radius:22px;
+  box-shadow:0 1px 2px rgba(21,19,19,.04), 0 16px 36px -22px rgba(21,19,19,.14);
 }
 .teacher-panel-header{
   display:flex;
   justify-content:space-between;
   gap:18px;
   align-items:flex-start;
-  margin-bottom:24px;
+  margin-bottom:28px;
 }
 .teacher-panel-header h3,
 .teacher-actions h3{
@@ -595,6 +597,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--text);
   font-size:32px;
   line-height:1.05;
+  letter-spacing:-0.01em;
 }
 .teacher-text-link{
   color:var(--accent);
@@ -617,7 +620,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-table th,
 .teacher-table td{
-  padding:16px 10px;
+  padding:18px 14px;
   border-bottom:1px solid var(--border);
   text-align:left;
   font-size:14px;
@@ -628,6 +631,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   font-weight:700;
   letter-spacing:.16em;
   text-transform:uppercase;
+  padding-bottom:14px;
   border-bottom-color:var(--border-strong);
 }
 .teacher-table td{
@@ -700,15 +704,16 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:flex;
   align-items:center;
   gap:14px;
-  padding:14px 16px;
+  padding:14px 18px;
   color:var(--text);
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:8px;
+  background:var(--surface);
+  border:1px solid rgba(21,19,19,.08);
+  border-radius:14px;
+  box-shadow:0 1px 2px rgba(21,19,19,.03), 0 10px 22px -16px rgba(21,19,19,.12);
   text-decoration:none;
   font-size:14px;
   font-weight:700;
-  transition:background .2s ease,color .2s ease,border-color .2s ease;
+  transition:background .2s ease,color .2s ease,border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 .teacher-action span{
   color:var(--muted);
@@ -881,14 +886,15 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-info-box{
   overflow:hidden;
   background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
+  border:1px solid rgba(21,19,19,.06);
+  border-radius:20px;
+  box-shadow:0 1px 2px rgba(21,19,19,.04), 0 14px 32px -22px rgba(21,19,19,.14);
   transition:box-shadow .32s ease, transform .32s ease, border-color .32s ease;
 }
 .teacher-info-box:hover{
   transform:translateY(-5px);
-  border-color:var(--ink);
-  box-shadow:0 18px 42px rgba(21,19,19,.12);
+  border-color:var(--border-strong);
+  box-shadow:0 1px 2px rgba(21,19,19,.05), 0 22px 46px -20px rgba(21,19,19,.16);
 }
 .teacher-info-toggle{
   width:100%;
@@ -896,7 +902,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   justify-content:space-between;
   align-items:center;
   gap:16px;
-  padding:16px 18px;
+  padding:20px 24px;
   border:none;
   color:var(--text);
   cursor:pointer;
@@ -956,7 +962,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-info-content-inner{
   min-height:0;
-  padding:18px;
+  padding:8px 24px 26px;
   transform:translateY(-8px);
   transition:transform .42s cubic-bezier(.16,1,.3,1);
 }
@@ -964,37 +970,38 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   transform:translateY(0);
 }
 .teacher-info-content p{
-  margin:0 0 14px;
+  margin:0 0 16px;
   color:var(--muted);
 }
 .teacher-status-guide{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
-  gap:10px;
+  gap:12px;
 }
 .teacher-status-card{
-  padding:12px;
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:8px;
+  padding:16px 18px;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:16px;
+  box-shadow:0 1px 2px rgba(21,19,19,.03);
   animation:teacherFadeLift .54s cubic-bezier(.16,1,.3,1) both;
-  transition:transform .28s ease, box-shadow .28s ease, background .28s ease, border-color .28s ease;
+  transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease;
 }
 .teacher-status-card:hover{
   transform:translateY(-6px);
-  background:var(--surface);
   border-color:var(--ink);
   box-shadow:0 16px 34px rgba(21,19,19,.11);
 }
 .teacher-status-card span{
   display:inline-flex;
-  padding:4px 10px;
+  padding:5px 12px;
   border-radius:999px;
-  font-size:12px;
+  font-size:11px;
   font-weight:800;
+  letter-spacing:.03em;
 }
 .teacher-status-card p{
-  margin:10px 0 4px;
+  margin:12px 0 4px;
   color:var(--text);
   font-size:13px;
   line-height:1.5;
@@ -1006,17 +1013,27 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-column-guide{
   display:grid;
-  gap:12px;
+  gap:0;
 }
 .teacher-column-guide div{
+  padding:12px 0;
   color:var(--muted);
   font-size:13px;
   line-height:1.55;
+  border-bottom:1px solid var(--border);
+}
+.teacher-column-guide div:first-child{
+  padding-top:0;
+}
+.teacher-column-guide div:last-child{
+  padding-bottom:0;
+  border-bottom:none;
 }
 .teacher-column-guide strong{
   display:block;
-  margin-bottom:2px;
+  margin-bottom:3px;
   color:var(--text);
+  font-size:13px;
 }
 .teacher-roster-panel{
   padding-bottom:18px;
@@ -1027,8 +1044,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:8px;
   padding:6px;
   background:var(--bg);
-  border:1px solid var(--border);
+  border:1px solid var(--border-strong);
   border-radius:999px;
+  box-shadow:0 1px 2px rgba(21,19,19,.04) inset;
 }
 .teacher-sort-control span{
   padding:0 8px 0 10px;
@@ -1040,7 +1058,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-sort-control button{
   min-height:36px;
-  padding:8px 14px;
+  padding:8px 16px;
   color:var(--muted);
   background:transparent;
   border:none;
@@ -1049,6 +1067,10 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   font-size:13px;
   font-weight:700;
   transition:background .24s ease, color .24s ease, transform .18s ease, box-shadow .24s ease;
+}
+.teacher-sort-control button:hover:not(.active){
+  color:var(--text);
+  background:var(--surface);
 }
 .teacher-sort-control button.active{
   color:#fff;
@@ -1094,10 +1116,12 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-status-pill{
   display:inline-flex;
-  padding:4px 10px;
+  padding:5px 12px;
+  border:1px solid rgba(21,19,19,.06);
   border-radius:999px;
-  font-size:12px;
+  font-size:11.5px;
   font-weight:800;
+  letter-spacing:.02em;
   white-space:nowrap;
   transition:transform .18s ease, filter .18s ease;
 }
