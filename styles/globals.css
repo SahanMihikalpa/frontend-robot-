@@ -4,8 +4,8 @@
   --card:#FFFFFF;
 
   --text:#151313;
-  --text-secondary:#333331;
-  --muted:#6B6B68;
+  --text-secondary:#2A2826;
+  --muted:#4A4743;
 
   --ink:#151313;
 
@@ -31,6 +31,8 @@
   --warning-dim:rgba(252,204,66,0.1);
 
   --white:#151313;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 *{box-sizing:border-box}
@@ -38,7 +40,7 @@ html,body,#__next{height:100%}
 button,input,textarea,select{font-family:inherit}
 body{
   margin:0;
-  font-family: Kodchasan, sans-serif;
+  font-family: var(--font-sans);
   background:var(--bg);
   color:var(--text);
   -webkit-font-smoothing:antialiased;
@@ -46,7 +48,7 @@ body{
 }
 
 .editorial-title{
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-weight:700;
   letter-spacing:-0.01em;
 }
@@ -131,7 +133,7 @@ body{
 /* ─── Nav ─── */
 .nav-links{display:flex;gap:14px;align-items:center}
 .nav-links a{
-  color:#5f564d;
+  color:var(--text-secondary);
   text-decoration:none;
   padding:8px 10px;
   border-radius:0;
@@ -489,7 +491,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-hero-note strong{
   margin-top:16px;
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:68px;
   font-weight:500;
   line-height:.9;
@@ -540,7 +542,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-kpi-card strong{
   color:var(--text);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:48px;
   font-weight:500;
   line-height:1;
@@ -682,7 +684,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-action span{
   color:var(--muted);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:20px;
   font-weight:500;
 }
@@ -1249,7 +1251,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-filter strong{
   color:var(--text);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:42px;
   font-weight:500;
   line-height:1;
@@ -1625,7 +1627,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .modal.skills-modal h3{
   margin:8px 30px 8px;
   color:var(--text);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:38px;
   font-weight:500;
   line-height:1.05;
@@ -1933,7 +1935,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .knowledge-stat-grid strong{
   color:var(--surface);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:50px;
   font-weight:500;
   line-height:1;
@@ -2197,7 +2199,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .tutor-status-card strong{
   margin-top:16px;
   color:var(--surface);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:42px;
   font-weight:500;
   line-height:1;
@@ -2353,7 +2355,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .tutor-path-item span{
   color:var(--accent);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:22px;
   line-height:1;
 }
@@ -2415,7 +2417,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .history-subject-card strong{
   margin-top:14px;
   color:var(--surface);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:34px;
   font-weight:500;
   line-height:1.05;
@@ -2761,7 +2763,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:19px;
   font-weight:600;
   margin-bottom:20px;
@@ -2831,7 +2833,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .home-preview-kpi strong{
   color:var(--surface);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:28px;
   font-weight:500;
 }
@@ -2881,7 +2883,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:24px;
   color:var(--accent);
   background:var(--bg);
@@ -3376,7 +3378,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .analytics-stat-grid strong{
   color:var(--surface);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:42px;
   font-weight:500;
   line-height:1;
@@ -3478,7 +3480,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .selflearn-session-pct{
   margin-top:10px;
   color:var(--surface);
-  font-family:Kodchasan, sans-serif;
+  font-family:var(--font-sans);
   font-size:38px;
   font-weight:500;
   line-height:1;
