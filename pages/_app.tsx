@@ -1,7 +1,3 @@
-import '@fontsource/kodchasan/400.css'
-import '@fontsource/kodchasan/500.css'
-import '@fontsource/kodchasan/600.css'
-import '@fontsource/kodchasan/700.css'
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useEffect, useState } from 'react'

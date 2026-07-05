@@ -1216,7 +1216,7 @@ export default function LearnPage() {
                   borderBottom: '1px solid var(--border)',
                 }}>
                   <span style={{
-                    fontFamily: 'Kodchasan, sans-serif', fontSize: 18,
+                    fontSize: 18,
                     fontWeight: 500, color: 'var(--muted)', minWidth: 24, paddingTop: 2,
                   }}>{num}</span>
                   <div>
