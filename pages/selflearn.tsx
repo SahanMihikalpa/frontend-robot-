@@ -3,6 +3,7 @@ import {
   slStartSession, slSendMessage, slGetMastery, slGetProgress,
   slGetProviders, slResumeSession, slCreatePack,
 } from '../lib/api'
+import ImageLightbox from '../components/ImageLightbox'
 
 // One transcript entry as persisted by the backend (learning_messages).
 type LMsg = {
@@ -28,6 +29,14 @@ type Course = {
 }
 
 function uid() { return 'tmp-' + Math.random().toString(36).slice(2) }
+
+/** Build a displayable data: URL from a base64 image payload in message metadata. */
+function extractImageUrl(meta: any): string | undefined {
+  const b64 = meta?.image_b64
+  if (!b64 || typeof b64 !== 'string') return undefined
+  const mime = meta?.image_mime || 'image/png'
+  return b64.startsWith('data:') ? b64 : `data:${mime};base64,${b64}`
+}
 
 function errDetail(e: any): string {
   if (e?.response?.status === 401) return 'Your session expired — please sign in again.'
@@ -71,6 +80,7 @@ export default function SelfLearn() {
 
   const [files, setFiles] = useState<File[]>([])
   const [packMsg, setPackMsg] = useState('')
+  const [lightboxSrc, setLightboxSrc] = useState('')
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -443,10 +453,35 @@ export default function SelfLearn() {
               )
             }
             // Default tutor teaching / chat message.
+            const imageUrl = extractImageUrl(m.metadata)
             return (
               <div key={m.id} className="chat-bubble assistant selflearn-bubble">
                 {m.metadata?.concept && <p className="meta selflearn-detail-label">Tutor · {m.metadata.concept}</p>}
                 <p className="selflearn-teach-text">{m.content}</p>
+                {imageUrl && (
+                  <div style={{ marginTop: 10 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt="AI-generated visual — click to enlarge"
+                      onClick={() => setLightboxSrc(imageUrl)}
+                      style={{
+                        maxWidth: '100%', maxHeight: 260, borderRadius: 8, display: 'block',
+                        border: '1px solid var(--border)', cursor: 'zoom-in',
+                      }}
+                    />
+                    <span style={{ fontSize: 10, marginTop: 4, display: 'block', color: 'var(--muted)' }}>
+                      🖼️ {m.metadata?.image_source === 'llm_decision'
+                        ? 'The tutor added a visual'
+                        : 'Visual generated for you'} — click to enlarge
+                    </span>
+                  </div>
+                )}
+                {!imageUrl && m.metadata?.image_error && (
+                  <p className="meta" style={{ fontSize: 11, marginTop: 8, fontStyle: 'italic' }}>
+                    🖼️ Couldn't generate a visual for this one.
+                  </p>
+                )}
               </div>
             )
           })}
@@ -484,6 +519,8 @@ export default function SelfLearn() {
           </p>
         )}
       </section>
+
+      {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc('')} />}
     </div>
   )
 }
