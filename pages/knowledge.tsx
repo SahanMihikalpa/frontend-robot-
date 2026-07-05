@@ -2,10 +2,18 @@ import { useEffect, useState } from 'react'
 import {
   uploadKnowledgeDocument, queryKnowledgeBase,
   listKnowledgeDocuments, getKnowledgeStats, deleteKnowledgeDocument,
+  listSkills,
 } from '../lib/api'
+
+/** Private self-learn course packs are namespaced "sl:{user}:{skill}". */
+function isPrivatePack(subject?: string) {
+  return typeof subject === 'string' && subject.startsWith('sl:')
+}
 
 export default function KnowledgePage() {
   const [file, setFile] = useState<File | null>(null)
+  const [subject, setSubject] = useState('general')
+  const [skills, setSkills] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadMsg, setUploadMsg] = useState('')
   const [uploadOk, setUploadOk] = useState(false)
@@ -27,7 +35,12 @@ export default function KnowledgePage() {
     } catch { /* ignore */ }
   }
 
-  useEffect(() => { loadDocs() }, [])
+  useEffect(() => {
+    loadDocs()
+    listSkills()
+      .then((s) => setSkills(Array.isArray(s) ? s : s?.items || []))
+      .catch(() => {})
+  }, [])
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
@@ -36,7 +49,7 @@ export default function KnowledgePage() {
     setUploadMsg('')
     setError('')
     try {
-      await uploadKnowledgeDocument(file)
+      await uploadKnowledgeDocument(file, subject || 'general')
       setUploadMsg('Uploaded successfully')
       setUploadOk(true)
       setFile(null)
@@ -119,6 +132,20 @@ export default function KnowledgePage() {
               />
             </label>
 
+            <div className="field" style={{ marginTop: 12 }}>
+              <label>Skill scope</label>
+              <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+                <option value="general">General — available in every skill session</option>
+                {skills.map((s: any) => (
+                  <option key={s.id} value={s.name}>{s.name} — only this skill's sessions</option>
+                ))}
+              </select>
+              <p className="meta" style={{ fontSize: 11, marginTop: 4 }}>
+                Skill-tagged documents ground the tutor only in that skill's chat sessions.
+                General documents are used everywhere.
+              </p>
+            </div>
+
             {file && (
               <p className="knowledge-file-meta">
                 {file.name} | {(file.size / 1024).toFixed(1)} KB
@@ -147,22 +174,35 @@ export default function KnowledgePage() {
             ) : (
               <div className="knowledge-doc-list">
                 {docs.map((d: any, i: number) => {
-                  const name = d.source_name || d.name || d.filename || `Document ${i + 1}`
+                  const name = d.source || d.source_name || d.name || d.filename || `Document ${i + 1}`
+                  const priv = isPrivatePack(d.subject)
                   return (
                     <div key={i} className="knowledge-doc-card">
                       <div>
-                        <strong>{name}</strong>
-                        {d.chunk_count != null && (
-                          <p>{d.chunk_count} chunks</p>
-                        )}
+                        <strong>{priv ? (d.source?.split(':').slice(3).join(':') || name) : name}</strong>
+                        <p>
+                          {d.chunk_count != null && `${d.chunk_count} chunks`}
+                          {' · '}
+                          {priv ? (
+                            <span style={{ color: 'var(--warning)' }}>
+                              🔒 student self-learn material (private)
+                            </span>
+                          ) : (
+                            <span className="badge neutral" style={{ fontSize: 10 }}>
+                              {d.subject === 'general' || !d.subject ? 'general' : `skill: ${d.subject}`}
+                            </span>
+                          )}
+                        </p>
                       </div>
-                      <button
-                        type="button"
-                        className="skills-mini-action danger"
-                        onClick={() => setDeleteTarget(name)}
-                      >
-                        Delete
-                      </button>
+                      {!priv && (
+                        <button
+                          type="button"
+                          className="skills-mini-action danger"
+                          onClick={() => setDeleteTarget(name)}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   )
                 })}

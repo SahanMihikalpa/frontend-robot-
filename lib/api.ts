@@ -511,9 +511,10 @@ export function createVoiceSocket(
   return socket
 }
 
-export async function uploadKnowledgeDocument(file: File) {
+export async function uploadKnowledgeDocument(file: File, subject?: string) {
   const formData = new FormData()
   formData.append('file', file)
+  if (subject) formData.append('subject', subject)
   const { data } = await apiClient.post('/api/v1/knowledge/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
