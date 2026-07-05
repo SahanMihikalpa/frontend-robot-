@@ -439,20 +439,44 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+/* ─── Premium hero panel (shared across dashboards & content pages) ─── */
+.teacher-hero,
+.skills-hero,
+.questions-hero,
+.knowledge-hero,
+.tutor-hero,
+.history-hero,
+.analytics-hero{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(720px circle at 12% -10%, rgba(221,82,50,.12), transparent 55%),
+    linear-gradient(180deg, #FFFFFF 0%, #FCFAF8 100%);
+  border:1px solid rgba(21,19,19,.06);
+  border-radius:28px;
+  box-shadow:
+    0 1px 2px rgba(21,19,19,.04),
+    0 28px 56px -28px rgba(21,19,19,.20);
+}
+.teacher-hero h2,
+.skills-hero h2,
+.questions-hero h2,
+.knowledge-hero h2,
+.tutor-hero h2,
+.history-hero h2,
+.analytics-hero h2{
+  letter-spacing:-0.02em;
+}
+
 .teacher-hero{
   display:grid;
   grid-template-columns:minmax(0,1fr) 220px;
-  gap:32px;
+  gap:40px;
   align-items:end;
-  padding:46px 50px;
-  background:
-    linear-gradient(135deg, rgba(221,82,50,.10), transparent 42%),
-    var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
+  padding:56px 64px;
 }
 .teacher-hero h2{
-  margin:10px 0 18px;
+  margin:14px 0 20px;
   max-width:760px;
   color:var(--text);
   font-size:clamp(44px, 7vw, 86px);
@@ -470,18 +494,22 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--accent);
   font-size:11px;
   font-weight:700;
-  letter-spacing:.28em;
+  letter-spacing:.24em;
   text-transform:uppercase;
 }
 .teacher-hero-note{
   min-height:180px;
-  padding:22px;
+  padding:28px;
   display:flex;
   flex-direction:column;
   justify-content:flex-end;
-  background:var(--ink);
+  background:linear-gradient(160deg, #221F1E 0%, var(--ink) 65%);
   color:var(--surface);
-  border-radius:8px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 24px 48px -20px rgba(21,19,19,.45);
 }
 .teacher-hero-note span{
   color:#D8C9BD;
@@ -490,7 +518,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-transform:uppercase;
 }
 .teacher-hero-note strong{
-  margin-top:16px;
+  margin-top:18px;
   font-family:var(--font-sans);
   font-size:68px;
   font-weight:500;
@@ -1377,12 +1405,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
 }
 .skills-hero{
-  padding:42px;
-  background:
-    linear-gradient(135deg, rgba(221,82,50,.10), transparent 42%),
-    var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
+  padding:48px 56px;
 }
 .skills-hero-top{
   display:flex;
@@ -1738,16 +1761,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
 }
 .questions-hero{
-  padding:42px;
+  padding:48px 56px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-start;
-  background:
-    linear-gradient(135deg, rgba(221,82,50,.10), transparent 42%),
-    var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
 }
 .questions-hero h2{
   margin:10px 0 16px;
@@ -1877,16 +1895,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
 }
 .knowledge-hero{
-  padding:42px;
+  padding:48px 56px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-end;
-  background:
-    linear-gradient(135deg, rgba(221,82,50,.10), transparent 42%),
-    var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
 }
 .knowledge-hero h2{
   margin:10px 0 16px;
@@ -2143,16 +2156,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
 }
 .tutor-hero{
-  padding:42px;
+  padding:48px 56px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-end;
-  background:
-    linear-gradient(135deg, rgba(221,82,50,.10), transparent 42%),
-    var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
 }
 .tutor-hero h2{
   margin:10px 0 16px;
@@ -2359,16 +2367,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
 }
 .history-hero{
-  padding:42px;
+  padding:48px 56px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-end;
-  background:
-    linear-gradient(135deg, rgba(221,82,50,.10), transparent 42%),
-    var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
 }
 .history-hero h2{
   margin:10px 0 16px;
@@ -3314,16 +3317,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
 }
 .analytics-hero{
-  padding:42px;
+  padding:48px 56px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-end;
-  background:
-    linear-gradient(135deg, rgba(221,82,50,.10), transparent 42%),
-    var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
 }
 .analytics-hero h2{
   margin:10px 0 16px;
@@ -3585,12 +3583,101 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .selflearn-course-actions{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:10px;
   flex-shrink:0;
 }
 .selflearn-course-progress{
-  margin-top:14px;
-  max-width:360px;
+  margin-top:18px;
+  max-width:420px;
+}
+
+/* ─── "Your learning" panel (premium card treatment) ─── */
+.selflearn-learning-panel .skills-panel-header{
+  margin-bottom:28px;
+}
+.selflearn-learning-panel .skills-count-pill.subtle{
+  background:var(--surface);
+  border-color:var(--border-strong);
+  font-weight:600;
+}
+.selflearn-learning-panel .history-list{
+  gap:18px;
+}
+.history-card.selflearn-course-card{
+  padding:28px 32px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:
+    0 1px 2px rgba(21,19,19,.04),
+    0 18px 36px -22px rgba(21,19,19,.16);
+  transition:transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .28s ease;
+}
+.history-card.selflearn-course-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--border-strong);
+  box-shadow:
+    0 1px 2px rgba(21,19,19,.05),
+    0 26px 48px -22px rgba(21,19,19,.2);
+}
+.selflearn-course-card .history-card-main{
+  align-items:center;
+  gap:20px;
+  margin-bottom:2px;
+}
+.selflearn-course-card h4{
+  font-size:19px;
+  font-weight:700;
+  letter-spacing:-0.01em;
+}
+.selflearn-course-card > p{
+  font-size:13px;
+  letter-spacing:.01em;
+}
+.selflearn-course-card .selflearn-mastery-bar{
+  gap:12px;
+}
+.selflearn-course-card .selflearn-mastery-track{
+  height:10px;
+}
+.selflearn-course-card .selflearn-mastery-label{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.selflearn-course-card .selflearn-mastery-pct{
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+  min-width:38px;
+}
+.selflearn-course-actions .skills-chip{
+  min-height:40px;
+  padding:9px 20px;
+  background:var(--ink);
+  color:#fff;
+  border:1px solid var(--ink);
+  border-radius:999px;
+  font-weight:600;
+  transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.selflearn-course-actions .skills-chip:hover:not(:disabled){
+  background:#000;
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(21,19,19,.2);
+}
+.selflearn-course-actions .skills-chip:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+.selflearn-course-actions .btn.ghost.small{
+  color:var(--muted);
+  font-weight:600;
+}
+.selflearn-course-actions .btn.ghost.small:hover{
+  color:var(--text);
+  background:var(--bg);
 }
 .selflearn-course-detail{
   margin-top:16px;
