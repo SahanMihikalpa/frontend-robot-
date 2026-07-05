@@ -2,6 +2,19 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getCurrentUser, getMasterySummary } from '../../lib/api'
 
+/** Time-of-day greeting pinned to Sri Lankan time (Asia/Colombo), regardless
+ *  of the device's timezone. */
+function sriLankaGreeting(): string {
+  const hour = Number(
+    new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Colombo',
+    }).format(new Date()),
+  )
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
 export default function StudentDashboard() {
   const [me, setMe] = useState<any>(null)
   const [summary, setSummary] = useState<any>(null)
@@ -36,7 +49,7 @@ export default function StudentDashboard() {
         <div>
           <p className="teacher-eyebrow">Today's Learning Journey</p>
           <h2 className="editorial-title">
-            Good afternoon,
+            {sriLankaGreeting()},
             <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>
               {' '}
               {me?.full_name || me?.username || 'Student'}
