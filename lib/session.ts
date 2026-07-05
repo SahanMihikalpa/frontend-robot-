@@ -66,6 +66,7 @@ export function getRoleHome(role?: string | null) {
 
 export function isPublicRoute(pathname: string) {
   return pathname === '/' || pathname === '/login' || pathname === '/register'
+    || pathname === '/about' || pathname === '/contact'
 }
 
 export function canAccessPath(pathname: string, role?: string | null) {
