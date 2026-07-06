@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { BulkImportResult } from '../lib/api'
+import ModalMobileHeader from './ModalMobileHeader'
 
 type Props = {
   title: string
@@ -53,77 +54,98 @@ export default function CsvImportModal({
   return (
     <div className="modal-overlay skills-modal-overlay" onClick={onClose}>
       <div className="modal skills-modal" onClick={(e) => e.stopPropagation()}>
-        <p className="skills-modal-kicker">Bulk Import</p>
-        <h3>{title}</h3>
-        <p className="skills-modal-subtitle">{subtitle}</p>
+        <ModalMobileHeader
+          title={title}
+          subtitle="Bulk Import"
+          backLabel="Close import dialog"
+          onBack={onClose}
+        />
 
-        {!result ? (
-          <>
-            <div className="field">
-              <label>Step 1 — Get the template</label>
-              <p className="meta" style={{ fontSize: 11, marginBottom: 6 }}>
-                Columns: {columnsHint}
-              </p>
-              <button type="button" className="skills-action secondary" onClick={handleDownload}>
-                Download CSV template
-              </button>
-            </div>
+        <div className="skills-modal-scroll">
+          <p className="skills-modal-subtitle">{subtitle}</p>
 
-            <div className="field">
-              <label>Step 2 — Upload your filled CSV</label>
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".csv,text/csv"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
-            </div>
-
-            {error && <p className="feedback error">{error}</p>}
-
-            <div className="skills-modal-actions">
-              <button
-                type="button"
-                className="skills-modal-button primary"
-                onClick={handleImport}
-                disabled={uploading || !file}
-              >
-                {uploading ? 'Importing…' : 'Import'}
-              </button>
-              <button type="button" className="skills-modal-button" onClick={onClose}>Cancel</button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="field">
-              <label>Import results</label>
-              <p className="meta" style={{ marginTop: 4 }}>
-                {result.created} created · {result.skipped} skipped (already exist) ·{' '}
-                {result.errors.length} failed · {result.total_rows} rows total
-              </p>
-            </div>
-
-            {result.errors.length > 0 && (
+          {!result ? (
+            <>
+              <p className="modal-section-label">Step 1 — Download template</p>
               <div className="field">
-                <label>Row errors</label>
-                <div style={{ maxHeight: 180, overflowY: 'auto' }}>
-                  {result.errors.map((e, i) => (
-                    <p key={i} className="feedback error" style={{ margin: '4px 0', fontSize: 12 }}>
-                      Row {e.row}: {e.error}
-                    </p>
-                  ))}
-                </div>
+                <label>Template columns</label>
+                <p className="meta" style={{ fontSize: 11, marginBottom: 6 }}>
+                  {columnsHint}
+                </p>
+                <button type="button" className="skills-action secondary" onClick={handleDownload}>
+                  Download CSV template
+                </button>
               </div>
-            )}
 
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button" onClick={pickAnotherFile}>
-                Import another file
-              </button>
-              <button type="button" className="skills-modal-button primary" onClick={onClose}>Done</button>
-            </div>
-          </>
-        )}
+              <p className="modal-section-label">Step 2 — Upload your filled CSV</p>
+              <div className="field">
+                <label>CSV file</label>
+                <label className="csv-file-drop">
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  />
+                  <span className="csv-file-drop-icon" aria-hidden="true">↑</span>
+                  {file ? (
+                    <span className="csv-file-drop-name">{file.name}</span>
+                  ) : (
+                    <span className="csv-file-drop-hint">
+                      <strong>Choose a CSV file</strong>
+                      or drop it here
+                    </span>
+                  )}
+                </label>
+              </div>
+
+              {error && <p className="feedback error">{error}</p>}
+
+              <div className="skills-modal-actions">
+                <button
+                  type="button"
+                  className="skills-modal-button primary"
+                  onClick={handleImport}
+                  disabled={uploading || !file}
+                >
+                  {uploading ? 'Importing…' : 'Import'}
+                </button>
+                <button type="button" className="skills-modal-button" onClick={onClose}>Cancel</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="modal-section-label">Import results</p>
+              <div className="field">
+                <label>Summary</label>
+                <p className="meta" style={{ marginTop: 4 }}>
+                  {result.created} created · {result.skipped} skipped (already exist) ·{' '}
+                  {result.errors.length} failed · {result.total_rows} rows total
+                </p>
+              </div>
+
+              {result.errors.length > 0 && (
+                <div className="field">
+                  <label>Row errors</label>
+                  <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+                    {result.errors.map((e, i) => (
+                      <p key={i} className="feedback error" style={{ margin: '4px 0', fontSize: 12 }}>
+                        Row {e.row}: {e.error}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button" onClick={pickAnotherFile}>
+                  Import another file
+                </button>
+                <button type="button" className="skills-modal-button primary" onClick={onClose}>Done</button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
