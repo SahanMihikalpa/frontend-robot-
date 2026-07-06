@@ -7,6 +7,7 @@ import {
 } from '../lib/api'
 import { getStoredUser } from '../lib/session'
 import CsvImportModal from '../components/CsvImportModal'
+import ModalMobileHeader from '../components/ModalMobileHeader'
 
 type Skill = {
   id: number
@@ -116,6 +117,12 @@ export default function SkillsPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    const anyModalOpen = showForm || !!bktSkill
+    document.body.style.overflow = anyModalOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [showForm, bktSkill])
 
   const categories = useMemo(() => {
     const cats = new Set(skills.map((s) => s.category).filter(Boolean) as string[])
@@ -370,7 +377,9 @@ export default function SkillsPage() {
             <p className="teacher-eyebrow">Catalogue</p>
             <h3 className="editorial-title">Skill list</h3>
           </div>
-          <span className="skills-count-pill subtle">{filtered.length} shown</span>
+          <span className="skills-count-pill subtle">
+            {filtered.length} {filtered.length === 1 ? 'Skill' : 'Skills'}
+          </span>
         </div>
 
         {loading ? (
@@ -378,74 +387,137 @@ export default function SkillsPage() {
         ) : filtered.length === 0 ? (
           <div className="empty-state"><p>No skills found.</p></div>
         ) : (
-          <div className="skills-table-wrap">
-            <table className="skills-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Difficulty</th>
-                  <th>Questions</th>
-                  <th>Prerequisites</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((s) => {
-                  const node = graphNodes.find((n) => n.id === s.id)
-                  const prereqs = node?.prerequisites || []
-                  return (
-                    <tr key={s.id}>
-                      <td>
-                        <strong className="skills-name">{s.name}</strong>
-                        {s.description && (
-                          <p className="meta" style={{ fontSize: 11, margin: '2px 0 0' }}>{s.description}</p>
-                        )}
-                      </td>
-                      <td>{s.category ? <span className="badge neutral">{s.category}</span> : '—'}</td>
-                      <td><DiffBadge level={s.difficulty_level} /></td>
-                      <td>
-                        <span className="skills-question-pill">
-                          {questionCounts[s.id] ?? 0}
-                        </span>
-                      </td>
-                      <td>
-                        {prereqs.length === 0
-                          ? <span className="meta" style={{ fontSize: 11 }}>None</span>
-                          : (
-                            <span className="meta" style={{ fontSize: 11 }}>
-                              {prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
-                            </span>
+          <>
+            {/* Desktop / tablet table (lg and above) */}
+            <div className="skills-table-wrap">
+              <table className="skills-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Difficulty</th>
+                    <th>Questions</th>
+                    <th>Prerequisites</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((s) => {
+                    const node = graphNodes.find((n) => n.id === s.id)
+                    const prereqs = node?.prerequisites || []
+                    return (
+                      <tr key={s.id}>
+                        <td>
+                          <strong className="skills-name">{s.name}</strong>
+                          {s.description && (
+                            <p className="meta" style={{ fontSize: 11, margin: '2px 0 0' }}>{s.description}</p>
                           )}
-                      </td>
-                      <td>
-                        <div className="skills-row-actions">
-                          <button
-                            type="button"
-                            className="skills-mini-action"
-                            title="BKT parameters"
-                            onClick={() => openBkt(s)}
-                          >
-                            BKT
-                          </button>
-                          {canEdit && (
-                            <button type="button" className="skills-mini-action" onClick={() => openEdit(s)}>
-                              Edit
+                        </td>
+                        <td>{s.category ? <span className="badge neutral">{s.category}</span> : '—'}</td>
+                        <td><DiffBadge level={s.difficulty_level} /></td>
+                        <td>
+                          <span className="skills-question-pill">
+                            {questionCounts[s.id] ?? 0}
+                          </span>
+                        </td>
+                        <td>
+                          {prereqs.length === 0
+                            ? <span className="meta" style={{ fontSize: 11 }}>None</span>
+                            : (
+                              <span className="meta" style={{ fontSize: 11 }}>
+                                {prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <div className="skills-row-actions">
+                            <button
+                              type="button"
+                              className="skills-mini-action"
+                              title="BKT parameters"
+                              onClick={() => openBkt(s)}
+                            >
+                              BKT
                             </button>
-                          )}
-                          {canDelete && (
-                            <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(s)}>
-                              Delete
-                            </button>
-                          )}
+                            {canEdit && (
+                              <button type="button" className="skills-mini-action" onClick={() => openEdit(s)}>
+                                Edit
+                              </button>
+                            )}
+                            {canDelete && (
+                              <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(s)}>
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list (below lg) */}
+            <div className="skills-card-list">
+              {filtered.map((s) => {
+                const node = graphNodes.find((n) => n.id === s.id)
+                const prereqs = node?.prerequisites || []
+                return (
+                  <div className="skills-card" key={s.id}>
+                    <div className="skills-card-top">
+                      <strong className="skills-name">{s.name}</strong>
+                      <DiffBadge level={s.difficulty_level} />
+                    </div>
+
+                    {s.description && (
+                      <p className="meta" style={{ fontSize: 12, margin: '2px 0 0' }}>{s.description}</p>
+                    )}
+
+                    <div className="skills-card-meta">
+                      {s.category && (
+                        <div className="skills-card-meta-row">
+                          <span className="skills-card-meta-label">Category</span>
+                          <span className="badge neutral">{s.category}</span>
                         </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                      )}
+                      <div className="skills-card-meta-row">
+                        <span className="skills-card-meta-label">Questions</span>
+                        <span className="skills-question-pill">{questionCounts[s.id] ?? 0}</span>
+                      </div>
+                      <div className="skills-card-meta-row">
+                        <span className="skills-card-meta-label">Prerequisites</span>
+                        <span className="meta" style={{ fontSize: 12, textAlign: 'right' }}>
+                          {prereqs.length === 0 ? 'None' : prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="skills-card-actions">
+                      <button
+                        type="button"
+                        className="skills-mini-action"
+                        title="BKT parameters"
+                        onClick={() => openBkt(s)}
+                      >
+                        BKT
+                      </button>
+                      {canEdit && (
+                        <button type="button" className="skills-mini-action" onClick={() => openEdit(s)}>
+                          Edit
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(s)}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </>
         )}
       </section>
 
@@ -453,60 +525,71 @@ export default function SkillsPage() {
       {showForm && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal skills-modal" onClick={(e) => e.stopPropagation()}>
-            <p className="skills-modal-kicker">{editId != null ? 'Skill Editor' : 'Skill Builder'}</p>
-            <h3>{editId != null ? 'Edit skill' : 'New skill'}</h3>
-            <p className="skills-modal-subtitle">Define the skill details used across questions, mastery tracking, and prerequisite mapping.</p>
+            <ModalMobileHeader
+              title={editId != null ? 'Edit skill' : 'New skill'}
+              subtitle={editId != null ? 'Skill Editor' : 'Skill Builder'}
+              backLabel="Back to skill list"
+              onBack={() => setShowForm(false)}
+            />
 
-            <div className="field">
-              <label>Name *</label>
-              <input
-                type="text"
-                placeholder="e.g. Fractions, Variables, Ohm's Law"
-                value={form.name}
-                onChange={(e) => setF('name', e.target.value)}
-              />
-            </div>
+            <div className="skills-modal-scroll">
+              <div className="modal-desktop-title">
+                <p className="skills-modal-kicker">{editId != null ? 'Skill Editor' : 'Skill Builder'}</p>
+                <h3>{editId != null ? 'Edit skill' : 'New skill'}</h3>
+              </div>
+              <p className="skills-modal-subtitle">Define the skill details used across questions, mastery tracking, and prerequisite mapping.</p>
 
-            <div className="field">
-              <label>Description</label>
-              <textarea
-                rows={2}
-                placeholder="Short description of what this skill covers"
-                value={form.description}
-                onChange={(e) => setF('description', e.target.value)}
-              />
-            </div>
+              <div className="field">
+                <label>Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Fractions, Variables, Ohm's Law"
+                  value={form.name}
+                  onChange={(e) => setF('name', e.target.value)}
+                />
+              </div>
 
-            <div className="field">
-              <label>Category</label>
-              <input
-                type="text"
-                placeholder="e.g. Mathematics, Physics, Programming"
-                value={form.category}
-                onChange={(e) => setF('category', e.target.value)}
-                list="category-suggestions"
-              />
-              <datalist id="category-suggestions">
-                {categories.map((c) => <option key={c} value={c} />)}
-              </datalist>
-            </div>
+              <div className="field">
+                <label>Description</label>
+                <textarea
+                  rows={2}
+                  placeholder="Short description of what this skill covers"
+                  value={form.description}
+                  onChange={(e) => setF('description', e.target.value)}
+                />
+              </div>
 
-            <div className="field">
-              <label>Difficulty level</label>
-              <select value={form.difficulty_level} onChange={(e) => setF('difficulty_level', e.target.value)}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>{n} — {DIFF_LABELS[n]}</option>
-                ))}
-              </select>
-            </div>
+              <div className="field">
+                <label>Category</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mathematics, Physics, Programming"
+                  value={form.category}
+                  onChange={(e) => setF('category', e.target.value)}
+                  list="category-suggestions"
+                />
+                <datalist id="category-suggestions">
+                  {categories.map((c) => <option key={c} value={c} />)}
+                </datalist>
+              </div>
 
-            {formError && <p className="feedback error">{formError}</p>}
+              <div className="field">
+                <label>Difficulty level</label>
+                <select value={form.difficulty_level} onChange={(e) => setF('difficulty_level', e.target.value)}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>{n} — {DIFF_LABELS[n]}</option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
-                {saving ? 'Saving…' : editId != null ? 'Update' : 'Create'}
-              </button>
-              <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
+              {formError && <p className="feedback error">{formError}</p>}
+
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
+                  {saving ? 'Saving…' : editId != null ? 'Update' : 'Create'}
+                </button>
+                <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>
@@ -515,69 +598,80 @@ export default function SkillsPage() {
       {/* ── BKT parameters modal ── */}
       {bktSkill && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setBktSkill(null)}>
-          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
-            <h3>BKT Parameters — {bktSkill.name}</h3>
-            <p className="meta" style={{ marginBottom: 12 }}>
-              Bayesian Knowledge Tracing parameters control how the model estimates student knowledge.
-            </p>
+          <div className="modal skills-modal skills-modal-bkt" onClick={(e) => e.stopPropagation()}>
+            <ModalMobileHeader
+              title="BKT Parameters"
+              subtitle={bktSkill.name}
+              backLabel="Back to skill list"
+              onBack={() => setBktSkill(null)}
+            />
 
-            {bktLoading ? (
-              <p className="meta">Loading…</p>
-            ) : (
-              <>
-                {(
-                  [
-                    ['p_l0', 'Initial knowledge (P(L₀))', 'Probability student already knows this skill'],
-                    ['p_t', 'Learning rate (P(T))', 'Probability of learning the skill after each attempt'],
-                    ['p_s', 'Slip rate (P(S))', 'Probability of answering incorrectly despite knowing'],
-                    ['p_g', 'Guess rate (P(G))', 'Probability of answering correctly without knowing'],
-                  ] as [keyof BktParams, string, string][]
-                ).map(([key, label, hint]) => (
-                  <div className="field" key={key}>
-                    <label>{label}</label>
-                    <p className="meta" style={{ fontSize: 11, marginBottom: 4 }}>{hint}</p>
-                    <div className="row" style={{ gap: 8 }}>
-                      <input
-                        type="range"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        value={bktParams[key]}
-                        onChange={(e) => setBkt(key, e.target.value)}
-                        style={{ flex: 1 }}
-                      />
-                      <input
-                        type="number"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        value={bktParams[key].toFixed(2)}
-                        onChange={(e) => setBkt(key, e.target.value)}
-                        style={{ width: 70 }}
-                      />
+            <div className="skills-modal-scroll">
+              <div className="modal-desktop-title">
+                <h3>BKT Parameters — {bktSkill.name}</h3>
+              </div>
+              <p className="meta" style={{ marginBottom: 12 }}>
+                Bayesian Knowledge Tracing parameters control how the model estimates student knowledge.
+              </p>
+
+              {bktLoading ? (
+                <p className="meta">Loading…</p>
+              ) : (
+                <>
+                  {(
+                    [
+                      ['p_l0', 'Initial knowledge (P(L₀))', 'Probability student already knows this skill'],
+                      ['p_t', 'Learning rate (P(T))', 'Probability of learning the skill after each attempt'],
+                      ['p_s', 'Slip rate (P(S))', 'Probability of answering incorrectly despite knowing'],
+                      ['p_g', 'Guess rate (P(G))', 'Probability of answering correctly without knowing'],
+                    ] as [keyof BktParams, string, string][]
+                  ).map(([key, label, hint]) => (
+                    <div className="field" key={key}>
+                      <label>{label}</label>
+                      <p className="meta" style={{ fontSize: 11, marginBottom: 4 }}>{hint}</p>
+                      <div className="row" style={{ gap: 8 }}>
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={bktParams[key]}
+                          onChange={(e) => setBkt(key, e.target.value)}
+                          style={{ flex: 1 }}
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={bktParams[key].toFixed(2)}
+                          onChange={(e) => setBkt(key, e.target.value)}
+                          style={{ width: 70 }}
+                        />
+                      </div>
                     </div>
+                  ))}
+
+                  {bktError && <p className="feedback error">{bktError}</p>}
+
+                  <div className="skills-modal-actions">
+                    <button type="button" className="skills-modal-button primary" onClick={saveBkt} disabled={bktSaving}>
+                      {bktSaving ? 'Saving…' : 'Save parameters'}
+                    </button>
+                    <button
+                      type="button"
+                      className="skills-modal-button"
+                      onClick={runFitBkt}
+                      disabled={bktFitting}
+                      title="Auto-fit BKT parameters from interaction history"
+                    >
+                      {bktFitting ? 'Fitting…' : 'Auto-fit from data'}
+                    </button>
+                    <button type="button" className="skills-modal-button" onClick={() => setBktSkill(null)}>Cancel</button>
                   </div>
-                ))}
-
-                {bktError && <p className="feedback error">{bktError}</p>}
-
-                <div className="skills-modal-actions">
-                  <button type="button" className="skills-modal-button primary" onClick={saveBkt} disabled={bktSaving}>
-                    {bktSaving ? 'Saving…' : 'Save parameters'}
-                  </button>
-                  <button
-                    type="button"
-                    className="skills-modal-button"
-                    onClick={runFitBkt}
-                    disabled={bktFitting}
-                    title="Auto-fit BKT parameters from interaction history"
-                  >
-                    {bktFitting ? 'Fitting…' : 'Auto-fit from data'}
-                  </button>
-                  <button type="button" className="skills-modal-button" onClick={() => setBktSkill(null)}>Cancel</button>
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -598,15 +692,21 @@ export default function SkillsPage() {
       {/* ── Delete confirmation ── */}
       {deleteTarget && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
-            <h3>Delete skill?</h3>
-            <p className="meta">
-              "<strong>{deleteTarget.name}</strong>" and all associated questions and interactions will be removed.
-            </p>
-            <p className="meta">This cannot be undone.</p>
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
-              <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <ModalMobileHeader
+              title="Delete skill?"
+              subtitle="This cannot be undone"
+              backLabel="Back to skill list"
+              onBack={() => setDeleteTarget(null)}
+            />
+            <div className="skills-modal-scroll">
+              <p className="meta">
+                "<strong>{deleteTarget.name}</strong>" and all associated questions and interactions will be removed.
+              </p>
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
+                <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>

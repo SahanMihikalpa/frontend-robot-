@@ -4,6 +4,7 @@ import {
   listKnowledgeDocuments, getKnowledgeStats, deleteKnowledgeDocument,
   listSkills,
 } from '../lib/api'
+import ModalMobileHeader from '../components/ModalMobileHeader'
 
 /** Private self-learn course packs are namespaced "sl:{user}:{skill}". */
 function isPrivatePack(subject?: string) {
@@ -41,6 +42,11 @@ export default function KnowledgePage() {
       .then((s) => setSkills(Array.isArray(s) ? s : s?.items || []))
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = deleteTarget ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [deleteTarget])
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
@@ -123,39 +129,54 @@ export default function KnowledgePage() {
               </div>
             </div>
 
-            <label className="knowledge-file-drop">
-              <span>File (PDF, TXT, or MD)</span>
-              <input
-                type="file"
-                accept=".pdf,.txt,.md"
-                onChange={(e) => { setFile(e.target.files?.[0] || null); setUploadMsg('') }}
-              />
-            </label>
+            <div className="knowledge-form-group">
+              <label className="knowledge-form-label">File (PDF, TXT, or MD)</label>
+              <label className="csv-file-drop knowledge-upload-drop">
+                <input
+                  type="file"
+                  accept=".pdf,.txt,.md"
+                  onChange={(e) => { setFile(e.target.files?.[0] || null); setUploadMsg('') }}
+                />
+                <span className="csv-file-drop-icon" aria-hidden="true">↑</span>
+                {file ? (
+                  <span className="csv-file-drop-name">
+                    {file.name}
+                    <em>{(file.size / 1024).toFixed(1)} KB</em>
+                  </span>
+                ) : (
+                  <span className="csv-file-drop-hint">
+                    <strong>Choose a document</strong>
+                    PDF, TXT, or MD — or drop it here
+                  </span>
+                )}
+              </label>
+            </div>
 
-            <div className="field" style={{ marginTop: 12 }}>
-              <label>Skill scope</label>
-              <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+            <div className="knowledge-form-group">
+              <label className="knowledge-form-label" htmlFor="knowledge-skill-scope">Skill scope</label>
+              <select
+                id="knowledge-skill-scope"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              >
                 <option value="general">General — available in every skill session</option>
                 {skills.map((s: any) => (
                   <option key={s.id} value={s.name}>{s.name} — only this skill's sessions</option>
                 ))}
               </select>
-              <p className="meta" style={{ fontSize: 11, marginTop: 4 }}>
+              <p className="knowledge-form-hint">
                 Skill-tagged documents ground the tutor only in that skill's chat sessions.
                 General documents are used everywhere.
               </p>
             </div>
 
-            {file && (
-              <p className="knowledge-file-meta">
-                {file.name} | {(file.size / 1024).toFixed(1)} KB
-              </p>
-            )}
-
-            <button type="submit" className="skills-action primary" disabled={uploading || !file}>
-              {uploading ? 'Uploading...' : 'Upload'}
-            </button>
             {uploadMsg && <p className={`feedback ${uploadOk ? 'success' : 'error'}`}>{uploadMsg}</p>}
+
+            <div className="knowledge-form-footer">
+              <button type="submit" className="skills-action primary" disabled={uploading || !file}>
+                {uploading ? 'Uploading...' : 'Upload document'}
+              </button>
+            </div>
           </form>
 
           <section className="knowledge-panel">
@@ -243,9 +264,13 @@ export default function KnowledgePage() {
           </div>
 
           {results.length === 0 ? (
-            <div className="empty-state">
-              <p>No results yet.</p>
-              <p className="meta">Run a search to see matching chunks.</p>
+            <div className="empty-state knowledge-results-empty">
+              <span className="knowledge-results-empty-icon" aria-hidden="true">⌕</span>
+              <p><strong>No results yet</strong></p>
+              <p className="meta">
+                Ask the library a question and the best-matching
+                chunks will appear here.
+              </p>
             </div>
           ) : (
             <div className="knowledge-result-list">
@@ -267,14 +292,21 @@ export default function KnowledgePage() {
 
       {deleteTarget && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
-            <p className="skills-modal-kicker">Delete Source</p>
-            <h3>Delete document?</h3>
-            <p className="meta">"{deleteTarget}"</p>
-            <p className="meta">All chunks from this document will be removed. This cannot be undone.</p>
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
-              <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <ModalMobileHeader
+              title="Delete document?"
+              subtitle="This cannot be undone"
+              backLabel="Back to knowledge base"
+              onBack={() => setDeleteTarget(null)}
+            />
+            <div className="skills-modal-scroll">
+              <p className="meta">
+                "<strong>{deleteTarget}</strong>" — all chunks from this document will be removed.
+              </p>
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
+                <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>

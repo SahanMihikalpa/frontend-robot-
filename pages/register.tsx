@@ -214,6 +214,9 @@ export default function Register() {
             )}
           </div>
 
+          {/* Role selection temporarily disabled.
+              Keeping the implementation for future re-enablement. */}
+          {/*
           <div
             style={{
               marginTop: 24
@@ -259,6 +262,7 @@ export default function Register() {
               ))}
             </div>
           </div>
+          */}
 
           {error && <p className="form-error">{error}</p>}
 
