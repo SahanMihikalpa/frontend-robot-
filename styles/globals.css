@@ -3425,6 +3425,84 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-align:center;
 }
 
+/* ─── Contact page ─── */
+.contact-main{
+  padding:100px 80px 140px;
+  background:var(--bg);
+}
+.contact-main-inner{
+  max-width:1280px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+  gap:48px;
+  align-items:start;
+}
+.contact-info-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.contact-info-card{
+  padding:28px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:0 1px 2px rgba(27,23,18,.04), 0 16px 34px -26px rgba(27,23,18,.16);
+  transition:transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .28s ease;
+}
+.contact-info-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(232,90,51,.3);
+  box-shadow:0 1px 2px rgba(27,23,18,.05), 0 24px 44px -22px rgba(27,23,18,.18);
+}
+.contact-info-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  margin-bottom:18px;
+  border-radius:11px;
+  background:linear-gradient(150deg, rgba(232,90,51,.18), rgba(232,90,51,.06));
+  color:var(--accent);
+  font-family:var(--font-sans);
+  font-size:14px;
+  font-weight:700;
+}
+.contact-info-card h3{
+  margin:0 0 8px;
+  font-size:16px;
+  font-weight:700;
+  color:var(--text);
+}
+.contact-info-card p{
+  margin:0;
+  color:var(--text-secondary);
+  font-size:14px;
+  line-height:1.7;
+}
+.contact-form-card{
+  padding:48px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:28px;
+  box-shadow:0 1px 2px rgba(27,23,18,.04), 0 24px 48px -28px rgba(27,23,18,.18);
+}
+.contact-form-title{
+  margin:14px 0 0;
+  font-size:clamp(24px, 2.6vw, 30px);
+  letter-spacing:-0.01em;
+  line-height:1.2;
+  color:var(--text);
+}
+.contact-textarea{
+  resize:vertical;
+  min-height:130px;
+  line-height:1.6;
+  font-family:var(--font-sans);
+}
+
 /* ─── Responsive ─── */
 @media(max-width:1470px){
   .nav-toggle{display:flex}
@@ -3521,6 +3599,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .about-feature-grid > .about-feature-cell:nth-last-child(-n+4){border-bottom:1px solid var(--border)}
   .about-feature-grid > .about-feature-cell:nth-last-child(-n+2){border-bottom:none}
   .about-vision{padding:80px 40px}
+  .contact-main{padding:64px 40px 96px}
+  .contact-main-inner{grid-template-columns:1fr;gap:40px}
+  .contact-form-card{padding:36px}
   .auth-split{grid-template-columns:1fr;min-height:auto}
   .auth-left{border-right:none;border-bottom:1px solid rgba(107,107,104,0.12);padding:40px 40px 32px}
   .auth-left-content{padding-left:0}
@@ -3561,6 +3642,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .about-feature-grid > .about-feature-cell{border-right:none !important}
   .about-feature-grid > .about-feature-cell:last-child{border-bottom:none}
   .about-vision{padding:56px 24px}
+  .contact-main{padding:48px 20px 64px}
+  .contact-info-grid{grid-template-columns:1fr}
+  .contact-form-card{padding:28px 24px}
   .auth-left{padding:32px 24px 24px}
   .auth-right{padding:24px 24px 40px}
   .auth-title{font-size:2.4rem}
