@@ -418,7 +418,7 @@ export default function SelfLearn() {
           </div>
         </section>
 
-        <section className="history-panel">
+        <section className="history-panel selflearn-learning-panel">
           <div className="skills-panel-header">
             <div>
               <p className="teacher-eyebrow">In Progress</p>

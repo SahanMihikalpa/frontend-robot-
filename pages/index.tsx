@@ -114,11 +114,16 @@ export default function Home() {
         </div>
       </section>
 
-    <div className="stack" style={{ gap: 32 }}>
+    <div className="stack" style={{ gap: 0 }}>
 
       {/* Role cards */}
       <section className="home-roles-section">
-      <div className="home-roles-inner grid-three">
+      <div className="home-roles-inner">
+      <div className="home-section-header">
+        <p className="home-eyebrow">Choose Your Path</p>
+        <h2 className="editorial-title">Built for every seat in the classroom</h2>
+      </div>
+      <div className="grid-three">
         <div className="card stack home-role-card-outer">
           <div className="home-role-card">
             <div className="home-role-icon home-role-icon-student">S</div>
@@ -204,6 +209,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      </div>
       </section>
 
       {/* Product preview */}
@@ -219,6 +225,7 @@ export default function Home() {
           </p>
         </div>
 
+        <div className="home-preview-mockup-wrap">
         <div className="home-preview-mockup" aria-hidden="true">
           <div className="home-preview-mockup-bar">
             <span />
@@ -247,13 +254,15 @@ export default function Home() {
             </div>
           </div>
         </div>
+        </div>
       </section>
 
       {/* How It Works */}
       <section className="home-how-section">
-        <p className="home-eyebrow" style={{ textAlign: 'center' }}>
-          How It Works
-        </p>
+        <div className="home-section-header">
+          <p className="home-eyebrow">How It Works</p>
+          <h2 className="editorial-title">Three steps to a personalized classroom</h2>
+        </div>
 
         <div className="home-how-grid">
           {/* Step 01 */}
@@ -341,9 +350,50 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Closing CTA */}
+      <section className="home-cta-section">
+        <p className="home-eyebrow">Get Started</p>
+        <h2 className="editorial-title home-cta-title">
+          Start learning the way you learn.
+        </h2>
+        <p className="home-cta-desc">
+          Join as a student, teacher, or admin and put adaptive, AI-driven
+          learning to work in your classroom today.
+        </p>
+        <div className="home-cta-actions">
+          {authed ? (
+            <Link href={dashboardHref} className="btn">
+              Go to my dashboard
+            </Link>
+          ) : (
+            <>
+              <Link href="/register" className="btn">
+                Create account
+              </Link>
+              <Link href="/login" className="btn home-btn-outline">
+                Sign in
+              </Link>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="home-footer">
+        <div className="home-footer-brand">
+          <div className="logo" />
+          ATLAS
+        </div>
+        <nav className="home-footer-links">
+          <Link href="/about">About Us</Link>
+          <Link href="/contact">Contact Us</Link>
+        </nav>
+        <p className="home-footer-copy">© {new Date().getFullYear()} Atlas. All rights reserved.</p>
+      </footer>
     </div>
 
-    
+
     </>
   )
 }
