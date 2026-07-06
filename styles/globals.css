@@ -2,7 +2,11 @@
   --bg:#F8F7F4;
   --surface:#FFFFFF;
   --surface-alt:#F3F1EC;
+  --surface-2:#F5F3EF;
   --card:#FFFFFF;
+
+  --shadow-card:0 1px 2px rgba(27,23,18,.04), 0 16px 36px -22px rgba(27,23,18,.14);
+  --shadow-card-hover:0 1px 2px rgba(27,23,18,.05), 0 20px 40px -16px rgba(27,23,18,.18);
 
   --text:#1A1815;
   --text-secondary:#33302B;
@@ -334,8 +338,8 @@ body{
 .chip.active{border-color:var(--accent);background:var(--accent-dim);color:#7dd3fc}
 
 /* ─── Progress bar ─── */
-.progress{height:10px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden}
-.progress > span{display:block;height:100%;background:linear-gradient(90deg,#0ea5e9,#38bdf8);border-radius:999px;transition:width 0.4s}
+.progress{height:10px;border-radius:999px;background:#E3DAD0;overflow:hidden}
+.progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-tertiary));border-radius:999px;transition:width 0.4s}
 
 /* ─── Forms ─── */
 .form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
@@ -356,20 +360,22 @@ body{
 .field textarea,.field input,.field select{width:100%}
 label{font-size:13px;color:var(--muted)}
 input[type=text],input[type=password],input[type=email],input[type=number],textarea,select{
-  padding:10px 12px;border-radius:8px;
-  border:1px solid rgba(255,255,255,0.06);
-  background:rgba(255,255,255,0.02);
-  color:var(--white);outline:none;
+  padding:11px 13px;border-radius:10px;
+  border:1px solid var(--border-strong);
+  background:#FFFDF9;
+  color:var(--text);outline:none;
   font-size:14px;width:100%;
+  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
 }
 input:focus,
 textarea:focus,
 select:focus{
   outline:none;
-  box-shadow:none;
+  background:var(--surface);
   border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(232,90,51,.12);
 }
-select option{background:var(--ink)}
+select option{background:var(--surface);color:var(--text)}
 
 /* ─────────────────────────────
    Tables
@@ -5005,4 +5011,65 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .selflearn-composer-row{flex-direction:column;align-items:stretch}
   .selflearn-concept-row{flex-direction:column;align-items:flex-start;gap:6px}
   .selflearn-concept-bar{width:100%}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Surface system refinement
+   Level 0: page background (--bg)
+   Level 1: primary panels — white, 20px radius, layered shadow
+   Level 2: nested cards — warm tint, 14px radius
+   Level 3: interactive controls — pills / chips
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Level 1 — unify every content panel with the teacher-panel treatment */
+.skills-panel,
+.questions-filter-panel,
+.questions-panel,
+.knowledge-panel,
+.knowledge-results,
+.admin-panel,
+.tutor-chat-panel,
+.tutor-side-panel,
+.history-panel{
+  border-color:rgba(27,23,18,.06);
+  border-radius:20px;
+  box-shadow:var(--shadow-card);
+}
+
+/* Level 2 — nested cards sit on a warm tint so they read as their own surface */
+.skills-graph-item,
+.question-card,
+.knowledge-doc-card,
+.knowledge-result-card,
+.history-accuracy-block{
+  background:var(--surface-2);
+  border-color:rgba(27,23,18,.07);
+  border-radius:14px;
+}
+
+/* Level 3 — chips / segmented filters become proper pill controls */
+.skills-chip{
+  background:var(--surface);
+  border-radius:999px;
+  font-weight:600;
+  transition:background .2s ease, border-color .2s ease, color .2s ease;
+}
+.skills-chip:hover:not(.active):not(:disabled){
+  color:var(--text);
+  border-color:var(--border-strong);
+  background:var(--surface-2);
+}
+
+/* Tables — tinted header band, subtle zebra, gentle row hover */
+.skills-table th{
+  background:var(--surface-2);
+}
+.skills-table tbody tr{
+  transition:background .15s ease;
+}
+.skills-table tbody tr:nth-child(even) td{
+  background:rgba(27,23,18,.015);
+}
+.skills-table tbody tr:hover td{
+  background:rgba(232,90,51,.035);
 }

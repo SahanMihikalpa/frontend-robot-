@@ -1087,7 +1087,7 @@ export default function LearnPage() {
                     <button key={s.id} type="button"
                       className={`skills-chip ${selectedSkill === s.id ? 'active' : ''}`}
                       onClick={() => handleSkillSelect(s.id)}
-                      style={{ borderRadius: 8, fontSize: 14 }}
+                      style={{ fontSize: 14 }}
                     >
                       {s.name}
                       {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
