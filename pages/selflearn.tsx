@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import {
   slStartSession, slSendMessage, slGetMastery, slGetProgress,
   slGetProviders, slResumeSession, slCreatePack,
+  getAuthToken,
 } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
+
+type VoiceState = 'idle' | 'recording' | 'processing'
 
 // One transcript entry as persisted by the backend (learning_messages).
 type LMsg = {
@@ -81,6 +84,15 @@ export default function SelfLearn() {
   const [files, setFiles] = useState<File[]>([])
   const [packMsg, setPackMsg] = useState('')
   const [lightboxSrc, setLightboxSrc] = useState('')
+
+  const [voiceState, setVoiceState] = useState<VoiceState>('idle')
+  const [voiceStatus, setVoiceStatus] = useState('')
+  const voiceWsRef = useRef<WebSocket | null>(null)
+  const voiceRecorderRef = useRef<MediaRecorder | null>(null)
+  const voiceMicStreamRef = useRef<MediaStream | null>(null)
+  const audioQueueRef = useRef<ArrayBuffer[]>([])
+  const audioPlayingRef = useRef(false)
+  const audioCtxRef = useRef<AudioContext | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -179,6 +191,143 @@ export default function SelfLearn() {
   async function openReport() {
     try { setReport(await slGetMastery(sessionId)) } catch (e) { setError(errDetail(e)) }
   }
+
+  // ── Voice pipeline (mic → STT → tutor turn → TTS) ───────────────────────────
+
+  function wsVoiceUrl(sid: string) {
+    const base = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000')
+      .replace(/^https/, 'wss').replace(/^http/, 'ws').replace(/\/$/, '')
+    return `${base}/api/v1/selflearn/voice/ws/${sid}?token=${getAuthToken()}`
+  }
+
+  function playAudioChunk(b64: string) {
+    const binary = atob(b64)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    audioQueueRef.current.push(bytes.buffer)
+    if (!audioPlayingRef.current) drainAudioQueue()
+  }
+
+  async function drainAudioQueue() {
+    if (audioQueueRef.current.length === 0) { audioPlayingRef.current = false; return }
+    audioPlayingRef.current = true
+    const buf = audioQueueRef.current.shift()!
+    try {
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+        audioCtxRef.current = new AudioContext()
+      }
+      const decoded = await audioCtxRef.current.decodeAudioData(buf.slice(0))
+      const src = audioCtxRef.current.createBufferSource()
+      src.buffer = decoded
+      src.connect(audioCtxRef.current.destination)
+      src.onended = () => drainAudioQueue()
+      src.start()
+    } catch {
+      drainAudioQueue()
+    }
+  }
+
+  async function startVoiceRecording() {
+    if (!sessionId || voiceState !== 'idle' || done) return
+    try {
+      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      voiceMicStreamRef.current = micStream
+
+      const ws = new WebSocket(wsVoiceUrl(sessionId))
+      voiceWsRef.current = ws
+
+      ws.onopen = () => {
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+          ? 'audio/webm;codecs=opus' : 'audio/webm'
+        const recorder = new MediaRecorder(micStream, { mimeType })
+        voiceRecorderRef.current = recorder
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0 && ws.readyState === WebSocket.OPEN) ws.send(e.data)
+        }
+        recorder.start(200)
+        setVoiceState('recording')
+        setVoiceStatus('')
+      }
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data as string)
+          switch (data.event) {
+            case 'status':
+              setVoiceStatus(data.message || '')
+              break
+            case 'transcript':
+              // Show the spoken words as the student's bubble
+              setMessages((p) => [...p, {
+                id: uid(), sender: 'STUDENT',
+                type: pendingCheck ? 'ANSWER' : 'MESSAGE', content: data.text,
+              }])
+              break
+            case 'messages': {
+              // Same payload as slSendMessage — messages[0] is the student echo
+              const incoming: LMsg[] = Array.isArray(data.messages) ? data.messages.slice(1) : []
+              setMessages((p) => [...p, ...incoming])
+              setPendingCheck(data.pending_check || null)
+              if (typeof data.mastery === 'number') setConceptMastery(data.mastery)
+              if (data.level) setLevel(data.level)
+              if (data.completed) setDone(true)
+              break
+            }
+            case 'audio':
+              playAudioChunk(data.audio_base64)
+              break
+            case 'done':
+              setVoiceState('idle')
+              setVoiceStatus('')
+              break
+            case 'error':
+              setVoiceState('idle')
+              setVoiceStatus('')
+              setError(`Voice error (${data.step}): ${data.message}`)
+              break
+            case 'cancelled':
+              setVoiceState('idle')
+              setVoiceStatus('')
+              break
+          }
+        } catch { /* non-JSON frame */ }
+      }
+
+      ws.onerror = () => {
+        setVoiceState('idle')
+        setVoiceStatus('')
+        setError('Voice connection error — check backend')
+      }
+
+      ws.onclose = () => {
+        setVoiceState('idle')
+        setVoiceStatus('')
+      }
+    } catch {
+      setError('Microphone access denied')
+    }
+  }
+
+  function stopVoiceRecording() {
+    voiceRecorderRef.current?.stop()
+    voiceMicStreamRef.current?.getTracks().forEach((t) => t.stop())
+    voiceMicStreamRef.current = null
+    setVoiceState('processing')
+    setVoiceStatus('Processing…')
+    if (voiceWsRef.current?.readyState === WebSocket.OPEN) {
+      voiceWsRef.current.send('STOP')
+    }
+  }
+
+  // Tear the voice connection down when leaving the session view / unmounting
+  useEffect(() => {
+    return () => {
+      try { voiceRecorderRef.current?.stop() } catch { /* already inactive */ }
+      voiceMicStreamRef.current?.getTracks().forEach((t) => t.stop())
+      voiceWsRef.current?.close()
+      audioCtxRef.current?.close().catch(() => {})
+    }
+  }, [])
 
   // ── START VIEW ──────────────────────────────────────────────────────────────
   if (view === 'start') {
@@ -493,11 +642,18 @@ export default function SelfLearn() {
         {/* Always-on chat input: ask anything, or type your answer to a check. */}
         {!done && (
           <div className="selflearn-composer">
-            {pendingCheck && (
+            {pendingCheck && voiceState === 'idle' && (
               <p className="meta selflearn-pending-hint">
                 {pendingCheck.qtype === 'mcq'
-                  ? 'Pick an option above, or type the letter (A/B/C/D).'
+                  ? 'Pick an option above, type the letter (A/B/C/D), or say your answer.'
                   : 'Answer the check above, or keep the conversation going.'}
+              </p>
+            )}
+            {voiceState !== 'idle' && (
+              <p className="meta selflearn-pending-hint">
+                {voiceState === 'recording'
+                  ? '🎙️ Recording… click ⏹ when done'
+                  : `⏳ ${voiceStatus || 'Processing your voice…'}`}
               </p>
             )}
             <div className="selflearn-composer-row">
@@ -506,9 +662,34 @@ export default function SelfLearn() {
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(draft) } }}
                 placeholder={pendingCheck ? 'Type your answer…' : 'Ask a question, or say "go on"…'}
-                disabled={loading}
+                disabled={loading || voiceState !== 'idle'}
               />
-              <button className="btn" onClick={() => send(draft)} disabled={loading || !draft.trim()}>Send</button>
+              {voiceState === 'recording' ? (
+                <button
+                  className="btn"
+                  onClick={stopVoiceRecording}
+                  title="Stop recording"
+                  style={{ color: 'var(--danger)' }}
+                >
+                  ⏹ Stop
+                </button>
+              ) : (
+                <button
+                  className="btn secondary"
+                  onClick={startVoiceRecording}
+                  disabled={loading || voiceState !== 'idle'}
+                  title="Speak to the tutor"
+                >
+                  🎙️
+                </button>
+              )}
+              <button
+                className="btn"
+                onClick={() => send(draft)}
+                disabled={loading || !draft.trim() || voiceState !== 'idle'}
+              >
+                Send
+              </button>
             </div>
           </div>
         )}
