@@ -1658,6 +1658,74 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:rgba(239,68,68,.08);
   border-color:rgba(239,68,68,.22);
 }
+
+/* ─── Mobile skill cards (< lg) ─── */
+.skills-card-list{
+  display:none;
+}
+.skills-card{
+  padding:18px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+}
+.skills-card + .skills-card{
+  margin-top:14px;
+}
+.skills-card-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.skills-card-top .skills-name{
+  flex:1;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.skills-card-meta{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.skills-card-meta-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.skills-card-meta-label{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.skills-card-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+.skills-card-actions .skills-mini-action{
+  flex:1;
+  min-width:88px;
+  min-height:44px;
+  text-align:center;
+}
+
+@media(max-width:768px){
+  .skills-table-wrap{
+    display:none;
+  }
+  .skills-card-list{
+    display:block;
+  }
+}
+
 .modal.skills-modal{
   width:100%;
   max-width:560px;
@@ -1678,6 +1746,29 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .modal-overlay.skills-modal-overlay{
   background:rgba(27,23,18,.42);
   backdrop-filter:blur(6px);
+}
+.skills-modal-back{
+  display:none;
+}
+@media(max-width:768px){
+  .skills-modal-back{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    min-height:44px;
+    margin:16px 20px 0;
+    padding:0 10px;
+    align-self:flex-start;
+    background:transparent;
+    border:none;
+    color:var(--accent);
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .skills-modal-back:hover{
+    color:var(--accent-hover);
+  }
 }
 .modal.skills-modal h3{
   margin:8px 30px 8px;

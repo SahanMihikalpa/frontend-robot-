@@ -370,7 +370,9 @@ export default function SkillsPage() {
             <p className="teacher-eyebrow">Catalogue</p>
             <h3 className="editorial-title">Skill list</h3>
           </div>
-          <span className="skills-count-pill subtle">{filtered.length} shown</span>
+          <span className="skills-count-pill subtle">
+            {filtered.length} {filtered.length === 1 ? 'Skill' : 'Skills'}
+          </span>
         </div>
 
         {loading ? (
@@ -378,74 +380,137 @@ export default function SkillsPage() {
         ) : filtered.length === 0 ? (
           <div className="empty-state"><p>No skills found.</p></div>
         ) : (
-          <div className="skills-table-wrap">
-            <table className="skills-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Difficulty</th>
-                  <th>Questions</th>
-                  <th>Prerequisites</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((s) => {
-                  const node = graphNodes.find((n) => n.id === s.id)
-                  const prereqs = node?.prerequisites || []
-                  return (
-                    <tr key={s.id}>
-                      <td>
-                        <strong className="skills-name">{s.name}</strong>
-                        {s.description && (
-                          <p className="meta" style={{ fontSize: 11, margin: '2px 0 0' }}>{s.description}</p>
-                        )}
-                      </td>
-                      <td>{s.category ? <span className="badge neutral">{s.category}</span> : '—'}</td>
-                      <td><DiffBadge level={s.difficulty_level} /></td>
-                      <td>
-                        <span className="skills-question-pill">
-                          {questionCounts[s.id] ?? 0}
-                        </span>
-                      </td>
-                      <td>
-                        {prereqs.length === 0
-                          ? <span className="meta" style={{ fontSize: 11 }}>None</span>
-                          : (
-                            <span className="meta" style={{ fontSize: 11 }}>
-                              {prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
-                            </span>
+          <>
+            {/* Desktop / tablet table (lg and above) */}
+            <div className="skills-table-wrap">
+              <table className="skills-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Difficulty</th>
+                    <th>Questions</th>
+                    <th>Prerequisites</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((s) => {
+                    const node = graphNodes.find((n) => n.id === s.id)
+                    const prereqs = node?.prerequisites || []
+                    return (
+                      <tr key={s.id}>
+                        <td>
+                          <strong className="skills-name">{s.name}</strong>
+                          {s.description && (
+                            <p className="meta" style={{ fontSize: 11, margin: '2px 0 0' }}>{s.description}</p>
                           )}
-                      </td>
-                      <td>
-                        <div className="skills-row-actions">
-                          <button
-                            type="button"
-                            className="skills-mini-action"
-                            title="BKT parameters"
-                            onClick={() => openBkt(s)}
-                          >
-                            BKT
-                          </button>
-                          {canEdit && (
-                            <button type="button" className="skills-mini-action" onClick={() => openEdit(s)}>
-                              Edit
+                        </td>
+                        <td>{s.category ? <span className="badge neutral">{s.category}</span> : '—'}</td>
+                        <td><DiffBadge level={s.difficulty_level} /></td>
+                        <td>
+                          <span className="skills-question-pill">
+                            {questionCounts[s.id] ?? 0}
+                          </span>
+                        </td>
+                        <td>
+                          {prereqs.length === 0
+                            ? <span className="meta" style={{ fontSize: 11 }}>None</span>
+                            : (
+                              <span className="meta" style={{ fontSize: 11 }}>
+                                {prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <div className="skills-row-actions">
+                            <button
+                              type="button"
+                              className="skills-mini-action"
+                              title="BKT parameters"
+                              onClick={() => openBkt(s)}
+                            >
+                              BKT
                             </button>
-                          )}
-                          {canDelete && (
-                            <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(s)}>
-                              Delete
-                            </button>
-                          )}
+                            {canEdit && (
+                              <button type="button" className="skills-mini-action" onClick={() => openEdit(s)}>
+                                Edit
+                              </button>
+                            )}
+                            {canDelete && (
+                              <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(s)}>
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list (below lg) */}
+            <div className="skills-card-list">
+              {filtered.map((s) => {
+                const node = graphNodes.find((n) => n.id === s.id)
+                const prereqs = node?.prerequisites || []
+                return (
+                  <div className="skills-card" key={s.id}>
+                    <div className="skills-card-top">
+                      <strong className="skills-name">{s.name}</strong>
+                      <DiffBadge level={s.difficulty_level} />
+                    </div>
+
+                    {s.description && (
+                      <p className="meta" style={{ fontSize: 12, margin: '2px 0 0' }}>{s.description}</p>
+                    )}
+
+                    <div className="skills-card-meta">
+                      {s.category && (
+                        <div className="skills-card-meta-row">
+                          <span className="skills-card-meta-label">Category</span>
+                          <span className="badge neutral">{s.category}</span>
                         </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                      )}
+                      <div className="skills-card-meta-row">
+                        <span className="skills-card-meta-label">Questions</span>
+                        <span className="skills-question-pill">{questionCounts[s.id] ?? 0}</span>
+                      </div>
+                      <div className="skills-card-meta-row">
+                        <span className="skills-card-meta-label">Prerequisites</span>
+                        <span className="meta" style={{ fontSize: 12, textAlign: 'right' }}>
+                          {prereqs.length === 0 ? 'None' : prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="skills-card-actions">
+                      <button
+                        type="button"
+                        className="skills-mini-action"
+                        title="BKT parameters"
+                        onClick={() => openBkt(s)}
+                      >
+                        BKT
+                      </button>
+                      {canEdit && (
+                        <button type="button" className="skills-mini-action" onClick={() => openEdit(s)}>
+                          Edit
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button type="button" className="skills-mini-action danger" onClick={() => setDeleteTarget(s)}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </>
         )}
       </section>
 
@@ -453,6 +518,14 @@ export default function SkillsPage() {
       {showForm && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal skills-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="skills-modal-back"
+              aria-label="Back to skill list"
+              onClick={() => setShowForm(false)}
+            >
+              ← Back
+            </button>
             <p className="skills-modal-kicker">{editId != null ? 'Skill Editor' : 'Skill Builder'}</p>
             <h3>{editId != null ? 'Edit skill' : 'New skill'}</h3>
             <p className="skills-modal-subtitle">Define the skill details used across questions, mastery tracking, and prerequisite mapping.</p>
@@ -516,6 +589,14 @@ export default function SkillsPage() {
       {bktSkill && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setBktSkill(null)}>
           <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <button
+              type="button"
+              className="skills-modal-back"
+              aria-label="Back to skill list"
+              onClick={() => setBktSkill(null)}
+            >
+              ← Back
+            </button>
             <h3>BKT Parameters — {bktSkill.name}</h3>
             <p className="meta" style={{ marginBottom: 12 }}>
               Bayesian Knowledge Tracing parameters control how the model estimates student knowledge.
