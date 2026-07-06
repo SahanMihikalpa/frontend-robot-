@@ -25,9 +25,10 @@ export default function App({ Component, pageProps }: AppProps) {
       const pathname = router.pathname
 
       if (isPublicRoute(pathname)) {
-        // Redirect already-authenticated users away from login/register
+        // Redirect already-authenticated users away from login/register.
+        // Other public pages (/, /about, /contact) stay accessible to everyone.
         const token = getAuthTokenFromStorage()
-        if (token && pathname !== '/') {
+        if (token && (pathname === '/login' || pathname === '/register')) {
           let me = getStoredUser()
           if (!me?.role) {
             try {
