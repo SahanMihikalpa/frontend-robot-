@@ -5,6 +5,36 @@ import { getCurrentUser, loginUser, registerUser } from '../lib/api'
 import { getRoleHome, setStoredUser } from '../lib/session'
 import Image from 'next/image'
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,30}$/
+
+type FieldErrors = Partial<Record<'full_name' | 'username' | 'email' | 'password', string>>
+
+function validateRegister(form: { full_name: string; username: string; email: string; password: string }): FieldErrors {
+  const errs: FieldErrors = {}
+  if (form.full_name.trim().length < 2) {
+    errs.full_name = 'Please enter your full name (at least 2 characters).'
+  }
+  if (!form.username.trim()) {
+    errs.username = 'Username is required.'
+  } else if (!USERNAME_RE.test(form.username.trim())) {
+    errs.username = '3–30 characters; letters, numbers, and underscores only.'
+  }
+  if (!form.email.trim()) {
+    errs.email = 'Email is required.'
+  } else if (!EMAIL_RE.test(form.email.trim())) {
+    errs.email = 'Enter a valid email address, e.g. name@example.com.'
+  }
+  if (!form.password) {
+    errs.password = 'Password is required.'
+  } else if (form.password.length < 8) {
+    errs.password = 'Password must be at least 8 characters.'
+  } else if (!/[a-zA-Z]/.test(form.password) || !/\d/.test(form.password)) {
+    errs.password = 'Password must contain at least one letter and one number.'
+  }
+  return errs
+}
+
 export default function Register() {
   const router = useRouter()
   const [form, setForm] = useState({
@@ -16,26 +46,38 @@ export default function Register() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [submitted, setSubmitted] = useState(false)
 
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
+    setForm((prev) => {
+      const next = { ...prev, [key]: value }
+      // Live re-validation once the user has attempted a submit
+      if (submitted) setFieldErrors(validateRegister(next))
+      return next
+    })
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
+    setSubmitted(true)
     setError('')
 
+    const errs = validateRegister(form)
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
+
+    setLoading(true)
     try {
       await registerUser({
-        full_name: form.full_name,
-        username: form.username,
-        email: form.email,
+        full_name: form.full_name.trim(),
+        username: form.username.trim(),
+        email: form.email.trim(),
         password: form.password,
         role: form.role,
       })
 
-      await loginUser(form.username, form.password)
+      await loginUser(form.username.trim(), form.password)
       const me = await getCurrentUser()
       setStoredUser(me)
       router.push(getRoleHome(me?.role))
@@ -106,7 +148,7 @@ export default function Register() {
         <h2 className="editorial-title auth-heading" style={{ marginBottom: 30 }}>
           Begin your learning journey.
         </h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="form-row">
             <label className="form-label" htmlFor="register-full-name">Full name</label>
             <input
@@ -115,8 +157,10 @@ export default function Register() {
               type="text"
               value={form.full_name}
               onChange={(e) => update('full_name', e.target.value)}
+              aria-invalid={!!fieldErrors.full_name}
               required
             />
+            {fieldErrors.full_name && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.full_name}</p>}
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
@@ -127,8 +171,11 @@ export default function Register() {
               type="text"
               value={form.username}
               onChange={(e) => update('username', e.target.value)}
+              aria-invalid={!!fieldErrors.username}
+              autoComplete="username"
               required
             />
+            {fieldErrors.username && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.username}</p>}
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
@@ -139,8 +186,11 @@ export default function Register() {
               type="email"
               value={form.email}
               onChange={(e) => update('email', e.target.value)}
+              aria-invalid={!!fieldErrors.email}
+              autoComplete="email"
               required
             />
+            {fieldErrors.email && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.email}</p>}
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
@@ -151,8 +201,17 @@ export default function Register() {
               type="password"
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
+              aria-invalid={!!fieldErrors.password}
+              autoComplete="new-password"
               required
             />
+            {fieldErrors.password ? (
+              <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.password}</p>
+            ) : (
+              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                At least 8 characters, with a letter and a number.
+              </p>
+            )}
           </div>
 
           {/* Role selection temporarily disabled.

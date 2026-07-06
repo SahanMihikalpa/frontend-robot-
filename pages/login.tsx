@@ -5,19 +5,46 @@ import { getCurrentUser, loginUser } from '../lib/api'
 import { getRoleHome, setStoredUser } from '../lib/session'
 import Image from 'next/image'
 
+type LoginErrors = Partial<Record<'username' | 'password', string>>
+
+function validateLogin(username: string, password: string): LoginErrors {
+  const errs: LoginErrors = {}
+  if (!username.trim()) errs.username = 'Please enter your username.'
+  if (!password) errs.password = 'Please enter your password.'
+  return errs
+}
+
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<LoginErrors>({})
+  const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
+
+  function onUsername(v: string) {
+    setUsername(v)
+    if (submitted) setFieldErrors(validateLogin(v, password))
+  }
+
+  function onPassword(v: string) {
+    setPassword(v)
+    if (submitted) setFieldErrors(validateLogin(username, v))
+  }
 
   async function handleSubmit(e: any) {
     e.preventDefault()
+    setSubmitted(true)
     setError('')
+
+    const errs = validateLogin(username, password)
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
+
     setLoading(true)
     try {
-      await loginUser(username, password)
+      await loginUser(username.trim(), password)
       const me = await getCurrentUser()
       setStoredUser(me)
       router.push(getRoleHome(me?.role))
@@ -90,9 +117,10 @@ export default function Login() {
           Continue your session.
         </h2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="form-row">
             <label
+              htmlFor="login-username"
               style={{
                 letterSpacing: '.25em',
                 textTransform: 'uppercase',
@@ -103,13 +131,16 @@ export default function Login() {
               Username
             </label>
             <input
-              id="login-email"
+              id="login-username"
               className="editorial-input"
               type="text"
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={e => onUsername(e.target.value)}
+              aria-invalid={!!fieldErrors.username}
+              autoComplete="username"
               required
             />
+            {fieldErrors.username && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.username}</p>}
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
@@ -121,9 +152,12 @@ export default function Login() {
               className="editorial-input"
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={e => onPassword(e.target.value)}
+              aria-invalid={!!fieldErrors.password}
+              autoComplete="current-password"
               required
             />
+            {fieldErrors.password && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.password}</p>}
           </div>
 
           {error && <p className="form-error">{error}</p>}
