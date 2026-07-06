@@ -5,6 +5,7 @@ import {
 } from '../lib/api'
 import { getStoredUser } from '../lib/session'
 import CsvImportModal from '../components/CsvImportModal'
+import ModalMobileHeader from '../components/ModalMobileHeader'
 
 type Question = {
   id: number
@@ -68,6 +69,12 @@ export default function QuestionsPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    const anyModalOpen = showForm || !!deleteTarget
+    document.body.style.overflow = anyModalOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [showForm, deleteTarget])
 
   const filtered = useMemo(() => {
     if (selectedSkill === 'all') return questions
@@ -267,50 +274,66 @@ export default function QuestionsPage() {
       {showForm && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal skills-modal questions-modal" onClick={(e) => e.stopPropagation()}>
-            <p className="skills-modal-kicker">{editId != null ? 'Question Editor' : 'Question Builder'}</p>
-            <h3>{editId != null ? 'Edit question' : 'New question'}</h3>
-            <p className="skills-modal-subtitle">Write a question, connect it to a skill, and define the answer set used during practice.</p>
+            <ModalMobileHeader
+              title={editId != null ? 'Edit question' : 'New question'}
+              subtitle={editId != null ? 'Question Editor' : 'Question Builder'}
+              backLabel="Back to question list"
+              onBack={() => setShowForm(false)}
+            />
 
-            <div className="questions-modal-grid">
-              <div className="field">
-                <label>Skill *</label>
-                <select value={form.skill_id} onChange={(e) => setF('skill_id', e.target.value)}>
-                  <option value="">Select a skill</option>
-                  {skills.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+            <div className="skills-modal-scroll">
+              <p className="skills-modal-subtitle">Write a question, connect it to a skill, and define the answer set used during practice.</p>
+
+              <p className="questions-section-label">Question details</p>
+              <div className="questions-modal-grid questions-modal-grid-three">
+                <div className="field">
+                  <label>Skill *</label>
+                  <select value={form.skill_id} onChange={(e) => setF('skill_id', e.target.value)}>
+                    <option value="">Select a skill</option>
+                    {skills.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label>Question type</label>
+                  <select value={form.question_type} onChange={(e) => handleTypeChange(e.target.value)}>
+                    <option value="multiple_choice">Multiple choice</option>
+                    <option value="true_false">True / False</option>
+                    {/* <option value="open">Open</option> */}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label>Difficulty (1-5)</label>
+                  <input type="number" min={1} max={5} value={form.difficulty} onChange={(e) => setF('difficulty', e.target.value)} />
+                </div>
               </div>
 
+              <p className="questions-section-label">Question</p>
               <div className="field">
-                <label>Question type</label>
-                <select value={form.question_type} onChange={(e) => handleTypeChange(e.target.value)}>
-                  <option value="multiple_choice">Multiple choice</option>
-                  <option value="true_false">True / False</option>
-                  {/* <option value="open">Open</option> */}
-                </select>
+                <label>Question text *</label>
+                <textarea rows={3} value={form.question_text} onChange={(e) => setF('question_text', e.target.value)} />
               </div>
-            </div>
 
-            <div className="field">
-              <label>Question text *</label>
-              <textarea rows={3} value={form.question_text} onChange={(e) => setF('question_text', e.target.value)} />
-            </div>
-
-            {form.question_type === 'multiple_choice' && (
-              <div className="questions-options-grid">
-                {(['A', 'B', 'C', 'D'] as const).map((letter) => (
-                  <div className="field" key={letter}>
-                    <label>Option {letter}</label>
-                    <input
-                      type="text"
-                      value={form[`opt${letter}` as keyof typeof form]}
-                      onChange={(e) => setF(`opt${letter}` as keyof typeof BLANK_FORM, e.target.value)}
-                    />
+              {form.question_type === 'multiple_choice' && (
+                <>
+                  <p className="questions-section-label">Answer options</p>
+                  <div className="questions-options-grid">
+                    {(['A', 'B', 'C', 'D'] as const).map((letter) => (
+                      <div className="field" key={letter}>
+                        <label>Option {letter}</label>
+                        <input
+                          type="text"
+                          value={form[`opt${letter}` as keyof typeof form]}
+                          onChange={(e) => setF(`opt${letter}` as keyof typeof BLANK_FORM, e.target.value)}
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                </>
+              )}
 
-            <div className="questions-modal-grid">
+              <p className="questions-section-label">Correct answer</p>
               <div className="field">
                 <label>Correct answer</label>
                 {form.question_type === 'true_false' ? (
@@ -325,19 +348,14 @@ export default function QuestionsPage() {
                 )}
               </div>
 
-              <div className="field">
-                <label>Difficulty (1-5)</label>
-                <input type="number" min={1} max={5} value={form.difficulty} onChange={(e) => setF('difficulty', e.target.value)} />
+              {error && <p className="feedback error">{error}</p>}
+
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
+                  {saving ? 'Saving...' : editId != null ? 'Update' : 'Create'}
+                </button>
+                <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
               </div>
-            </div>
-
-            {error && <p className="feedback error">{error}</p>}
-
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
-                {saving ? 'Saving...' : editId != null ? 'Update' : 'Create'}
-              </button>
-              <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
             </div>
           </div>
         </div>
@@ -357,14 +375,19 @@ export default function QuestionsPage() {
 
       {deleteTarget && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
-            <p className="skills-modal-kicker">Delete Question</p>
-            <h3>Delete question?</h3>
-            <p className="meta">"{deleteTarget.question_text}"</p>
-            <p className="meta">This cannot be undone.</p>
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
-              <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <ModalMobileHeader
+              title="Delete question?"
+              subtitle="This cannot be undone"
+              backLabel="Back to question list"
+              onBack={() => setDeleteTarget(null)}
+            />
+            <div className="skills-modal-scroll">
+              <p className="meta">"{deleteTarget.question_text}"</p>
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
+                <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>

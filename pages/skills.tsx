@@ -7,6 +7,7 @@ import {
 } from '../lib/api'
 import { getStoredUser } from '../lib/session'
 import CsvImportModal from '../components/CsvImportModal'
+import ModalMobileHeader from '../components/ModalMobileHeader'
 
 type Skill = {
   id: number
@@ -116,6 +117,12 @@ export default function SkillsPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    const anyModalOpen = showForm || !!bktSkill
+    document.body.style.overflow = anyModalOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [showForm, bktSkill])
 
   const categories = useMemo(() => {
     const cats = new Set(skills.map((s) => s.category).filter(Boolean) as string[])
@@ -518,68 +525,71 @@ export default function SkillsPage() {
       {showForm && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal skills-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="skills-modal-back"
-              aria-label="Back to skill list"
-              onClick={() => setShowForm(false)}
-            >
-              ← Back
-            </button>
-            <p className="skills-modal-kicker">{editId != null ? 'Skill Editor' : 'Skill Builder'}</p>
-            <h3>{editId != null ? 'Edit skill' : 'New skill'}</h3>
-            <p className="skills-modal-subtitle">Define the skill details used across questions, mastery tracking, and prerequisite mapping.</p>
+            <ModalMobileHeader
+              title={editId != null ? 'Edit skill' : 'New skill'}
+              subtitle={editId != null ? 'Skill Editor' : 'Skill Builder'}
+              backLabel="Back to skill list"
+              onBack={() => setShowForm(false)}
+            />
 
-            <div className="field">
-              <label>Name *</label>
-              <input
-                type="text"
-                placeholder="e.g. Fractions, Variables, Ohm's Law"
-                value={form.name}
-                onChange={(e) => setF('name', e.target.value)}
-              />
-            </div>
+            <div className="skills-modal-scroll">
+              <div className="modal-desktop-title">
+                <p className="skills-modal-kicker">{editId != null ? 'Skill Editor' : 'Skill Builder'}</p>
+                <h3>{editId != null ? 'Edit skill' : 'New skill'}</h3>
+              </div>
+              <p className="skills-modal-subtitle">Define the skill details used across questions, mastery tracking, and prerequisite mapping.</p>
 
-            <div className="field">
-              <label>Description</label>
-              <textarea
-                rows={2}
-                placeholder="Short description of what this skill covers"
-                value={form.description}
-                onChange={(e) => setF('description', e.target.value)}
-              />
-            </div>
+              <div className="field">
+                <label>Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Fractions, Variables, Ohm's Law"
+                  value={form.name}
+                  onChange={(e) => setF('name', e.target.value)}
+                />
+              </div>
 
-            <div className="field">
-              <label>Category</label>
-              <input
-                type="text"
-                placeholder="e.g. Mathematics, Physics, Programming"
-                value={form.category}
-                onChange={(e) => setF('category', e.target.value)}
-                list="category-suggestions"
-              />
-              <datalist id="category-suggestions">
-                {categories.map((c) => <option key={c} value={c} />)}
-              </datalist>
-            </div>
+              <div className="field">
+                <label>Description</label>
+                <textarea
+                  rows={2}
+                  placeholder="Short description of what this skill covers"
+                  value={form.description}
+                  onChange={(e) => setF('description', e.target.value)}
+                />
+              </div>
 
-            <div className="field">
-              <label>Difficulty level</label>
-              <select value={form.difficulty_level} onChange={(e) => setF('difficulty_level', e.target.value)}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>{n} — {DIFF_LABELS[n]}</option>
-                ))}
-              </select>
-            </div>
+              <div className="field">
+                <label>Category</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mathematics, Physics, Programming"
+                  value={form.category}
+                  onChange={(e) => setF('category', e.target.value)}
+                  list="category-suggestions"
+                />
+                <datalist id="category-suggestions">
+                  {categories.map((c) => <option key={c} value={c} />)}
+                </datalist>
+              </div>
 
-            {formError && <p className="feedback error">{formError}</p>}
+              <div className="field">
+                <label>Difficulty level</label>
+                <select value={form.difficulty_level} onChange={(e) => setF('difficulty_level', e.target.value)}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>{n} — {DIFF_LABELS[n]}</option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
-                {saving ? 'Saving…' : editId != null ? 'Update' : 'Create'}
-              </button>
-              <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
+              {formError && <p className="feedback error">{formError}</p>}
+
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button primary" onClick={saveForm} disabled={saving}>
+                  {saving ? 'Saving…' : editId != null ? 'Update' : 'Create'}
+                </button>
+                <button type="button" className="skills-modal-button" onClick={() => setShowForm(false)}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>
@@ -588,77 +598,80 @@ export default function SkillsPage() {
       {/* ── BKT parameters modal ── */}
       {bktSkill && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setBktSkill(null)}>
-          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
-            <button
-              type="button"
-              className="skills-modal-back"
-              aria-label="Back to skill list"
-              onClick={() => setBktSkill(null)}
-            >
-              ← Back
-            </button>
-            <h3>BKT Parameters — {bktSkill.name}</h3>
-            <p className="meta" style={{ marginBottom: 12 }}>
-              Bayesian Knowledge Tracing parameters control how the model estimates student knowledge.
-            </p>
+          <div className="modal skills-modal skills-modal-bkt" onClick={(e) => e.stopPropagation()}>
+            <ModalMobileHeader
+              title="BKT Parameters"
+              subtitle={bktSkill.name}
+              backLabel="Back to skill list"
+              onBack={() => setBktSkill(null)}
+            />
 
-            {bktLoading ? (
-              <p className="meta">Loading…</p>
-            ) : (
-              <>
-                {(
-                  [
-                    ['p_l0', 'Initial knowledge (P(L₀))', 'Probability student already knows this skill'],
-                    ['p_t', 'Learning rate (P(T))', 'Probability of learning the skill after each attempt'],
-                    ['p_s', 'Slip rate (P(S))', 'Probability of answering incorrectly despite knowing'],
-                    ['p_g', 'Guess rate (P(G))', 'Probability of answering correctly without knowing'],
-                  ] as [keyof BktParams, string, string][]
-                ).map(([key, label, hint]) => (
-                  <div className="field" key={key}>
-                    <label>{label}</label>
-                    <p className="meta" style={{ fontSize: 11, marginBottom: 4 }}>{hint}</p>
-                    <div className="row" style={{ gap: 8 }}>
-                      <input
-                        type="range"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        value={bktParams[key]}
-                        onChange={(e) => setBkt(key, e.target.value)}
-                        style={{ flex: 1 }}
-                      />
-                      <input
-                        type="number"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        value={bktParams[key].toFixed(2)}
-                        onChange={(e) => setBkt(key, e.target.value)}
-                        style={{ width: 70 }}
-                      />
+            <div className="skills-modal-scroll">
+              <div className="modal-desktop-title">
+                <h3>BKT Parameters — {bktSkill.name}</h3>
+              </div>
+              <p className="meta" style={{ marginBottom: 12 }}>
+                Bayesian Knowledge Tracing parameters control how the model estimates student knowledge.
+              </p>
+
+              {bktLoading ? (
+                <p className="meta">Loading…</p>
+              ) : (
+                <>
+                  {(
+                    [
+                      ['p_l0', 'Initial knowledge (P(L₀))', 'Probability student already knows this skill'],
+                      ['p_t', 'Learning rate (P(T))', 'Probability of learning the skill after each attempt'],
+                      ['p_s', 'Slip rate (P(S))', 'Probability of answering incorrectly despite knowing'],
+                      ['p_g', 'Guess rate (P(G))', 'Probability of answering correctly without knowing'],
+                    ] as [keyof BktParams, string, string][]
+                  ).map(([key, label, hint]) => (
+                    <div className="field" key={key}>
+                      <label>{label}</label>
+                      <p className="meta" style={{ fontSize: 11, marginBottom: 4 }}>{hint}</p>
+                      <div className="row" style={{ gap: 8 }}>
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={bktParams[key]}
+                          onChange={(e) => setBkt(key, e.target.value)}
+                          style={{ flex: 1 }}
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={bktParams[key].toFixed(2)}
+                          onChange={(e) => setBkt(key, e.target.value)}
+                          style={{ width: 70 }}
+                        />
+                      </div>
                     </div>
+                  ))}
+
+                  {bktError && <p className="feedback error">{bktError}</p>}
+
+                  <div className="skills-modal-actions">
+                    <button type="button" className="skills-modal-button primary" onClick={saveBkt} disabled={bktSaving}>
+                      {bktSaving ? 'Saving…' : 'Save parameters'}
+                    </button>
+                    <button
+                      type="button"
+                      className="skills-modal-button"
+                      onClick={runFitBkt}
+                      disabled={bktFitting}
+                      title="Auto-fit BKT parameters from interaction history"
+                    >
+                      {bktFitting ? 'Fitting…' : 'Auto-fit from data'}
+                    </button>
+                    <button type="button" className="skills-modal-button" onClick={() => setBktSkill(null)}>Cancel</button>
                   </div>
-                ))}
-
-                {bktError && <p className="feedback error">{bktError}</p>}
-
-                <div className="skills-modal-actions">
-                  <button type="button" className="skills-modal-button primary" onClick={saveBkt} disabled={bktSaving}>
-                    {bktSaving ? 'Saving…' : 'Save parameters'}
-                  </button>
-                  <button
-                    type="button"
-                    className="skills-modal-button"
-                    onClick={runFitBkt}
-                    disabled={bktFitting}
-                    title="Auto-fit BKT parameters from interaction history"
-                  >
-                    {bktFitting ? 'Fitting…' : 'Auto-fit from data'}
-                  </button>
-                  <button type="button" className="skills-modal-button" onClick={() => setBktSkill(null)}>Cancel</button>
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -679,15 +692,21 @@ export default function SkillsPage() {
       {/* ── Delete confirmation ── */}
       {deleteTarget && (
         <div className="modal-overlay skills-modal-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
-            <h3>Delete skill?</h3>
-            <p className="meta">
-              "<strong>{deleteTarget.name}</strong>" and all associated questions and interactions will be removed.
-            </p>
-            <p className="meta">This cannot be undone.</p>
-            <div className="skills-modal-actions">
-              <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
-              <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+          <div className="modal skills-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <ModalMobileHeader
+              title="Delete skill?"
+              subtitle="This cannot be undone"
+              backLabel="Back to skill list"
+              onBack={() => setDeleteTarget(null)}
+            />
+            <div className="skills-modal-scroll">
+              <p className="meta">
+                "<strong>{deleteTarget.name}</strong>" and all associated questions and interactions will be removed.
+              </p>
+              <div className="skills-modal-actions">
+                <button type="button" className="skills-modal-button danger" onClick={confirmDelete}>Yes, delete</button>
+                <button type="button" className="skills-modal-button" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>

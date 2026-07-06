@@ -1730,16 +1730,20 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   width:100%;
   max-width:560px;
   padding:0;
-  gap:18px;
+  gap:0;
   overflow:hidden;
   background:#FBF7F1;
   border:1px solid #E3D5C9;
   border-radius:10px;
   box-shadow:0 28px 80px rgba(27,23,18,.28);
 }
+.skills-modal-bkt{
+  max-width:420px;
+}
 .modal.skills-modal::before{
   content:"";
   display:block;
+  flex-shrink:0;
   height:10px;
   background:linear-gradient(90deg,var(--accent),var(--accent-tertiary));
 }
@@ -1747,30 +1751,80 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:rgba(27,23,18,.42);
   backdrop-filter:blur(6px);
 }
-.skills-modal-back{
+
+/* Scrollable body — keeps the header fixed while content scrolls on any
+   viewport where the form is taller than the dialog's max-height. */
+.skills-modal-scroll{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding-top:18px;
+  padding-bottom:12px;
+}
+
+/* Mobile page-style header (hidden on desktop; the kicker + h3 above
+   serve as the title there instead). */
+.modal-mobile-header{
   display:none;
 }
+.modal-desktop-title{
+  display:contents;
+}
 @media(max-width:768px){
-  .skills-modal-back{
+  .modal-mobile-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-shrink:0;
+    padding:14px 16px;
+    border-bottom:1px solid var(--border);
+  }
+  .modal-mobile-back{
     display:inline-flex;
     align-items:center;
-    gap:6px;
-    min-height:44px;
-    margin:16px 20px 0;
-    padding:0 10px;
-    align-self:flex-start;
-    background:transparent;
-    border:none;
+    justify-content:center;
+    width:44px;
+    height:44px;
+    flex-shrink:0;
+    border-radius:12px;
+    background:rgba(232,90,51,.08);
+    border:1px solid rgba(232,90,51,.2);
     color:var(--accent);
-    font-size:14px;
-    font-weight:700;
     cursor:pointer;
   }
-  .skills-modal-back:hover{
-    color:var(--accent-hover);
+  .modal-mobile-back:hover{
+    background:rgba(232,90,51,.14);
+  }
+  .modal-mobile-header-text{
+    min-width:0;
+  }
+  .modal-mobile-header-text h3{
+    margin:0;
+    font-size:17px;
+    font-weight:700;
+    line-height:1.3;
+    color:var(--text);
+    overflow-wrap:anywhere;
+  }
+  .modal-mobile-header-text p{
+    margin:2px 0 0;
+    font-size:12.5px;
+    color:var(--muted);
+    overflow-wrap:anywhere;
+  }
+  .modal-desktop-title{
+    display:none;
+  }
+  .skills-modal-scroll{
+    padding-top:16px;
   }
 }
-.modal.skills-modal h3{
+.modal-desktop-title h3{
   margin:8px 30px 8px;
   color:var(--text);
   font-family:var(--font-sans);
@@ -1793,7 +1847,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   font-size:14px;
   line-height:1.65;
 }
-.modal.skills-modal > .meta{
+.skills-modal-scroll > .meta{
   margin-left:30px !important;
   margin-right:30px !important;
   color:var(--muted);
@@ -1884,6 +1938,146 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   opacity:.55;
   cursor:not-allowed;
 }
+
+/* Desktop-only refinement for the Skill Editor / BKT Parameters dialogs.
+   Scoped to min-width so the polished mobile layout above is untouched. */
+@media(min-width:769px){
+  .modal.skills-modal{
+    max-width:640px;
+    border-radius:16px;
+  }
+  .skills-modal-bkt{
+    max-width:560px;
+  }
+  .modal.skills-modal::before{
+    height:6px;
+  }
+
+  /* The shared dialog header (same component as mobile) becomes the
+     desktop header bar: back arrow + title + context subtitle. */
+  .modal-mobile-header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-shrink:0;
+    padding:14px 28px;
+    background:#FFFDF9;
+    border-bottom:1px solid rgba(27,23,18,.08);
+  }
+  .modal-mobile-back{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:36px;
+    height:36px;
+    flex-shrink:0;
+    border-radius:10px;
+    background:transparent;
+    border:1px solid var(--border-strong);
+    color:var(--muted);
+    cursor:pointer;
+    transition:color .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .modal-mobile-back:hover{
+    color:var(--accent);
+    border-color:rgba(232,90,51,.4);
+    background:rgba(232,90,51,.06);
+  }
+  .modal-mobile-header-text{
+    min-width:0;
+  }
+  .modal-mobile-header-text h3{
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    line-height:1.25;
+    color:var(--text);
+  }
+  .modal-mobile-header-text p{
+    margin:2px 0 0;
+    font-size:12.5px;
+    color:var(--muted);
+  }
+
+  /* The old in-body title is replaced by the header above. */
+  .modal-desktop-title{
+    display:none;
+  }
+
+  .skills-modal-scroll{
+    gap:14px;
+    padding:18px 0 16px;
+  }
+  .skills-modal-subtitle{
+    margin:0 28px 2px;
+    max-width:none;
+  }
+  .skills-modal-scroll > .meta{
+    margin:0 28px 2px !important;
+  }
+
+  .modal.skills-modal .field{
+    margin:0 28px;
+    padding:14px 16px;
+    background:#FFFDF9;
+    border:1px solid rgba(27,23,18,.08);
+    border-radius:12px;
+    box-shadow:0 1px 2px rgba(27,23,18,.03);
+  }
+  .modal.skills-modal .field label{
+    font-size:11px;
+    letter-spacing:.14em;
+  }
+  .modal.skills-modal .field input,
+  .modal.skills-modal .field select{
+    min-height:42px;
+    padding:10px 12px !important;
+  }
+  .modal.skills-modal .field textarea{
+    min-height:84px;
+  }
+  .modal.skills-modal .field .row{
+    align-items:center;
+    gap:14px !important;
+  }
+  .modal.skills-modal .field input[type=number]{
+    text-align:center;
+  }
+  .modal.skills-modal .field input[type=range]{
+    min-height:0;
+    padding:0 !important;
+  }
+
+  .skills-modal-actions{
+    margin:2px 28px 0;
+    padding:14px 0 2px;
+    border-top:1px solid rgba(27,23,18,.08);
+    justify-content:flex-end;
+  }
+  .skills-modal-button{
+    min-height:40px;
+  }
+  .skills-modal-button.primary{
+    order:3;
+    padding:10px 24px;
+  }
+  .skills-modal-actions .skills-modal-button:last-child:not(.primary){
+    order:2;
+    background:transparent;
+    border-color:transparent;
+    box-shadow:none;
+    color:var(--muted);
+  }
+  .skills-modal-actions .skills-modal-button:last-child:not(.primary):hover{
+    background:rgba(27,23,18,.05);
+    color:var(--text);
+  }
+  .skills-modal-actions .skills-modal-button:not(.primary):not(:last-child){
+    order:1;
+  }
+}
+
 .questions-page{
   display:flex;
   flex-direction:column;
@@ -2016,7 +2210,33 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .questions-modal-grid .field,
 .questions-options-grid .field{
-  margin:0;
+  margin:0 !important;
+}
+.questions-section-label{
+  margin:8px 30px -6px;
+  color:var(--accent);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+@media(min-width:769px){
+  .questions-modal-grid,
+  .questions-options-grid{
+    gap:12px;
+    margin:0 28px;
+  }
+  .questions-modal-grid-three{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .questions-section-label{
+    margin:10px 28px -4px;
+  }
+}
+@media(max-width:768px){
+  .questions-section-label{
+    margin:8px 22px -8px;
+  }
 }
 .knowledge-page{
   display:flex;
