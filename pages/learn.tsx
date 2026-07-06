@@ -203,46 +203,33 @@ function QuestionPanel({
           <>
             <div>
               <p className="teacher-eyebrow" style={{ marginBottom: 10 }}>Practice Question</p>
-              <p style={{ fontSize: 16, lineHeight: 1.7, margin: 0, fontWeight: 500, color: 'var(--text)' }}>
+              <p style={{ fontSize: 17, lineHeight: 1.65, margin: 0, fontWeight: 600, color: 'var(--text)' }}>
                 {question.content}
               </p>
             </div>
 
             {question.options && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {Object.entries(question.options).map(([k, v]) => {
-                  let borderColor = 'var(--border)'
-                  let bg = 'var(--surface)'
-                  let color = 'var(--text)'
-
+                  let stateClass = ''
                   if (answered && k === question.selectedAnswer) {
-                    if (answerCorrect === true) {
-                      borderColor = 'var(--success)'; bg = 'rgba(22,163,74,0.08)'; color = 'var(--success)'
-                    } else if (answerCorrect === false) {
-                      borderColor = 'var(--danger)'; bg = 'rgba(239,68,68,0.08)'; color = 'var(--danger)'
-                    } else {
-                      borderColor = 'var(--accent)'; bg = 'var(--accent-dim)'; color = 'var(--accent)'
-                    }
+                    if (answerCorrect === true) stateClass = 'correct'
+                    else if (answerCorrect === false) stateClass = 'incorrect'
+                    else stateClass = 'selected'
                   } else if (answered) {
-                    color = 'var(--muted)'
+                    stateClass = 'dimmed'
                   }
 
                   return (
                     <button
                       key={k}
                       type="button"
+                      className={`learn-option ${stateClass}`}
                       onClick={() => !answered && !pendingAnswer && onAnswer(k)}
                       disabled={answered || pendingAnswer}
-                      style={{
-                        textAlign: 'left', width: '100%', padding: '13px 16px',
-                        borderRadius: 8, border: `1px solid ${borderColor}`,
-                        background: bg, color,
-                        cursor: answered || pendingAnswer ? 'default' : 'pointer',
-                        fontSize: 14, lineHeight: 1.5,
-                        transition: 'all 0.15s', fontFamily: 'inherit',
-                      }}
                     >
-                      <strong style={{ marginRight: 8, opacity: 0.6 }}>{k}.</strong>{safeStr(v)}
+                      <span className="learn-option-key">{k}</span>
+                      <span>{safeStr(v)}</span>
                     </button>
                   )
                 })}
@@ -256,15 +243,7 @@ function QuestionPanel({
                 💡 Hint
               </button> */}
               {answered && (
-                <span
-                  style={{
-                    fontSize: 13, fontWeight: 700, padding: '6px 14px',
-                    borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: answerCorrect === true ? 'var(--success-dim)' : answerCorrect === false ? 'var(--danger-dim)' : 'var(--accent-dim)',
-                    color: answerCorrect === true ? 'var(--success)' : answerCorrect === false ? 'var(--danger)' : 'var(--accent)',
-                    border: `1px solid ${answerCorrect === true ? 'rgba(22,163,74,0.3)' : answerCorrect === false ? 'rgba(239,68,68,0.3)' : 'rgba(221,82,50,0.3)'}`,
-                  }}
-                >
+                <span className={`learn-status-pill ${answerCorrect === true ? 'success' : answerCorrect === false ? 'error' : 'pending'}`}>
                   {answerCorrect === true ? '✓ Correct! Next question loading…' : answerCorrect === false ? '✗ Wrong — next question loading…' : 'Submitted…'}
                 </span>
               )}
@@ -984,72 +963,60 @@ export default function LearnPage() {
     const pct = Math.round(((assessmentIdx) / total) * 100)
 
     return (
-      <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      <div className="learn-assessment">
         <div className="teacher-dashboard">
-          <section className="teacher-hero" style={{ padding: '36px 40px' }}>
+          <section className="teacher-hero" style={{ padding: '32px 40px', alignItems: 'center' }}>
             <div>
               <p className="teacher-eyebrow">Initial Assessment</p>
-              <h2 className="editorial-title" style={{ fontSize: 'clamp(36px,5vw,60px)', margin: '10px 0 14px' }}>
+              <h2 className="editorial-title" style={{ fontSize: 'clamp(32px,4.5vw,52px)', margin: '10px 0 12px' }}>
                 Knowledge check
               </h2>
               <p style={{ margin: 0, color: 'var(--muted)', fontSize: 16, lineHeight: 1.7 }}>
                 Answer a few questions so we can calibrate the right difficulty for you.
               </p>
             </div>
-            <div className="teacher-hero-note">
+            <div className="teacher-hero-note" style={{ minHeight: 150, padding: 24 }}>
               <span>Question</span>
-              <strong style={{ fontSize: 52 }}>{assessmentIdx + 1}<span style={{ fontSize: 28, opacity: 0.5 }}>/{total}</span></strong>
+              <strong style={{ fontSize: 46 }}>{assessmentIdx + 1}<span style={{ fontSize: 26, opacity: 0.5 }}>/{total}</span></strong>
               <p>initial assessment</p>
             </div>
           </section>
 
           <section className="teacher-panel">
-            <div style={{ marginBottom: 20 }}>
-              <div className="teacher-progress">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+              <div className="teacher-progress" style={{ flex: 1 }}>
                 <span style={{ width: `${pct}%` }} />
               </div>
+              {q.difficulty && (
+                <span className="badge neutral" style={{ flexShrink: 0 }}>Difficulty {q.difficulty}</span>
+              )}
             </div>
 
-            <p style={{ fontSize: 17, lineHeight: 1.75, fontWeight: 500, color: 'var(--text)', margin: '0 0 20px' }}>
+            <p style={{ fontSize: 18, lineHeight: 1.65, fontWeight: 600, color: 'var(--text)', margin: '0 0 20px' }}>
               {q.question_text}
             </p>
-
-            {q.difficulty && (
-              <p className="teacher-eyebrow" style={{ marginBottom: 16 }}>
-                Difficulty {q.difficulty}
-              </p>
-            )}
 
             {q.options && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {Object.entries(q.options).map(([k, v]) => {
-                  let borderColor = 'var(--border)'
-                  let bg = 'var(--surface)'
-                  let color = 'var(--text)'
-
+                  let stateClass = ''
                   if (assessmentSelected === k) {
-                    if (assessmentFeedback === true)  { borderColor = 'var(--success)'; bg = 'rgba(22,163,74,0.08)'; color = 'var(--success)' }
-                    if (assessmentFeedback === false)  { borderColor = 'var(--danger)'; bg = 'rgba(239,68,68,0.08)'; color = 'var(--danger)' }
+                    if (assessmentFeedback === true) stateClass = 'correct'
+                    if (assessmentFeedback === false) stateClass = 'incorrect'
                   } else if (assessmentSelected && k === q.correct_answer) {
-                    borderColor = 'var(--success)'; bg = 'rgba(22,163,74,0.06)'; color = 'var(--success)'
+                    stateClass = 'correct'
                   } else if (assessmentSelected) {
-                    color = 'var(--muted)'
+                    stateClass = 'dimmed'
                   }
 
                   return (
                     <button key={k} type="button"
+                      className={`learn-option ${stateClass}`}
                       onClick={() => handleAssessmentAnswer(k)}
                       disabled={!!assessmentSelected}
-                      style={{
-                        textAlign: 'left', width: '100%', padding: '14px 18px',
-                        borderRadius: 8, border: `1px solid ${borderColor}`,
-                        background: bg, color,
-                        cursor: assessmentSelected ? 'default' : 'pointer',
-                        fontSize: 15, lineHeight: 1.5, fontFamily: 'inherit',
-                        transition: 'all 0.15s',
-                      }}
                     >
-                      <strong style={{ marginRight: 10, opacity: 0.6 }}>{k}.</strong>{safeStr(v)}
+                      <span className="learn-option-key">{k}</span>
+                      <span>{safeStr(v)}</span>
                     </button>
                   )
                 })}
@@ -1057,21 +1024,14 @@ export default function LearnPage() {
             )}
 
             {assessmentSelected && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 20 }}>
-                <span
-                  style={{
-                    fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 6,
-                    background: assessmentFeedback ? 'var(--success-dim)' : 'var(--danger-dim)',
-                    color: assessmentFeedback ? 'var(--success)' : 'var(--danger)',
-                    border: `1px solid ${assessmentFeedback ? 'rgba(22,163,74,0.3)' : 'rgba(239,68,68,0.3)'}`,
-                  }}
-                >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+                <span className={`learn-status-pill ${assessmentFeedback ? 'success' : 'error'}`}>
                   {assessmentFeedback ? '✓ Correct!' : '✗ Incorrect'}
                 </span>
                 <button type="button" className="teacher-action primary"
                   onClick={handleAssessmentNext}
                   disabled={assessmentSubmitting}
-                  style={{ minHeight: 'unset', padding: '10px 22px' }}
+                  style={{ minHeight: 'unset', padding: '10px 22px', marginLeft: 'auto' }}
                 >
                   {assessmentSubmitting ? 'Submitting…' : assessmentIdx + 1 < assessmentQs.length ? 'Next →' : 'Finish Assessment →'}
                 </button>
@@ -1332,9 +1292,9 @@ export default function LearnPage() {
   )
 
   return (
-    <div style={{ display: 'flex', gap: 16, height: 'calc(100vh - 130px)', minHeight: 520 }}>
+    <div className="learn-session">
       {/* ── LEFT: Question panel ── */}
-      <div style={{ width: '44%', minWidth: 280, flexShrink: 0 }}>
+      <div className="learn-question-col">
         <QuestionPanel
           question={currentQuestion}
           pendingAnswer={pendingAnswer}
@@ -1353,12 +1313,13 @@ export default function LearnPage() {
       </div>
 
       {/* ── RIGHT: Tutor chat panel ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+      <div className="learn-chat-col">
         {/* Chat header */}
         <div className="teacher-panel" style={{ padding: '14px 20px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <p className="teacher-eyebrow" style={{ margin: 0 }}>AI Tutor</p>
+              <span className="status-dot online" title="Tutor ready" />
             </div>
             {voiceStatus ? (
               <span style={{ fontSize: 13, color: 'var(--accent)', fontStyle: 'italic', fontWeight: 600 }}>
@@ -1371,17 +1332,14 @@ export default function LearnPage() {
         </div>
 
         {/* Chat messages */}
-        <div
-          className="chat-messages"
-          style={{
-            flex: 1, overflowY: 'auto', gap: 14, padding: '16px 20px', minHeight: 0,
-            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-          }}
-        >
+        <div className="learn-chat-messages">
           {chatMessages.length === 0 && voiceStreamText === '' && (
-            <div className="empty-state">
-              <p style={{ color: 'var(--muted)', margin: 0 }}>
-                Answer a question on the left, or ask the tutor via text or voice…
+            <div className="learn-chat-empty">
+              <span className="learn-chat-empty-icon" aria-hidden="true">💬</span>
+              <strong>Your tutor is ready</strong>
+              <p>
+                Answer the question on the left, or ask anything about this
+                topic — by text or voice — and the explanation will appear here.
               </p>
             </div>
           )}
@@ -1424,6 +1382,7 @@ export default function LearnPage() {
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
             <textarea
               rows={2}
+              className="learn-chat-textarea"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
@@ -1432,12 +1391,6 @@ export default function LearnPage() {
                 : 'Ask the tutor anything — or use the mic'
               }
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-              style={{
-                flex: 1, resize: 'none', fontSize: 14, padding: '10px 14px',
-                borderRadius: 8, border: '1px solid var(--border)',
-                background: 'var(--bg)', color: 'var(--text)',
-                fontFamily: 'inherit', outline: 'none',
-              }}
               disabled={loading || pendingAnswer || voiceState !== 'idle'}
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
