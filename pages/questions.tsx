@@ -284,7 +284,7 @@ export default function QuestionsPage() {
             <div className="skills-modal-scroll">
               <p className="skills-modal-subtitle">Write a question, connect it to a skill, and define the answer set used during practice.</p>
 
-              <p className="questions-section-label">Question details</p>
+              <p className="modal-section-label">Question details</p>
               <div className="questions-modal-grid questions-modal-grid-three">
                 <div className="field">
                   <label>Skill *</label>
@@ -309,7 +309,7 @@ export default function QuestionsPage() {
                 </div>
               </div>
 
-              <p className="questions-section-label">Question</p>
+              <p className="modal-section-label">Question</p>
               <div className="field">
                 <label>Question text *</label>
                 <textarea rows={3} value={form.question_text} onChange={(e) => setF('question_text', e.target.value)} />
@@ -317,7 +317,7 @@ export default function QuestionsPage() {
 
               {form.question_type === 'multiple_choice' && (
                 <>
-                  <p className="questions-section-label">Answer options</p>
+                  <p className="modal-section-label">Answer options</p>
                   <div className="questions-options-grid">
                     {(['A', 'B', 'C', 'D'] as const).map((letter) => (
                       <div className="field" key={letter}>
@@ -333,7 +333,7 @@ export default function QuestionsPage() {
                 </>
               )}
 
-              <p className="questions-section-label">Correct answer</p>
+              <p className="modal-section-label">Correct answer</p>
               <div className="field">
                 <label>Correct answer</label>
                 {form.question_type === 'true_false' ? (
