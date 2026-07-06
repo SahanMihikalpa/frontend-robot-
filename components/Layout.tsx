@@ -1,4 +1,5 @@
 import Nav from './Nav'
+import Footer from './Footer'
 import Link from 'next/link'
 import React from 'react'
 import { useEffect, useState } from 'react'
@@ -25,7 +26,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   }, [router.pathname])
 
   return (
-    <div>
+    <div className="app-shell">
       <header className="site-header">
         <Link href="/" className="brand">
           <div className="logo" />
@@ -46,14 +47,16 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         </div>
       </header>
 
-      <main 
+      <main
         className={
           router.pathname === '/login' ||
           router.pathname === '/register'
-            ? ''
-            : 'container'
+            ? 'app-main'
+            : 'app-main container'
         }
       >{children}</main>
+
+      <Footer />
     </div>
   )
 }
