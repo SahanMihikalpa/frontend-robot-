@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   getCurrentUser, listSkills, getMasterySummary,
   startChatSession, sendChatMessage, endChatSession,
@@ -61,6 +61,8 @@ function extractImageUrl(meta: any): string | undefined {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const DIFF_LABELS: Record<number, string> = { 1: 'Beginner', 2: 'Easy', 3: 'Medium', 4: 'Hard', 5: 'Expert' }
 
 function uid() { return Math.random().toString(36).slice(2) }
 
@@ -367,6 +369,37 @@ export default function LearnPage() {
   const [mastery, setMastery] = useState(0)
   const [lightboxSrc, setLightboxSrc] = useState('')
   const [phase, setPhase] = useState<Phase>('skill-pick')
+
+  // Skill-picker filters (frontend only)
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('all')
+
+  const skillCategories = useMemo(() => {
+    const cats = new Set(skills.map((s: any) => s.category).filter(Boolean) as string[])
+    return Array.from(cats).sort()
+  }, [skills])
+
+  const visibleSkills = useMemo(() => {
+    return skills.filter((s: any) => {
+      if (categoryFilter !== 'all' && s.category !== categoryFilter) return false
+      if (difficultyFilter !== 'all' && String(s.difficulty_level ?? '') !== difficultyFilter) return false
+      return true
+    })
+  }, [skills, categoryFilter, difficultyFilter])
+
+  // A skill hidden by the filters can't stay selected — otherwise the Start /
+  // Continue button would still act on a skill the student can no longer see.
+  useEffect(() => {
+    if (
+      phase === 'skill-pick' &&
+      selectedSkill != null &&
+      skills.length > 0 &&
+      !visibleSkills.some((s: any) => s.id === selectedSkill)
+    ) {
+      setSelectedSkill(null)
+      setSkillStatus(null)
+    }
+  }, [visibleSkills, selectedSkill, phase, skills.length])
 
   // Session-status per skill (fetched when skill is selected)
   const [skillStatus, setSkillStatus] = useState<SkillStatus | null>(null)
@@ -1072,26 +1105,88 @@ export default function LearnPage() {
         <div className="teacher-layout">
           <section className="teacher-main">
             <section className="teacher-panel">
-              <div className="teacher-panel-header">
+              {/* Header: title left, filters right */}
+              <div className="learn-picker-header">
                 <div>
                   <p className="teacher-eyebrow">Step 1</p>
-                  <h3 className="editorial-title">Choose a topic</h3>
+                  <h3 className="editorial-title" style={{ margin: 0 }}>Choose a topic</h3>
                 </div>
+                {skills.length > 0 &&
+                  (skillCategories.length > 0 || skills.some((s: any) => s.difficulty_level)) && (
+                  <div className="learn-filter-row">
+                    {skillCategories.length > 0 && (
+                      <div className="learn-filter">
+                        <label htmlFor="learn-category-filter">Category</label>
+                        <select
+                          id="learn-category-filter"
+                          value={categoryFilter}
+                          onChange={(e) => setCategoryFilter(e.target.value)}
+                        >
+                          <option value="all">All categories</option>
+                          {skillCategories.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    <div className="learn-filter">
+                      <label htmlFor="learn-difficulty-filter">Difficulty</label>
+                      <select
+                        id="learn-difficulty-filter"
+                        value={difficultyFilter}
+                        onChange={(e) => setDifficultyFilter(e.target.value)}
+                      >
+                        <option value="all">All difficulties</option>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <option key={n} value={String(n)}>{DIFF_LABELS[n]}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {skills.length === 0 ? (
                 <p style={{ color: 'var(--muted)', margin: 0 }}>Loading skills…</p>
+              ) : visibleSkills.length === 0 ? (
+                <div className="learn-skill-empty">
+                  <p>No skills match these filters.</p>
+                  <button
+                    type="button"
+                    className="skills-chip"
+                    onClick={() => { setCategoryFilter('all'); setDifficultyFilter('all') }}
+                  >
+                    Clear filters
+                  </button>
+                </div>
               ) : (
-                <div className="skills-chip-row">
-                  {skills.map((s: any) => (
-                    <button key={s.id} type="button"
-                      className={`skills-chip ${selectedSkill === s.id ? 'active' : ''}`}
+                <div className="learn-skill-grid">
+                  {visibleSkills.map((s: any) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      className={`learn-skill-card ${selectedSkill === s.id ? 'selected' : ''}`}
                       onClick={() => handleSkillSelect(s.id)}
-                      style={{ borderRadius: 8, fontSize: 14 }}
+                      title={s.description || s.name}
                     >
-                      {s.name}
-                      {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
-                        <span style={{ marginLeft: 8, fontSize: 10, opacity: 0.75 }}>▶ active</span>
+                      <div className="learn-skill-card-top">
+                        <span className="learn-skill-card-name">{s.name}</span>
+                        <span className="learn-skill-card-check" aria-hidden="true">✓</span>
+                      </div>
+                      <div className="learn-skill-card-badges">
+                        {s.difficulty_level != null && (
+                          <span className="badge neutral" style={{ fontSize: 10 }}>
+                            {DIFF_LABELS[s.difficulty_level] || `Level ${s.difficulty_level}`}
+                          </span>
+                        )}
+                        {s.category && (
+                          <span className="badge neutral" style={{ fontSize: 10 }}>{s.category}</span>
+                        )}
+                      </div>
+                      {s.description ? (
+                        <p className="learn-skill-card-desc">{s.description}</p>
+                      ) : (
+                        <p className="learn-skill-card-desc placeholder">No description yet.</p>
                       )}
                     </button>
                   ))}
