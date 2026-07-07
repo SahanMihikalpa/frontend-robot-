@@ -5013,6 +5013,99 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .selflearn-concept-bar{width:100%}
 }
 
+/* ─────────────────────────────
+   Learn page — skill picker filters
+───────────────────────────── */
+.learn-filter-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.learn-filter{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px;max-width:260px}
+.learn-filter label{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;
+}
+.learn-filter select{
+  min-height:44px;
+  padding:10px 42px 10px 14px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid var(--border-strong) !important;
+  border-radius:8px !important;
+  font-size:14px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726A61' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 14px center !important;
+  cursor:pointer;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.learn-filter select:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px rgba(232,90,51,.12) !important;
+}
+.learn-filter select option{background:#FFF9F3;color:var(--text)}
+@media (max-width:640px){
+  .learn-filter{max-width:none}
+}
+
+/* Learn page — skill picker redesign: filters in the header, skill card grid */
+.learn-picker-header{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  gap:16px;flex-wrap:wrap;margin-bottom:18px;
+}
+.learn-picker-header .learn-filter-row{margin-bottom:0}
+.learn-picker-header .learn-filter{min-width:150px;max-width:200px}
+.learn-picker-header .learn-filter select{min-height:40px;padding-top:8px !important;padding-bottom:8px !important}
+
+.learn-skill-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;
+}
+.learn-skill-card{
+  text-align:left;padding:16px;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;display:flex;flex-direction:column;gap:8px;
+  font-family:inherit;
+  transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease;
+}
+.learn-skill-card:hover{
+  border-color:var(--border-strong);
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(26,24,21,.07);
+}
+.learn-skill-card.selected{
+  border-color:var(--accent);
+  background:rgba(232,90,51,.045);
+  box-shadow:0 0 0 3px rgba(232,90,51,.13);
+}
+.learn-skill-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.learn-skill-card-name{font-weight:700;font-size:15px;color:var(--text);line-height:1.35}
+.learn-skill-card-check{
+  flex:none;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:#fff;background:var(--accent);
+  opacity:0;transform:scale(.6);
+  transition:opacity .18s ease, transform .18s ease;
+}
+.learn-skill-card.selected .learn-skill-card-check{opacity:1;transform:scale(1)}
+.learn-skill-card-badges{display:flex;gap:6px;flex-wrap:wrap}
+.learn-skill-card-desc{
+  margin:0;font-size:12.5px;line-height:1.55;color:var(--muted);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.learn-skill-card-desc.placeholder{font-style:italic;opacity:.8}
+
+.learn-skill-empty{
+  border:1px dashed var(--border-strong);border-radius:12px;
+  padding:28px 20px;text-align:center;
+}
+.learn-skill-empty p{margin:0 0 12px;color:var(--muted);font-size:14px}
+
+@media (max-width:640px){
+  .learn-picker-header{align-items:stretch}
+  .learn-picker-header .learn-filter{max-width:none}
+  .learn-skill-grid{grid-template-columns:1fr}
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Surface system refinement
    Level 0: page background (--bg)

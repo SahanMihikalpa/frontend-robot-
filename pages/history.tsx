@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getMyInteractions, getStudentInteractions, listStudentsAnalytics } from '../lib/api'
+import { getMyInteractions, getStudentInteractions, listStudentsAnalytics, listSkills } from '../lib/api'
 import { getStoredUser } from '../lib/session'
 
 export default function HistoryPage() {
@@ -8,10 +8,18 @@ export default function HistoryPage() {
 
   const [history, setHistory] = useState<any[]>([])
   const [students, setStudents] = useState<any[]>([])
+  const [skillNames, setSkillNames] = useState<Record<string, string>>({})
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
   const [activeSkill, setActiveSkill] = useState<string>('all')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Interactions only carry skill_id — resolve names from the skills list
+  function skillLabel(item: any): string {
+    if (item.skill_name) return String(item.skill_name)
+    if (item.skill_id != null) return skillNames[String(item.skill_id)] || `Skill ${item.skill_id}`
+    return '-'
+  }
 
   async function loadInteractions(studentId?: number) {
     setLoading(true)
@@ -41,6 +49,13 @@ export default function HistoryPage() {
           setStudents(Array.isArray(s) ? s : [])
         } catch { /* ignore */ }
       }
+      try {
+        const sk = await listSkills()
+        const list: any[] = Array.isArray(sk) ? sk : sk?.items || []
+        const map: Record<string, string> = {}
+        list.forEach((s: any) => { if (s?.id != null && s?.name) map[String(s.id)] = s.name })
+        setSkillNames(map)
+      } catch { /* names fall back to "Skill <id>" */ }
       await loadInteractions()
     }
     init()
@@ -55,15 +70,15 @@ export default function HistoryPage() {
   const skills = useMemo(() => {
     const set = new Set<string>()
     history.forEach((item) => {
-      if (item.skill_name) set.add(String(item.skill_name))
-      else if (item.skill_id) set.add(String(item.skill_id))
+      const label = skillLabel(item)
+      if (label !== '-') set.add(label)
     })
     return ['all', ...Array.from(set)]
-  }, [history])
+  }, [history, skillNames])
 
   const filtered = activeSkill === 'all'
     ? history
-    : history.filter((item) => String(item.skill_name || item.skill_id) === activeSkill)
+    : history.filter((item) => skillLabel(item) === activeSkill)
 
   const correctCount = filtered.filter((item) => item.is_correct).length
   const accuracy = filtered.length ? (correctCount / filtered.length) * 100 : 0
@@ -191,7 +206,7 @@ export default function HistoryPage() {
                   </span>
                 </div>
                 <p>
-                  Skill: {item.skill_name || item.skill_id || '-'}
+                  Skill: {skillLabel(item)}
                   {item.time_taken != null && ` | ${item.time_taken}s`}
                   {item.timestamp && ` | ${new Date(item.timestamp).toLocaleString()}`}
                 </p>
