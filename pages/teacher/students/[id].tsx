@@ -44,23 +44,22 @@ function InfoBox({
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div style={{ borderRadius: 10, border: `1px solid ${accent}33`, overflow: 'hidden', fontSize: 13 }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', textAlign: 'left', padding: '10px 14px',
-          background: accent + '12', border: 'none', cursor: 'pointer',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          color: 'inherit',
-        }}>
-        <span style={{ fontWeight: 600, color: accent }}>ℹ {title}</span>
-        <span style={{ color: accent, fontSize: 11, opacity: 0.8 }}>{open ? '▲ close' : '▼ expand'}</span>
+    <div className="student-info-box">
+      <button type="button" className="student-info-box-toggle" onClick={() => setOpen(o => !o)}>
+        <span className="student-info-box-title">
+          <span
+            className="student-info-box-icon"
+            style={{ background: accent + '1a', color: accent }}
+            aria-hidden="true"
+          >
+            i
+          </span>
+          {title}
+        </span>
+        <span className="student-info-box-caret">{open ? '▲ close' : '▼ expand'}</span>
       </button>
       {open && (
-        <div style={{
-          padding: '12px 16px', background: accent + '0a',
-          borderTop: `1px solid ${accent}22`, lineHeight: 1.75,
-        }}>
+        <div className="student-info-box-body">
           {children}
         </div>
       )}
@@ -71,12 +70,8 @@ function InfoBox({
 /** Yellow action tip box */
 function ActionTip({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{
-      padding: '10px 14px', borderRadius: 10,
-      background: '#fbbf2412', border: '1px solid #fbbf2438',
-      fontSize: 13, display: 'flex', gap: 10, alignItems: 'flex-start', lineHeight: 1.7,
-    }}>
-      <span style={{ fontSize: 16 }}>💡</span>
+    <div className="student-action-tip">
+      <span style={{ fontSize: 16 }} aria-hidden="true">💡</span>
       <div>{children}</div>
     </div>
   )
@@ -103,16 +98,16 @@ function Pct({ v }: { v: number | null }) {
 
 function KPI({ label, sub, children }: { label: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="kpi-card">
-      <p className="kpi-label">{label}</p>
-      <p className="kpi-value">{children}</p>
-      {sub && <p className="meta" style={{ fontSize: 11, marginTop: 2 }}>{sub}</p>}
+    <div className="teacher-kpi-card" style={{ minHeight: 120, padding: 20 }}>
+      <p>{label}</p>
+      <strong style={{ fontSize: 36 }}>{children}</strong>
+      {sub && <p className="meta" style={{ fontSize: 11, textTransform: 'none', letterSpacing: 0 }}>{sub}</p>}
     </div>
   )
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h4 style={{ margin: '4px 0', borderBottom: '1px solid var(--border)', paddingBottom: 8 }}>{children}</h4>
+  return <h4 className="student-section-title">{children}</h4>
 }
 
 /** Horizontal coloured bar (0–1 value) */
@@ -201,8 +196,22 @@ export default function StudentDetail() {
       .finally(() => setLoading(false))
   }, [userId])
 
-  if (loading) return <div className="stack" style={{ padding: 32 }}><p className="meta">Loading student data…</p></div>
-  if (error)   return <div className="stack" style={{ padding: 32 }}><p className="feedback error">{error}</p></div>
+  if (loading) {
+    return (
+      <div className="student-detail-page">
+        <div className="empty-state" style={{ padding: '80px 24px' }}>
+          <p className="meta">Loading student data…</p>
+        </div>
+      </div>
+    )
+  }
+  if (error) {
+    return (
+      <div className="student-detail-page">
+        <p className="feedback error">{error}</p>
+      </div>
+    )
+  }
   if (!profile) return null
 
   // ── Build mastery chart data ─────────────────────────────────────────────
@@ -245,23 +254,35 @@ export default function StudentDetail() {
   const totalSkills     = mastery?.skills.length ?? 0
 
   return (
-    <div className="stack teacher-student-detail-page" style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 16px' }}>
+    <div className="student-detail-page">
 
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+      {/* ── Back navigation ── */}
+      <Link href="/teacher/students" className="student-detail-back">
+        ← All Students
+      </Link>
+
+      {/* ── Hero ── */}
+      <section className="teacher-hero student-detail-hero">
         <div>
-          <h2 style={{ margin: 0 }}>{profile.full_name || profile.username}</h2>
-          <p className="meta" style={{ marginTop: 4 }}>
+          <p className="teacher-eyebrow">Student Profile</p>
+          <h2 className="editorial-title">{profile.full_name || profile.username}</h2>
+          <p className="student-detail-contact">
             {profile.email}
             {' · '}
-            <span style={{ color: '#60a5fa' }}>{profile.total_interactions} questions answered</span>
+            <strong>{profile.total_interactions} questions answered</strong>
           </p>
         </div>
-        <Link href="/teacher/students" className="btn secondary">← All Students</Link>
-      </div>
+        <div className="teacher-hero-note">
+          <span>Overall mastery</span>
+          <strong style={{ fontSize: 52 }}>
+            {profile.overall_score != null ? `${Math.round(profile.overall_score * 100)}%` : '—'}
+          </strong>
+          <p>average P(mastery) across all skills</p>
+        </div>
+      </section>
 
       {/* ── Top KPI row ── */}
-      <div className="kpi-grid">
+      <div className="teacher-kpi-grid">
         <KPI label="Overall mastery" sub="Average P(mastery) across all skills">
           <Pct v={profile.overall_score} />
         </KPI>
@@ -271,26 +292,25 @@ export default function StudentDetail() {
             : '—'}
         </KPI>
         <KPI label="Skills mastered" sub={`Out of ${totalSkills} skills`}>
-          <span style={{ color: '#4ade80' }}>{masteredCount}</span>
+          <span style={{ color: 'var(--success)' }}>{masteredCount}</span>
         </KPI>
         <KPI label="Skills struggling" sub="Needs teacher attention">
-          <span style={{ color: strugglingCount > 0 ? '#f87171' : '#94a3b8' }}>
+          <span style={{ color: strugglingCount > 0 ? 'var(--danger)' : 'var(--muted)' }}>
             {strugglingCount || '—'}
           </span>
         </KPI>
       </div>
 
       {/* ── Tab strip ── */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '2px solid var(--border)' }}>
+      <div className="student-tabs" role="tablist">
         {(['mastery', 'performance', 'engagement', 'personalization'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`btn small ${tab === t ? '' : 'secondary'}`}
-            style={{ borderRadius: '6px 6px 0 0', borderBottom: 'none', textTransform: 'capitalize' }}>
+          <button key={t} type="button" onClick={() => setTab(t)}
+            role="tab"
+            aria-selected={tab === t}
+            className={`student-tab ${tab === t ? 'active' : ''}`}>
             {t}
             {t === 'mastery' && strugglingCount > 0 && (
-              <span style={{ marginLeft: 5, background: '#f87171', color: '#fff', borderRadius: 8, padding: '1px 5px', fontSize: 10 }}>
-                {strugglingCount}
-              </span>
+              <span className="student-tab-badge">{strugglingCount}</span>
             )}
           </button>
         ))}
@@ -323,8 +343,8 @@ export default function StudentDetail() {
 
           {/* Reference line legend */}
           <div style={{
-            display: 'flex', flexWrap: 'wrap', gap: 16, padding: '10px 14px',
-            background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)',
+            display: 'flex', flexWrap: 'wrap', gap: 16, padding: '12px 16px',
+            background: 'var(--surface-2)', borderRadius: 12, border: '1px solid var(--border)',
             fontSize: 12,
           }}>
             <span style={{ fontWeight: 600, color: 'var(--muted)', alignSelf: 'center' }}>Chart thresholds:</span>
@@ -360,6 +380,7 @@ export default function StudentDetail() {
           {allEvents.length < 2 ? (
             <p className="meta">Not enough history yet — student needs more interactions.</p>
           ) : (
+            <div className="student-chart-card">
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={allEvents} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -385,6 +406,7 @@ export default function StudentDetail() {
                 ))}
               </LineChart>
             </ResponsiveContainer>
+            </div>
           )}
 
           {/* Current skill status cards */}
@@ -393,16 +415,15 @@ export default function StudentDetail() {
           {(!mastery || mastery.skills.length === 0) ? (
             <p className="meta">No mastery data yet.</p>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 14 }}>
               {mastery.skills.map(sk => (
-                <div key={sk.skill_id} style={{
-                  padding: '12px 14px', borderRadius: 10,
-                  background: statusColor(sk.status) + '15',
+                <div key={sk.skill_id} className="student-skill-card" style={{
                   border: `1px solid ${statusColor(sk.status)}40`,
+                  borderTop: `3px solid ${statusColor(sk.status)}`,
                 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6 }}>{sk.skill_name}</div>
+                  <div className="student-skill-name">{sk.skill_name}</div>
                   <MiniBar value={sk.current_p_mastery} color={statusColor(sk.status)} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                     <Badge status={sk.status} />
                     <span className="meta" style={{ fontSize: 11 }}>{sk.total_attempts} attempts</span>
                   </div>
@@ -425,7 +446,7 @@ export default function StudentDetail() {
                     <span className="meta" style={{ fontSize: 11 }}>{g.what}</span>
                   </div>
                   <p style={{ margin: '4px 0 2px', fontSize: 12 }}>{g.meaning}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: '#fbbf24' }}>→ {g.action}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: 'var(--warning)', fontWeight: 600 }}>→ {g.action}</p>
                 </div>
               ))}
             </div>
@@ -464,6 +485,7 @@ export default function StudentDetail() {
           {(trends?.buckets ?? []).length < 2 ? (
             <p className="meta">Not enough data yet.</p>
           ) : (
+            <div className="student-chart-card">
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={trends!.buckets} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -480,6 +502,7 @@ export default function StudentDetail() {
                 <Line type="monotone" dataKey="accuracy" name="Accuracy" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
+            </div>
           )}
 
           {/* Response time trend */}
@@ -500,6 +523,7 @@ export default function StudentDetail() {
           {(trends?.buckets ?? []).filter(b => b.avg_response_ms != null).length < 2 ? (
             <p className="meta">Not enough response time data.</p>
           ) : (
+            <div className="student-chart-card">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart
                 data={trends!.buckets.filter(b => b.avg_response_ms != null)}
@@ -515,6 +539,7 @@ export default function StudentDetail() {
                 <Bar dataKey="avg_response_ms" name="Avg response" fill="#60a5fa" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           )}
 
           {/* Repeated errors */}
@@ -585,7 +610,7 @@ export default function StudentDetail() {
               <li><span style={{ color: '#fbbf24', fontWeight: 600 }}>40% – 70% — PARTIALLY ENGAGED</span>: Some distraction detected</li>
               <li><span style={{ color: '#f87171', fontWeight: 600 }}>{'< 40% — DISENGAGED'}</span>: Student may be away from the screen or looking elsewhere</li>
             </ul>
-            <p style={{ margin: '8px 0 0', color: '#94a3b8' }}>
+            <p style={{ margin: '8px 0 0', color: 'var(--muted)' }}>
               ⚠ Note: Low scores can also be caused by <strong>poor lighting</strong>, <strong>backlit environments</strong>,
               or the camera not being positioned correctly — not necessarily disengagement. Check the "Face detected %"
               column to distinguish between technical issues and genuine disengagement.
@@ -593,7 +618,7 @@ export default function StudentDetail() {
           </InfoBox>
 
           {/* KPI row */}
-          <div className="kpi-grid">
+          <div className="teacher-kpi-grid">
             <KPI label="Overall engagement" sub="Average across all sessions">
               <span style={{ color: scoreColor(engagement?.overall_avg ?? null) }}>
                 {engagement ? `${Math.round(engagement.overall_avg * 100)}%` : '—'}
@@ -622,7 +647,7 @@ export default function StudentDetail() {
           {engagementChartData.length === 0 ? (
             <p className="meta">No engagement data yet — camera tracking may not be active for this student.</p>
           ) : (
-            <>
+            <div className="student-chart-card">
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={engagementChartData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                   <defs>
@@ -647,11 +672,11 @@ export default function StudentDetail() {
                 </AreaChart>
               </ResponsiveContainer>
 
-              <p className="meta" style={{ fontSize: 12 }}>
+              <p className="meta" style={{ fontSize: 12, marginTop: 10 }}>
                 Solid area = engagement score. Dashed green line = % of snapshots where student's face was visible.
                 If the dashed line is low but engagement score is also low, it may be a <strong>camera/lighting issue</strong>.
               </p>
-            </>
+            </div>
           )}
 
           {/* Action tip for low engagement */}
@@ -732,7 +757,7 @@ export default function StudentDetail() {
                   <li><strong>Slip (10%)</strong> — chance of a wrong answer even when skilled</li>
                   <li><strong>Guess (20%)</strong> — chance of a right answer without knowing</li>
                 </ul>
-                <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: 12 }}>
+                <p style={{ margin: '6px 0 0', color: 'var(--muted)', fontSize: 12 }}>
                   ✓ Works from question 1. Reliable and predictable.
                 </p>
               </div>
@@ -745,7 +770,7 @@ export default function StudentDetail() {
                   <li>Adapts to this student's unique learning style</li>
                   <li>More accurate — but needs enough data first</li>
                 </ul>
-                <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: 12 }}>
+                <p style={{ margin: '6px 0 0', color: 'var(--muted)', fontSize: 12 }}>
                   ✓ Becomes reliable after ~20 answers per skill.
                 </p>
               </div>
@@ -758,7 +783,7 @@ export default function StudentDetail() {
                   <li><strong>10 attempts</strong> → 70% BKT, 30% DKT</li>
                   <li><strong>≥20 attempts</strong> → 40% BKT, 60% DKT</li>
                 </ul>
-                <p style={{ margin: '6px 0 4px', fontStyle: 'italic', color: '#94a3b8', fontSize: 12 }}>
+                <p style={{ margin: '6px 0 4px', fontStyle: 'italic', color: 'var(--muted)', fontSize: 12 }}>
                   Final mastery = (BKT weight × BKT estimate) + (DKT weight × DKT estimate)
                 </p>
               </div>
@@ -772,8 +797,8 @@ export default function StudentDetail() {
           {(fusion?.skills ?? []).length === 0 ? (
             <p className="meta">No personalization data yet — student has not practised any skills.</p>
           ) : (
-            <>
-              <p className="meta" style={{ fontSize: 12 }}>
+            <div className="student-chart-card">
+              <p className="meta" style={{ fontSize: 12, marginBottom: 10 }}>
                 Each bar shows the current model blend for that skill.
                 <span style={{ color: '#60a5fa' }}> Blue (BKT)</span> = classical model,
                 <span style={{ color: '#f472b6' }}> Pink (DKT)</span> = AI model.
@@ -797,7 +822,7 @@ export default function StudentDetail() {
                   <Bar dataKey="DKT" name="DKT" stackId="a" fill="#f472b6" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </>
+            </div>
           )}
 
           {/* Fusion detail table */}

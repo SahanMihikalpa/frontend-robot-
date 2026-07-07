@@ -1167,6 +1167,11 @@ export default function LearnPage() {
                       type="button"
                       className={`learn-skill-card ${selectedSkill === s.id ? 'selected' : ''}`}
                       onClick={() => handleSkillSelect(s.id)}
+                      style={{ fontSize: 14 }}
+                    // >
+                    //   {s.name}
+                    //   {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
+                    //     <span style={{ marginLeft: 8, fontSize: 10, opacity: 0.75 }}>▶ active</span>
                       title={s.description || s.name}
                     >
                       <div className="learn-skill-card-top">
