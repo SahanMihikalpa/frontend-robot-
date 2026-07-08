@@ -131,20 +131,24 @@ export default function AdminDashboard() {
           <h3 className="editorial-title">Quick actions</h3>
 
           <div className="teacher-action-list">
-            <Link href="/hardware" className="teacher-action primary">
+            <Link href="/dashboard/users" className="teacher-action primary">
               <span>01</span>
+              User management
+            </Link>
+            <Link href="/hardware" className="teacher-action">
+              <span>02</span>
               Hardware control
             </Link>
             <Link href="/voice" className="teacher-action">
-              <span>02</span>
+              <span>03</span>
               Voice pipeline
             </Link>
             <Link href="/knowledge" className="teacher-action">
-              <span>03</span>
+              <span>04</span>
               Knowledge base
             </Link>
             <Link href="/analytics" className="teacher-action">
-              <span>04</span>
+              <span>05</span>
               Full analytics
             </Link>
           </div>
