@@ -45,6 +45,7 @@ export default function Nav() {
     if (role === 'admin') {
       return [
         { href: '/dashboard/admin', label: 'Dashboard' },
+        { href: '/dashboard/users', label: 'Users' },
         { href: '/skills', label: 'Skills' },
         { href: '/questions', label: 'Questions' },
         { href: '/history', label: 'History' },

@@ -137,6 +137,23 @@ export default function CsvImportModal({
                 </div>
               )}
 
+              {result.notes && result.notes.length > 0 && (
+                <div className="field">
+                  <label>Temporary passwords</label>
+                  <p className="meta" style={{ fontSize: 11, marginBottom: 6 }}>
+                    Copy these now — they are shown only once. Share each password with its
+                    user and ask them to change it after first sign-in.
+                  </p>
+                  <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+                    {result.notes.map((n, i) => (
+                      <p key={i} className="meta" style={{ margin: '4px 0', fontSize: 12, fontFamily: 'monospace' }}>
+                        {n}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="skills-modal-actions">
                 <button type="button" className="skills-modal-button" onClick={pickAnotherFile}>
                   Import another file

@@ -202,6 +202,7 @@ export type BulkImportResult = {
   created: number
   skipped: number
   errors: { row: number; error: string }[]
+  notes?: string[]
 }
 
 async function downloadCsv(path: string, filename: string) {
@@ -239,6 +240,42 @@ export function bulkImportSkills(file: File) {
 
 export function bulkImportQuestions(file: File) {
   return uploadCsv('/api/v1/questions/bulk-import', file)
+}
+
+// ── User management (admin only) ─────────────────────────────────────────────
+
+export type AdminUser = {
+  id: number
+  username: string
+  email: string
+  full_name?: string | null
+  role: 'student' | 'teacher' | 'admin'
+  is_active: boolean
+}
+
+export async function listUsers(params?: { role?: string; search?: string }): Promise<AdminUser[]> {
+  const { data } = await apiClient.get('/api/v1/users/', { params })
+  return data
+}
+
+export async function updateUser(
+  id: number,
+  payload: { role?: 'student' | 'teacher' | 'admin'; is_active?: boolean },
+): Promise<AdminUser> {
+  const { data } = await apiClient.patch(`/api/v1/users/${id}`, payload)
+  return data
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  await apiClient.delete(`/api/v1/users/${id}`)
+}
+
+export function downloadUsersCsvTemplate() {
+  return downloadCsv('/api/v1/users/bulk-template', 'users_template.csv')
+}
+
+export function bulkImportUsers(file: File) {
+  return uploadCsv('/api/v1/users/bulk-import', file)
 }
 
 export async function createInteraction(payload: {

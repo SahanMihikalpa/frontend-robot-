@@ -82,6 +82,7 @@ export function canAccessPath(pathname: string, role?: string | null) {
     return ![
       '/dashboard/teacher',
       '/dashboard/admin',
+      '/dashboard/users',
       '/analytics',
       '/knowledge',
       '/hardware',
@@ -91,7 +92,7 @@ export function canAccessPath(pathname: string, role?: string | null) {
   }
 
   if (role === 'teacher') {
-    return !['/dashboard/student', '/dashboard/admin', '/hardware', '/voice'].includes(pathname)
+    return !['/dashboard/student', '/dashboard/admin', '/dashboard/users', '/hardware', '/voice'].includes(pathname)
   }
 
   return true
