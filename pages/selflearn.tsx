@@ -332,22 +332,7 @@ export default function SelfLearn() {
   // ── START VIEW ──────────────────────────────────────────────────────────────
   if (view === 'start') {
     return (
-      <div className="selflearn-page">
-        <section className="history-hero">
-          <div>
-            <p className="teacher-eyebrow">Self-Paced Learning</p>
-            <h2 className="editorial-title">Learn Anything</h2>
-            <p>
-              Tell the tutor what you want to learn. It teaches you in a back-and-forth conversation —
-              ask questions any time — and quietly checks your understanding to track your mastery.
-            </p>
-          </div>
-          <div className="history-subject-card">
-            <span>Courses</span>
-            <strong>{courses.length}</strong>
-          </div>
-        </section>
-
+      <div className="teacher-dashboard student-dash selflearn-page">
         {error && (
           <p className="feedback error">
             {error}
@@ -355,15 +340,115 @@ export default function SelfLearn() {
           </p>
         )}
 
-        <section className="history-panel">
-          <div className="skills-panel-header">
-            <div>
-              <p className="teacher-eyebrow">New Course</p>
-              <h3 className="editorial-title">What do you want to learn?</h3>
-            </div>
-          </div>
+        <div className="teacher-layout">
+          <section className="teacher-main">
+            <section className="teacher-hero">
+              <div>
+                <p className="teacher-eyebrow">Self-Paced Learning</p>
+                <h2 className="editorial-title">Learn Anything</h2>
+                <p>
+                  Tell the tutor what you want to learn. It teaches you in a back-and-forth conversation —
+                  ask questions any time - and quietly checks your understanding to track your mastery.
+                </p>
+              </div>
+              <div className="teacher-hero-note">
+                <span>Courses</span>
+                <strong>{courses.length}</strong>
+                <p>started so far</p>
+              </div>
+            </section>
 
-          <div className="selflearn-form">
+            <section className="teacher-panel selflearn-learning-panel">
+              <div className="skills-panel-header">
+                <div>
+                  <p className="teacher-eyebrow">In Progress</p>
+                  <h3 className="editorial-title">Your learning</h3>
+                </div>
+                <span className="skills-count-pill subtle">{courses.length} course{courses.length === 1 ? '' : 's'}</span>
+              </div>
+
+              {courses.length === 0 ? (
+                <div className="empty-state">
+                  <p>No courses yet.</p>
+                  <p className="meta">Start a new topic in the panel on the right to begin your first course.</p>
+                </div>
+              ) : (
+                <div className="history-list">
+                  {courses.map((c) => {
+                    const rep = breakdown[c.session_id]
+                    const isOpen = expanded === c.session_id
+                    return (
+                      <article key={c.session_id} className="history-card selflearn-course-card">
+                        <div className="history-card-main">
+                          <div className="selflearn-course-title">
+                            <h4>{c.topic}</h4>
+                            {c.is_private && <span className="history-result-pill success">your material</span>}
+                          </div>
+                          <div className="selflearn-course-actions">
+                            <button className="skills-chip" onClick={() => resume(c.session_id)} disabled={loading}>
+                              {resumingId === c.session_id ? 'Loading…' : (c.phase === 'complete' ? 'Review' : 'Continue')}
+                            </button>
+                            <button className="btn ghost small" onClick={() => toggleExpand(c)}>
+                              {isOpen ? 'Hide details' : 'View details'}
+                            </button>
+                          </div>
+                        </div>
+
+                        <p>
+                          {c.phase === 'complete' ? 'Completed' : `In progress · ${c.current_level}`}
+                          {' · '}{c.concepts_mastered}/{c.concepts_total} concepts mastered
+                        </p>
+
+                        <div className="selflearn-course-progress">
+                          <MasteryBar pct={c.overall_mastery * 100} label="Overall" />
+                        </div>
+
+                        {isOpen && (
+                          <div className="selflearn-course-detail">
+                            {c.documents.length > 0 && (
+                              <div className="selflearn-doc-list">
+                                <p className="meta selflearn-detail-label">Course material</p>
+                                {c.documents.map((d, i) => (
+                                  <div key={i} className="selflearn-doc-row">
+                                    <span>{d.status === 'ingested' ? '📄' : '⚠️'}</span>
+                                    <span className="selflearn-doc-name">{d.filename}</span>
+                                    <span className="meta selflearn-doc-meta">
+                                      {d.status === 'ingested' ? `${d.chunk_count} chunks` : (d.warning || d.status)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <p className="meta selflearn-detail-label">Concepts</p>
+                            {rep ? (
+                              <div className="selflearn-concept-list">
+                                {(rep.concepts || []).map((cc: any, i: number) => (
+                                  <div key={i} className="selflearn-concept-row">
+                                    <span className="selflearn-concept-name">
+                                      {cc.mastered ? '✅' : '•'} {cc.concept} <span className="meta">({cc.level})</span>
+                                    </span>
+                                    <div className="selflearn-concept-bar"><MasteryBar pct={cc.mastery * 100} /></div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="meta">Loading concepts…</p>
+                            )}
+                          </div>
+                        )}
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </section>
+          </section>
+
+          <aside className="teacher-actions">
+            <p className="teacher-eyebrow">New Course</p>
+            <h3 className="editorial-title">What do you want to learn?</h3>
+
+            <div className="selflearn-form">
             <div className="field">
               <label>Topic</label>
               <input
@@ -415,93 +500,9 @@ export default function SelfLearn() {
             <button className="btn selflearn-start-btn" onClick={() => start()} disabled={loading || !topic.trim()}>
               {loading ? 'Building your course…' : 'Start learning'}
             </button>
-          </div>
-        </section>
-
-        <section className="history-panel selflearn-learning-panel">
-          <div className="skills-panel-header">
-            <div>
-              <p className="teacher-eyebrow">In Progress</p>
-              <h3 className="editorial-title">Your learning</h3>
             </div>
-            <span className="skills-count-pill subtle">{courses.length} course{courses.length === 1 ? '' : 's'}</span>
-          </div>
-
-          {courses.length === 0 ? (
-            <div className="empty-state">
-              <p>No courses yet.</p>
-              <p className="meta">Start a new topic above to begin your first course.</p>
-            </div>
-          ) : (
-            <div className="history-list">
-              {courses.map((c) => {
-                const rep = breakdown[c.session_id]
-                const isOpen = expanded === c.session_id
-                return (
-                  <article key={c.session_id} className="history-card selflearn-course-card">
-                    <div className="history-card-main">
-                      <div className="selflearn-course-title">
-                        <h4>{c.topic}</h4>
-                        {c.is_private && <span className="history-result-pill success">your material</span>}
-                      </div>
-                      <div className="selflearn-course-actions">
-                        <button className="skills-chip" onClick={() => resume(c.session_id)} disabled={loading}>
-                          {resumingId === c.session_id ? 'Loading…' : (c.phase === 'complete' ? 'Review' : 'Continue')}
-                        </button>
-                        <button className="btn ghost small" onClick={() => toggleExpand(c)}>
-                          {isOpen ? 'Hide details' : 'View details'}
-                        </button>
-                      </div>
-                    </div>
-
-                    <p>
-                      {c.phase === 'complete' ? 'Completed' : `In progress · ${c.current_level}`}
-                      {' · '}{c.concepts_mastered}/{c.concepts_total} concepts mastered
-                    </p>
-
-                    <div className="selflearn-course-progress">
-                      <MasteryBar pct={c.overall_mastery * 100} label="Overall" />
-                    </div>
-
-                    {isOpen && (
-                      <div className="selflearn-course-detail">
-                        {c.documents.length > 0 && (
-                          <div className="selflearn-doc-list">
-                            <p className="meta selflearn-detail-label">Course material</p>
-                            {c.documents.map((d, i) => (
-                              <div key={i} className="selflearn-doc-row">
-                                <span>{d.status === 'ingested' ? '📄' : '⚠️'}</span>
-                                <span className="selflearn-doc-name">{d.filename}</span>
-                                <span className="meta selflearn-doc-meta">
-                                  {d.status === 'ingested' ? `${d.chunk_count} chunks` : (d.warning || d.status)}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <p className="meta selflearn-detail-label">Concepts</p>
-                        {rep ? (
-                          <div className="selflearn-concept-list">
-                            {(rep.concepts || []).map((cc: any, i: number) => (
-                              <div key={i} className="selflearn-concept-row">
-                                <span className="selflearn-concept-name">
-                                  {cc.mastered ? '✅' : '•'} {cc.concept} <span className="meta">({cc.level})</span>
-                                </span>
-                                <div className="selflearn-concept-bar"><MasteryBar pct={cc.mastery * 100} /></div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="meta">Loading concepts…</p>
-                        )}
-                      </div>
-                    )}
-                  </article>
-                )
-              })}
-            </div>
-          )}
-        </section>
+          </aside>
+        </div>
       </div>
     )
   }
