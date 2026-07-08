@@ -5390,3 +5390,256 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 @media(max-width:600px){
   .student-detail-page .teacher-kpi-grid{grid-template-columns:1fr}
 }
+
+/* ─── Student dashboard — compact density overrides ───
+   Scoped to .student-dash so the teacher dashboard keeps its original scale.
+   Same tokens, radii, and shadows — only spacing and type scale change. */
+.student-dash{gap:20px}
+
+/* Hero: dashboard header inside the main column, not a full-width banner */
+.student-dash .teacher-hero{
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:28px;
+  padding:30px 36px;
+  border-radius:22px;
+}
+.student-dash .teacher-hero h2{
+  margin:12px 0 12px;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
+}
+.student-dash .teacher-hero p{
+  font-size:18px;
+  line-height:1.65;
+}
+.student-dash .teacher-eyebrow{font-size:12px}
+.student-dash .teacher-hero-note{
+  min-height:0;
+  min-width:220px;
+  padding:22px 26px;
+  border-radius:18px;
+  justify-content:center;
+}
+.student-dash .teacher-hero-note span{font-size:11px}
+.student-dash .teacher-hero-note strong{margin-top:12px;font-size:50px}
+.student-dash .teacher-hero-note p{margin-top:6px;font-size:13px}
+
+/* Layout: narrower main column, wider quick-actions sidebar.
+   Sidebar stretches to match the height of the main column. */
+.student-dash .teacher-layout{
+  grid-template-columns:minmax(0,1fr) 380px;
+  gap:20px;
+  align-items:stretch;
+}
+.student-dash .teacher-main{gap:20px}
+.student-dash .teacher-actions{
+  position:static;
+  display:flex;
+  flex-direction:column;
+}
+.student-dash .student-account{margin-top:auto}
+
+/* KPI cards: compact, four across */
+.student-dash .teacher-kpi-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+.student-dash .teacher-kpi-card{
+  min-height:0;
+  justify-content:flex-start;
+  padding:22px 24px;
+  border-radius:16px;
+}
+.student-dash .teacher-kpi-card p{
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+.student-dash .teacher-kpi-card strong{
+  margin-top:12px;
+  font-size:40px;
+}
+.student-dash .teacher-kpi-card small{margin-top:10px;font-size:16px}
+
+/* Panels: tighter padding and headers */
+.student-dash .teacher-panel,
+.student-dash .teacher-actions{
+  padding:28px 32px;
+  border-radius:18px;
+}
+.student-dash .teacher-panel-header{margin-bottom:20px}
+.student-dash .teacher-panel-header h3,
+.student-dash .teacher-actions h3{
+  margin-top:6px;
+  font-size:27px;
+}
+.student-dash .teacher-text-link{font-size:15px}
+.student-dash .teacher-skill-list{gap:16px}
+.student-dash .teacher-skill-row{padding-bottom:16px}
+.student-dash .teacher-skill-topline{margin-bottom:8px}
+.student-dash .teacher-skill-topline p{font-size:17px}
+.student-dash .teacher-skill-topline span{font-size:15px}
+.student-dash .teacher-progress{height:8px}
+
+/* Progress stat strip inside the mastery panel */
+.student-progress-stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-top:22px;
+  padding-top:20px;
+  border-top:1px solid var(--border);
+}
+.student-progress-stat p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.student-progress-stat strong{
+  display:block;
+  margin-top:8px;
+  color:var(--text);
+  font-family:var(--font-sans);
+  font-size:30px;
+  font-weight:500;
+  line-height:1.1;
+}
+.student-skill-breakdown{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+}
+
+/* Quick actions: dashboard shortcuts, not marketing buttons */
+.student-dash .teacher-action-list{
+  margin-top:18px;
+  gap:12px;
+}
+.student-dash .teacher-action{
+  min-height:0;
+  padding:15px 18px;
+  gap:14px;
+  border-radius:13px;
+  font-size:15px;
+}
+.student-dash .teacher-action span{font-size:17px}
+.student-account{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid var(--border);
+}
+
+/* Learn page: Step 1 + Step 2 share one row inside the main column.
+   The row grows to fill the main column so both panels match the
+   session-guide sidebar height. */
+.learn-step-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);
+  gap:20px;
+  align-items:stretch;
+}
+.student-dash .teacher-main .learn-step-row{flex:1}
+.learn-step-row .teacher-panel{margin:0}
+/* Skill cards expand to fill the panel instead of a fixed narrow track */
+.learn-step-row .learn-skill-grid{
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}
+.student-dash .learn-skill-card{padding:20px;gap:10px}
+.student-dash .learn-skill-card-name{font-size:18px}
+.student-dash .learn-skill-card-desc{font-size:15px;-webkit-line-clamp:4}
+.student-dash .learn-skill-empty p{font-size:15px}
+.student-dash .learn-filter label{font-size:12px}
+.student-dash .learn-filter select{font-size:15px}
+/* Step 2: centre the start controls in the available height */
+.learn-step-start{display:flex;flex-direction:column}
+.learn-step-start .learn-step-start-body{
+  margin-block:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:16px;
+}
+
+/* Mastery page: three KPI cards, so a three-track grid.
+   Extra .teacher-dashboard qualifier outranks the generic .student-dash
+   media rules that appear later in the file. */
+.teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:600px){
+  .teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:1fr}
+}
+
+/* History page: the hero note shows a name, not a percentage */
+.student-dash .history-hero-note strong{font-size:26px;line-height:1.2}
+/* History sidebar filter groups */
+.history-filter-group{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+}
+.history-filter-group:first-of-type{margin-top:20px;padding-top:0;border-top:none}
+.history-filter-label{
+  margin:0 0 10px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.history-scope-panel .history-chip-row{margin-bottom:0}
+.history-scope-panel .history-accuracy-block{
+  margin-top:18px;
+  margin-bottom:0;
+}
+/* KPI cards stacked in the sidebar */
+.history-kpi-stack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:18px;
+}
+
+/* History mobile: hero → session scope → metrics → timeline */
+@media(max-width:960px){
+  .history-page .teacher-main{display:contents}
+  .history-page .teacher-layout .teacher-hero{order:1}
+  .history-page .teacher-layout .history-scope-panel{order:2}
+  .history-page .teacher-layout .teacher-actions{order:3}
+  .history-page .teacher-layout .history-timeline-panel{order:4}
+}
+
+/* Self-learn mobile: hero → new-course form → your learning */
+@media(max-width:960px){
+  .selflearn-page .teacher-main{display:contents}
+  .selflearn-page .teacher-layout .teacher-hero{order:1}
+  .selflearn-page .teacher-layout .teacher-actions{order:2}
+  .selflearn-page .teacher-layout .selflearn-learning-panel{order:3}
+}
+
+/* Self-learn page: new-course form lives in the sidebar */
+.student-dash .teacher-actions .selflearn-form{margin-top:20px}
+.student-dash .teacher-actions .selflearn-start-btn{align-self:stretch;text-align:center}
+.student-dash .selflearn-form .field label{font-size:13px}
+.student-dash .selflearn-file-drop-text{font-size:15px}
+.student-dash .selflearn-field-hint{font-size:14px}
+.student-dash .selflearn-course-title h4{margin:0;font-size:18px}
+.student-dash .selflearn-course-card > p{font-size:15px}
+
+@media(max-width:960px){
+  .student-dash .teacher-hero{grid-template-columns:minmax(0,1fr)}
+  .student-dash .teacher-layout{grid-template-columns:minmax(0,1fr)}
+  .student-dash .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .learn-step-row{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:600px){
+  .student-dash .teacher-hero,
+  .student-dash .teacher-panel,
+  .student-dash .teacher-actions{padding:18px 20px}
+  .student-dash .teacher-hero h2{font-size:26px}
+  .student-dash .teacher-hero-note{min-height:0;width:100%}
+  .student-dash .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .student-progress-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

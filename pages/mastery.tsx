@@ -59,24 +59,24 @@ export default function MasteryPage() {
     : conceptMap.filter((s) => s.status === filter)
 
   return (
-    <div className="teacher-dashboard">
-      <section className="teacher-hero">
-        <div>
-          <p className="teacher-eyebrow">BKT Concept Map</p>
-          <h2 className="editorial-title">Mastery</h2>
-          <p>
-            Track skill progress and mastery probability across your learning path.
-          </p>
-        </div>
-        <div className="teacher-hero-note">
-          <span>Overall mastery</span>
-          <strong>{masteredLabel}%</strong>
-          <p>{summary?.total_skills ? `of ${summary.total_skills} skills` : 'across all skills'}</p>
-        </div>
-      </section>
-
+    <div className="teacher-dashboard student-dash mastery-page">
       <div className="teacher-layout">
         <section className="teacher-main">
+          <section className="teacher-hero">
+            <div>
+              <p className="teacher-eyebrow">BKT Concept Map</p>
+              <h2 className="editorial-title">Mastery</h2>
+              <p>
+                Track skill progress and mastery probability across your learning path.
+              </p>
+            </div>
+            <div className="teacher-hero-note">
+              <span>Overall mastery</span>
+              <strong>{masteredLabel}%</strong>
+              <p>{summary?.total_skills ? `of ${summary.total_skills} skills` : 'across all skills'}</p>
+            </div>
+          </section>
+
           <div className="teacher-kpi-grid">
             <div className="teacher-kpi-card">
               <p>Mastered</p>
@@ -131,7 +131,7 @@ export default function MasteryPage() {
                         <p style={{ fontWeight: 600, color: 'var(--text)' }}>{skill.skill_name || `Skill ${skill.skill_id}`}</p>
                         <span
                           style={{
-                            fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                            fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 999,
                             color: cfg.color, background: `${cfg.color}1A`, border: `1px solid ${cfg.color}4D`,
                           }}
                         >
@@ -140,7 +140,7 @@ export default function MasteryPage() {
                       </div>
                       <div className="teacher-skill-topline" style={{ marginTop: 6 }}>
                         <p>Mastery</p>
-                        <span style={{ fontSize: 12, color: cfg.color, fontWeight: 600 }}>{pct}%</span>
+                        <span style={{ fontSize: 14, color: cfg.color, fontWeight: 600 }}>{pct}%</span>
                       </div>
                       <div className="teacher-progress">
                         <span style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${cfg.color}, ${cfg.color}cc)` }} />
@@ -168,7 +168,7 @@ export default function MasteryPage() {
                   margin: 0
                 }}
               >Next skill to practise</p>
-              <strong style={{ display: 'block', marginTop: 8, fontSize: 16 }}>
+              <strong style={{ display: 'block', marginTop: 8, fontSize: 17 }}>
                 {nextSkill.skill_name || `Skill ${nextSkill.skill_id}`}
               </strong>
               {nextSkill.reason && (
@@ -206,9 +206,9 @@ export default function MasteryPage() {
                       padding: '10px 0', borderBottom: i < Math.min(unlockedSkills.length, 6) - 1 ? '1px solid var(--border)' : 'none',
                     }}
                   >
-                    <span style={{ fontSize: 13, color: 'var(--text)' }}>{s.skill_name || `Skill ${s.skill_id}`}</span>
+                    <span style={{ fontSize: 14, color: 'var(--text)' }}>{s.skill_name || `Skill ${s.skill_id}`}</span>
                     {s.unlocked_at && (
-                      <span className="meta" style={{ fontSize: 11 }}>
+                      <span className="meta" style={{ fontSize: 12 }}>
                         {new Date(s.unlocked_at).toLocaleDateString()}
                       </span>
                     )}
