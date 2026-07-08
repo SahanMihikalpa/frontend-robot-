@@ -10,7 +10,7 @@ import ImageLightbox from '../components/ImageLightbox'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type MsgRole = 'system' | 'student'
-type MsgType = 'PRACTICE_QUESTION' | 'FEEDBACK' | 'EXPLANATION' | 'HINT' | 'DIALOGUE' | 'ANSWER' | 'QUESTION' | 'SUMMARY' | 'SESSION_RESUMED' | 'SESSION_START'
+type MsgType = 'PRACTICE_QUESTION' | 'FEEDBACK' | 'EXPLANATION' | 'HINT' | 'DIALOGUE' | 'ANSWER' | 'QUESTION' | 'SUMMARY' | 'SESSION_RESUMED' | 'SESSION_START' | 'LESSON'
 type VoiceState = 'idle' | 'recording' | 'processing'
 type Phase = 'skill-pick' | 'assessment' | 'session'
 
@@ -298,6 +298,12 @@ function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 14 }}>💡</span>
             <strong style={{ fontSize: 12, color: 'var(--warning)' }}>Hint</strong>
+          </div>
+        )}
+        {msg.type === 'LESSON' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <span style={{ fontSize: 16 }}>📘</span>
+            <strong style={{ fontSize: 13, color: 'var(--accent)' }}>Lesson</strong>
           </div>
         )}
 
@@ -627,6 +633,10 @@ export default function LearnPage() {
         if (resumedMastery != null) setMastery(resumedMastery * 100)
       } else {
         setMessages([])
+        // Welcome + full lesson content appear in the chat before the first
+        // practice question, so the student reads the topic before practising.
+        if (res.welcome_message) addSystemMsg(res.welcome_message)
+        if (res.lesson_message) addSystemMsg(res.lesson_message)
         const firstMsg = res.first_message || res.message || res
         addSystemMsg(firstMsg)
       }
