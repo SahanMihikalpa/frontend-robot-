@@ -5533,10 +5533,42 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border-top:1px solid var(--border);
 }
 
+/* Learn page: Step 1 + Step 2 share one row inside the main column.
+   The row grows to fill the main column so both panels match the
+   session-guide sidebar height. */
+.learn-step-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);
+  gap:20px;
+  align-items:stretch;
+}
+.student-dash .teacher-main .learn-step-row{flex:1}
+.learn-step-row .teacher-panel{margin:0}
+/* Skill cards expand to fill the panel instead of a fixed narrow track */
+.learn-step-row .learn-skill-grid{
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}
+.student-dash .learn-skill-card{padding:20px;gap:10px}
+.student-dash .learn-skill-card-name{font-size:18px}
+.student-dash .learn-skill-card-desc{font-size:15px;-webkit-line-clamp:4}
+.student-dash .learn-skill-empty p{font-size:15px}
+.student-dash .learn-filter label{font-size:12px}
+.student-dash .learn-filter select{font-size:15px}
+/* Step 2: centre the start controls in the available height */
+.learn-step-start{display:flex;flex-direction:column}
+.learn-step-start .learn-step-start-body{
+  margin-block:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:16px;
+}
+
 @media(max-width:960px){
   .student-dash .teacher-hero{grid-template-columns:minmax(0,1fr)}
   .student-dash .teacher-layout{grid-template-columns:minmax(0,1fr)}
   .student-dash .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .learn-step-row{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:600px){
   .student-dash .teacher-hero,
