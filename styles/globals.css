@@ -5572,6 +5572,45 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:1fr}
 }
 
+/* History page: the hero note shows a name, not a percentage */
+.student-dash .history-hero-note strong{font-size:26px;line-height:1.2}
+/* History sidebar filter groups */
+.history-filter-group{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+}
+.history-filter-group:first-of-type{margin-top:20px;padding-top:0;border-top:none}
+.history-filter-label{
+  margin:0 0 10px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.history-scope-panel .history-chip-row{margin-bottom:0}
+.history-scope-panel .history-accuracy-block{
+  margin-top:18px;
+  margin-bottom:0;
+}
+/* KPI cards stacked in the sidebar */
+.history-kpi-stack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:18px;
+}
+
+/* History mobile: hero → session scope → metrics → timeline */
+@media(max-width:960px){
+  .history-page .teacher-main{display:contents}
+  .history-page .teacher-layout .teacher-hero{order:1}
+  .history-page .teacher-layout .history-scope-panel{order:2}
+  .history-page .teacher-layout .teacher-actions{order:3}
+  .history-page .teacher-layout .history-timeline-panel{order:4}
+}
+
 /* Self-learn mobile: hero → new-course form → your learning */
 @media(max-width:960px){
   .selflearn-page .teacher-main{display:contents}
