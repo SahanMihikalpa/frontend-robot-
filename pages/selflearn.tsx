@@ -652,34 +652,36 @@ export default function SelfLearn() {
                     placeholder={pendingCheck ? 'Type your answer…' : 'Ask a question, or say "go on"…'}
                     disabled={loading || voiceState !== 'idle'}
                   />
-                  {voiceState === 'recording' ? (
+                  <div className="selflearn-composer-actions">
+                    {voiceState === 'recording' ? (
+                      <button
+                        className="teacher-action selflearn-mic-btn"
+                        onClick={stopVoiceRecording}
+                        title="Stop recording"
+                        style={{ minHeight: 'unset', fontSize: 15, color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                      >
+                        ⏹
+                      </button>
+                    ) : (
+                      <button
+                        className="teacher-action selflearn-mic-btn"
+                        onClick={startVoiceRecording}
+                        disabled={loading || voiceState !== 'idle'}
+                        title="Speak to the tutor"
+                        style={{ minHeight: 'unset', fontSize: 18, justifyContent: 'center' }}
+                      >
+                        🎙️
+                      </button>
+                    )}
                     <button
-                      className="teacher-action"
-                      onClick={stopVoiceRecording}
-                      title="Stop recording"
-                      style={{ minHeight: 'unset', padding: '10px 18px', fontSize: 15, color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                      className="teacher-action primary selflearn-send-btn"
+                      onClick={() => send(draft)}
+                      disabled={loading || !draft.trim() || voiceState !== 'idle'}
+                      style={{ minHeight: 'unset', padding: '12px 22px', fontSize: 16 }}
                     >
-                      ⏹ Stop
+                      Send
                     </button>
-                  ) : (
-                    <button
-                      className="teacher-action"
-                      onClick={startVoiceRecording}
-                      disabled={loading || voiceState !== 'idle'}
-                      title="Speak to the tutor"
-                      style={{ minHeight: 'unset', padding: '10px 18px', fontSize: 18, justifyContent: 'center' }}
-                    >
-                      🎙️
-                    </button>
-                  )}
-                  <button
-                    className="teacher-action primary"
-                    onClick={() => send(draft)}
-                    disabled={loading || !draft.trim() || voiceState !== 'idle'}
-                    style={{ minHeight: 'unset', padding: '12px 22px', fontSize: 16 }}
-                  >
-                    Send
-                  </button>
+                  </div>
                 </div>
               </div>
             )}

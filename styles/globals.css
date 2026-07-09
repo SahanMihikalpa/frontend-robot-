@@ -4724,9 +4724,42 @@ body:has(.selflearn-session-view) .home-footer{
   .selflearn-session-layout .teacher-main{
     height:auto;
   }
+}
+/* Mobile: a true full-screen chat takeover (Claude/ChatGPT mobile
+   pattern) — the site header/footer/page padding were eating most of the
+   viewport, leaving a small message window no matter how the internal
+   heights were tuned. Instead the lesson card becomes a fixed layer that
+   covers the whole screen; its own header (topic + back button) acts as
+   the app bar, the message list fills all remaining space, and the
+   composer is pinned to the very bottom edge. The progress sidebar isn't
+   part of this screen — reachable again once the student is back on
+   the wider layout. */
+@media(max-width:600px){
+  body:has(.selflearn-session-view) .site-header,
+  body:has(.selflearn-session-view) .header-blur-mask{
+    display:none;
+  }
+  .selflearn-session-view .selflearn-progress-panel{
+    display:none;
+  }
   .selflearn-lesson-card{
-    flex:none;
-    height:640px;
+    position:fixed;
+    inset:0;
+    z-index:150;
+    height:auto;
+    border-radius:0;
+    box-shadow:none;
+    border:none;
+  }
+  .selflearn-lesson-header{
+    padding:14px 16px !important;
+    padding-top:calc(14px + env(safe-area-inset-top)) !important;
+  }
+  .selflearn-lesson-header-title h2{
+    font-size:20px;
+  }
+  .learn-chat-card-input{
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));
   }
 }
 
@@ -5165,6 +5198,26 @@ body:has(.selflearn-session-view) .home-footer{
   min-height:54px;
   max-height:160px;
   resize:vertical;
+}
+/* Mic + Send always sit side by side in their own row, even when the
+   composer stacks to a column on narrow screens — the mic button is a
+   small fixed-size square icon button, Send fills the rest. */
+.selflearn-composer-actions{
+  display:flex;
+  gap:10px;
+  flex-shrink:0;
+}
+.selflearn-mic-btn{
+  flex-shrink:0;
+  width:48px;
+  height:48px;
+  padding:0 !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.selflearn-send-btn{
+  flex:1;
 }
 @media(max-width:600px){
   .selflearn-course-title,
