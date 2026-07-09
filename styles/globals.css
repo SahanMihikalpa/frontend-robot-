@@ -3147,7 +3147,8 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 /* The practice session is a fixed-height workspace — the footer below it
    just adds a dead scroll strip, so hide it while a session is active. */
-body:has(.learn-session) .home-footer{
+body:has(.learn-session) .home-footer,
+body:has(.selflearn-session-view) .home-footer{
   display:none;
 }
 .learn-question-col{
@@ -4646,29 +4647,112 @@ body:has(.learn-session) .home-footer{
   flex-direction:column;
   gap:24px;
 }
-.selflearn-session-hero{
-  align-items:flex-start;
+/* Session — topic header merged into the top of the lesson card itself
+   (no separate hero): title on the left, back button on the right, both
+   on the same row so the button sits level with the title. */
+.selflearn-lesson-header{
+  align-items:flex-end !important;
+  gap:16px;
+  padding:18px 22px !important;
 }
-.selflearn-session-title{
-  margin:10px 0 12px;
-  font-size:clamp(34px, 5vw, 56px);
+.selflearn-lesson-header-title h2{
+  margin:4px 0 0;
+  font-size:26px;
+  line-height:1.15;
 }
-.selflearn-session-status{
-  min-width:240px;
-  gap:0;
+.selflearn-level-pill{
+  margin-left:14px;
+  vertical-align:middle;
+  font-size:14px;
 }
-.selflearn-session-pct{
-  margin-top:10px;
-  color:var(--surface);
+/* Accent-tinted back button, matching the Exit button used in the
+   practice session — its own class since inline styles can't :hover. */
+.selflearn-back-btn{
+  flex-shrink:0;
+  font-size:14px !important;
+  padding:10px 16px !important;
+  color:var(--accent) !important;
+  border-color:var(--accent) !important;
+  background:var(--accent-light) !important;
+}
+.selflearn-back-btn:hover{
+  color:#fff !important;
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+}
+
+/* Session layout — the row is pinned to a fixed viewport-relative height
+   (grid-template-rows forces the implicit row to actually fill the
+   container instead of the default content-sized auto row). The main
+   column keeps the default align-self:stretch so it's clipped to that
+   fixed height — that's what keeps the composer reachable without page
+   scroll. The sidebar gets align-self:start instead, so it does NOT
+   stretch/clip to that same height — it sizes to its own content and any
+   overflow past the row just flows into the normal page scroll, instead
+   of needing a second, competing internal scrollbar. */
+.selflearn-session-layout{
+  height:calc(100vh - 140px);
+  min-height:560px;
+  grid-template-rows:minmax(0,1fr);
+}
+.selflearn-session-layout .teacher-main{
+  height:100%;
+  min-height:0;
+}
+.selflearn-progress-panel{
+  align-self:start;
+}
+/* Wider sidebar for this page specifically — the concept list reads better
+   with more room. Three-class selector to reliably beat the shared
+   .student-dash .teacher-layout rule regardless of source order. */
+.student-dash .teacher-layout.selflearn-session-layout{
+  grid-template-columns:minmax(0,1fr) 460px;
+}
+.selflearn-lesson-card{
+  flex:1;
+  min-height:0;
+}
+@media(max-width:960px){
+  .selflearn-session-layout{
+    height:auto;
+    min-height:0;
+    grid-template-rows:none;
+  }
+  .student-dash .teacher-layout.selflearn-session-layout{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .selflearn-session-layout .teacher-main{
+    height:auto;
+  }
+  .selflearn-lesson-card{
+    flex:none;
+    height:640px;
+  }
+}
+
+/* Progress sidebar — always-visible concept breakdown. No internal scroll:
+   it sizes to its own content (see align-self:start above) and any
+   overflow past the lesson card's height is handled by the normal page
+   scroll, so there's a single extra scrollbar at most instead of a third
+   competing one squeezed into the sidebar itself. */
+.selflearn-progress-stat{
+  margin-top:18px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--border);
+}
+.selflearn-progress-stat strong{
+  display:block;
+  margin-bottom:10px;
+  color:var(--text);
   font-family:var(--font-sans);
-  font-size:38px;
+  font-size:44px;
   font-weight:500;
   line-height:1;
 }
-.selflearn-report-btn{
-  margin-top:14px;
-  align-self:flex-start;
-  color:#D8C9BD !important;
+.selflearn-progress-detail{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid var(--border);
 }
 
 /* New course form */
@@ -4892,7 +4976,7 @@ body:has(.learn-session) .home-footer{
   font-weight:700;
   letter-spacing:.08em;
   text-transform:uppercase;
-  font-size:11px;
+  font-size:12px;
 }
 .selflearn-doc-list{
   margin-bottom:14px;
@@ -4904,14 +4988,14 @@ body:has(.learn-session) .home-footer{
   display:flex;
   align-items:center;
   gap:8px;
-  font-size:13px;
+  font-size:14px;
   color:var(--text);
 }
 .selflearn-doc-name{
   flex:1;
 }
 .selflearn-doc-meta{
-  font-size:11px;
+  font-size:12px;
 }
 .selflearn-concept-list{
   display:flex;
@@ -4920,17 +5004,25 @@ body:has(.learn-session) .home-footer{
 }
 .selflearn-concept-row{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   gap:14px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.selflearn-concept-row:last-child{
+  padding-bottom:0;
+  border-bottom:none;
 }
 .selflearn-concept-name{
   flex:1;
-  font-size:13px;
+  font-size:15px;
+  line-height:1.5;
   color:var(--text);
 }
 .selflearn-concept-bar{
-  width:150px;
+  width:160px;
   flex-shrink:0;
+  margin-top:3px;
 }
 
 /* Mastery bar (shared mini component) */
@@ -4941,31 +5033,24 @@ body:has(.learn-session) .home-footer{
 }
 .selflearn-mastery-label{
   white-space:nowrap;
-  font-size:12px;
+  font-size:13px;
 }
 .selflearn-mastery-track{
   flex:1;
-  height:6px;
+  height:7px;
 }
 .selflearn-mastery-pct{
-  font-size:12px;
-  min-width:34px;
+  font-size:13px;
+  min-width:38px;
   text-align:right;
   color:var(--muted);
 }
 
-/* Session / chat view */
+/* Session / chat view — height for .selflearn-lesson-card comes from the
+   flex:1 rule near .selflearn-session-layout above; sizing within the
+   scrolling message list comes from .learn-chat-messages. */
 .selflearn-chat-window{
-  min-height:360px;
-  max-height:56vh;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  overflow-y:auto;
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:8px;
+  min-height:200px;
 }
 .selflearn-msg-row{
   display:flex;
@@ -5003,9 +5088,9 @@ body:has(.learn-session) .home-footer{
   color:var(--danger);
 }
 .selflearn-feedback-text{
-  margin:6px 0 10px;
-  font-size:14px;
-  line-height:1.55;
+  margin:8px 0 12px;
+  font-size:16px;
+  line-height:1.6;
   color:var(--text);
 }
 .selflearn-bubble.selflearn-check{
@@ -5015,27 +5100,44 @@ body:has(.learn-session) .home-footer{
 .selflearn-check-text{
   margin:0;
   white-space:pre-wrap;
-  line-height:1.55;
-  font-size:14px;
+  line-height:1.6;
+  font-size:16px;
   font-weight:700;
   color:var(--text);
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 .selflearn-teach-text{
   margin:0;
   white-space:pre-wrap;
-  line-height:1.65;
-  font-size:14px;
+  line-height:1.7;
+  font-size:16px;
   color:var(--text);
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 .selflearn-options{
   display:flex;
   flex-direction:column;
-  gap:8px;
-  margin-top:12px;
+  gap:10px;
+  margin-top:14px;
 }
 .selflearn-option-btn{
   justify-content:flex-start;
   text-align:left;
+  font-size:15px !important;
+  padding:12px 16px !important;
+  color:var(--text) !important;
+  background:var(--surface) !important;
+  border:1px solid var(--border) !important;
+}
+.selflearn-option-btn:hover:not(:disabled){
+  border-color:rgba(232,90,51,.45) !important;
+  background:var(--accent-light) !important;
+  color:var(--text) !important;
+}
+.selflearn-option-key{
+  color:var(--accent) !important;
 }
 .selflearn-option-key{
   margin-right:8px;
@@ -5044,43 +5146,27 @@ body:has(.learn-session) .home-footer{
   align-self:flex-start;
   color:var(--muted);
   font-style:italic;
-  font-size:13px;
+  font-size:15px;
 }
 .selflearn-complete-row{
   text-align:center;
   margin-top:8px;
 }
-.selflearn-composer{
-  margin-top:18px;
-}
 .selflearn-pending-hint{
   margin-bottom:8px;
+  font-size:14px;
 }
 .selflearn-composer-row{
   display:flex;
   gap:10px;
   align-items:flex-end;
 }
-.selflearn-composer-row textarea{
-  flex:1;
+.selflearn-composer-row .learn-chat-textarea{
   min-height:54px;
   max-height:160px;
-  padding:14px !important;
-  color:var(--text) !important;
-  background:#FFFDF9 !important;
-  border:1px solid var(--border-strong) !important;
-  border-radius:8px !important;
   resize:vertical;
 }
-.selflearn-error{
-  margin-top:14px;
-}
-@media(max-width:960px){
-  .selflearn-session-hero{flex-direction:column;align-items:flex-start}
-}
 @media(max-width:600px){
-  .selflearn-page > .history-hero,
-  .selflearn-page > .history-panel{padding:22px}
   .selflearn-course-title,
   .history-card-main.selflearn-course-title{flex-direction:column;align-items:flex-start}
   .selflearn-composer-row{flex-direction:column;align-items:stretch}
