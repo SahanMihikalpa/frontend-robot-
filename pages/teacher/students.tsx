@@ -17,21 +17,25 @@ function InfoBox({ title, children, accent = 'var(--accent-secondary)', defaultO
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  // color-mix() blends the (always var(--x)) accent with transparent to get
+  // a tint/border — string-concatenating a hex-alpha suffix directly onto a
+  // var() reference (the old `${accent}33` pattern) isn't valid CSS and
+  // silently drops the whole declaration, so nothing rendered.
   return (
-    <div className="teacher-info-box" style={{ borderColor: `${accent}33` }}>
+    <div className="teacher-info-box" style={{ borderColor: `color-mix(in srgb, ${accent} 20%, transparent)` }}>
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(o => !o)}
         className="teacher-info-toggle"
-        style={{ background: accent + '12' }}>
+        style={{ background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>
         <span style={{ color: accent }}>{title}</span>
         <span style={{ color: accent }}>{open ? 'Close' : 'Expand'}</span>
       </button>
       <div
         className={`teacher-info-body ${open ? 'open' : ''}`}
         aria-hidden={!open}
-        style={{ borderTopColor: `${accent}22` }}
+        style={{ borderTopColor: `color-mix(in srgb, ${accent} 13%, transparent)` }}
       >
         <div className="teacher-info-content">
           <div className="teacher-info-content-inner">
@@ -138,7 +142,7 @@ export default function TeacherStudents() {
               <div
                 key={key}
                 className="teacher-status-card"
-                style={{ borderColor: `${val.color}30`, animationDelay: `${idx * 45}ms` }}
+                style={{ borderColor: `color-mix(in srgb, ${val.color} 19%, transparent)`, animationDelay: `${idx * 45}ms` }}
               >
                 <span style={{ background: val.color + '22', color: val.color }}>
                   {statusLabel(key)}

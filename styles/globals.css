@@ -669,11 +669,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   padding:18px 14px;
   border-bottom:1px solid var(--border);
   text-align:left;
-  font-size:14px;
+  font-size:15px;
 }
 .teacher-table th{
   color:var(--muted);
-  font-size:11px;
+  font-size:12px;
   font-weight:700;
   letter-spacing:.16em;
   text-transform:uppercase;
@@ -974,13 +974,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   letter-spacing:.16em;
 }
 .teacher-info-toggle span:first-child{
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
 .teacher-info-toggle span:last-child{
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
 }
 .teacher-info-content{
@@ -1039,21 +1039,21 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-status-card span{
   display:inline-flex;
-  padding:5px 12px;
+  padding:6px 13px;
   border-radius:999px;
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   letter-spacing:.03em;
 }
 .teacher-status-card p{
   margin:12px 0 4px;
   color:var(--text);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.5;
 }
 .teacher-status-card small{
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .teacher-column-guide{
@@ -1063,7 +1063,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-column-guide div{
   padding:12px 0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.55;
   border-bottom:1px solid var(--border);
 }
@@ -1096,20 +1096,20 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-sort-control span{
   padding:0 8px 0 10px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
 .teacher-sort-control button{
-  min-height:36px;
+  min-height:38px;
   padding:8px 16px;
   color:var(--muted);
   background:transparent;
   border:none;
   border-radius:999px;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   font-weight:700;
   transition:background .24s ease, color .24s ease, transform .18s ease, box-shadow .24s ease;
 }
@@ -1140,7 +1140,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:var(--surface);
   border:1px solid var(--border-strong);
   border-radius:10px;
-  font-size:14px;
+  font-size:15px;
   font-weight:700;
   appearance:none;
   -webkit-appearance:none;
@@ -1176,13 +1176,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-student-name{
   color:var(--text);
+  font-size:16px;
   font-weight:800;
   transition:color .2s ease;
 }
 .teacher-student-meta{
   margin-top:4px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.45;
 }
 
@@ -1229,7 +1230,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     display:block;
     margin-bottom:6px;
     color:var(--muted);
-    font-size:10.5px;
+    font-size:11.5px;
     font-weight:800;
     letter-spacing:.1em;
     text-transform:uppercase;
@@ -1243,7 +1244,8 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     border-bottom:1px solid var(--border-strong) !important;
   }
   .teacher-roster-cell-name::before{display:none}
-  .teacher-roster-cell-name .teacher-student-name{font-size:17px}
+  .teacher-roster-cell-name .teacher-student-name{font-size:18px}
+  .teacher-roster-cell-name .teacher-student-meta{font-size:14px}
 
   /* ZPD status: full-width tinted strip, pill + description inline */
   .teacher-roster-table td[data-label="ZPD Status"]{
@@ -1266,13 +1268,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     margin-bottom:10px;
     background:var(--bg);
     border-radius:12px;
-    font-size:19px;
+    font-size:21px;
   }
 
   /* Last active: full width, its own line */
   .teacher-roster-table td[data-label="Last active"]{
     grid-column:1 / -1;
     padding-top:2px !important;
+    font-size:15px;
   }
 
   /* Details link — no caption, full-width button, sits below a divider */
@@ -1287,15 +1290,15 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     width:100%;
     min-height:44px;
     text-align:center;
-    font-size:14px;
+    font-size:15px;
   }
 }
 .teacher-status-pill{
   display:inline-flex;
-  padding:5px 12px;
+  padding:6px 13px;
   border:1px solid rgba(27,23,18,.06);
   border-radius:999px;
-  font-size:11.5px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.02em;
   white-space:nowrap;
@@ -1309,14 +1312,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:34px;
-  padding:8px 13px;
+  min-height:36px;
+  padding:8px 14px;
   color:var(--accent);
   background:rgba(232,90,51,.08);
   border:1px solid rgba(232,90,51,.24);
   border-radius:999px;
   text-decoration:none;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
   transition:background .2s ease, color .2s ease, transform .18s ease, box-shadow .2s ease;
 }
@@ -1332,7 +1335,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-roster-note{
   margin:0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.7;
 }
 .teacher-heatmap-page{
@@ -1365,13 +1368,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-align:left;
 }
 .teacher-heatmap-info-toggle span:first-child{
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.14em;
   text-transform:uppercase;
 }
 .teacher-heatmap-info-toggle span:last-child{
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-info-content{
@@ -1408,28 +1411,28 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-guide-card span{
   width:max-content;
-  padding:5px 10px;
+  padding:6px 11px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-guide-card p{
   margin:0;
   color:var(--text);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.5;
 }
 .teacher-heatmap-guide-card small{
   margin-top:auto;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .teacher-heatmap-hint,
 .teacher-heatmap-filter-note{
   margin:0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.6;
 }
 .teacher-heatmap-summary{
@@ -1443,7 +1446,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border:1px solid rgba(232,90,51,.24);
   border-radius:999px;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
 }
 .teacher-heatmap-filter-grid{
@@ -1468,9 +1471,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-align:left;
 }
 .teacher-heatmap-filter span{
-  padding:5px 10px;
+  padding:6px 11px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-filter strong{
@@ -1482,7 +1485,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-filter small{
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
 }
 .teacher-heatmap-filter.active{
   background:#FFF9F3;
@@ -1512,7 +1515,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-heatmap-table th{
   padding:10px 8px;
   color:var(--muted);
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   letter-spacing:.12em;
   text-align:center;
@@ -1529,7 +1532,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-table td{
   padding:6px 8px;
-  font-size:13px;
+  font-size:14px;
   vertical-align:middle;
 }
 .teacher-heatmap-table td:first-child{
@@ -1548,12 +1551,12 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--accent);
 }
 .teacher-heatmap-cell{
-  width:44px;
-  height:40px;
+  width:46px;
+  height:42px;
   padding:0 !important;
   border-radius:8px;
   text-align:center;
-  font-size:12px !important;
+  font-size:13px !important;
   font-weight:800;
   cursor:default;
 }
@@ -1564,9 +1567,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-row-status span{
   display:inline-flex;
-  padding:4px 9px;
+  padding:5px 10px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-row-status .danger{
@@ -1596,7 +1599,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-heatmap-tooltip p{
   margin:0;
   color:var(--accent);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .skills-page{
