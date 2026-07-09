@@ -347,7 +347,7 @@ export default function SelfLearn() {
           </p>
         )}
 
-        <div className="teacher-layout">
+        <div className="teacher-layout selflearn-start-layout">
           <section className="teacher-main">
             <section className="teacher-hero">
               <div>
@@ -467,7 +467,7 @@ export default function SelfLearn() {
             </div>
 
             <div className="field">
-              <label>Course material <span className="meta" style={{ fontWeight: 400 }}>(optional — PDF, TXT, MD)</span></label>
+              <label>Course material <span className="meta" style={{ fontWeight: 400, fontSize: 12, textTransform: 'none', letterSpacing: 'normal' }}>(optional — PDF, TXT, MD)</span></label>
               <label className="selflearn-file-drop">
                 <input
                   type="file"

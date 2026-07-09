@@ -4837,7 +4837,7 @@ body:has(.selflearn-session-view) .home-footer{
 .selflearn-file-drop-text{
   color:var(--text);
   font-size:14px;
-  font-weight:700;
+  font-weight:600;
 }
 
 /* Field hints */
@@ -5800,12 +5800,28 @@ body:has(.selflearn-session-view) .home-footer{
   .selflearn-page .teacher-layout .selflearn-learning-panel{order:3}
 }
 
-/* Self-learn page: new-course form lives in the sidebar */
+/* Self-learn page: new-course form lives in the sidebar.
+   Hierarchy top to bottom: title (27px) > field labels (13px, the
+   section headings within the form) > field values/file-drop prompt
+   (14-15px, the actual content) > hints (12px fine print) — the hint
+   was previously 14px, i.e. bigger than the label above it. */
+/* Wider sidebar so the form's labels/hints wrap less and the card sits
+   shorter overall — narrows the "Your learning" column to compensate.
+   Three-class selector to reliably beat the shared .student-dash
+   .teacher-layout rule regardless of source order. */
+.student-dash .teacher-layout.selflearn-start-layout{
+  grid-template-columns:minmax(0,1fr) 480px;
+}
+@media(max-width:960px){
+  .student-dash .teacher-layout.selflearn-start-layout{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
 .student-dash .teacher-actions .selflearn-form{margin-top:20px}
 .student-dash .teacher-actions .selflearn-start-btn{align-self:stretch;text-align:center}
 .student-dash .selflearn-form .field label{font-size:13px}
-.student-dash .selflearn-file-drop-text{font-size:15px}
-.student-dash .selflearn-field-hint{font-size:14px}
+.student-dash .selflearn-file-drop-text{font-size:14px}
+.student-dash .selflearn-field-hint{font-size:12px}
 .student-dash .selflearn-course-title h4{margin:0;font-size:18px}
 .student-dash .selflearn-course-card > p{font-size:15px}
 
