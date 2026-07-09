@@ -3019,16 +3019,16 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .learn-option{
   display:flex;
   align-items:flex-start;
-  gap:12px;
+  gap:14px;
   width:100%;
   text-align:left;
-  padding:14px 16px;
+  padding:16px 18px;
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:12px;
   color:var(--text);
   font-family:inherit;
-  font-size:14.5px;
+  font-size:16px;
   line-height:1.55;
   cursor:pointer;
   transition:border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
@@ -3052,13 +3052,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:28px;
-  height:28px;
+  width:30px;
+  height:30px;
   border-radius:8px;
   background:var(--bg);
   border:1px solid var(--border);
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
 }
 .learn-option.correct{
@@ -3094,13 +3094,25 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .learn-option.dimmed{
   color:var(--muted);
 }
+/* Exit session button — accent-tinted, with its own hover state since
+   inline styles (used for the base look) can't respond to :hover. */
+.learn-exit-btn{
+  color:var(--accent) !important;
+  border-color:var(--accent) !important;
+  background:var(--accent-light) !important;
+}
+.learn-exit-btn:hover{
+  color:#fff !important;
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+}
 .learn-status-pill{
   display:inline-flex;
   align-items:center;
   gap:6px;
-  padding:7px 14px;
+  padding:8px 16px;
   border-radius:999px;
-  font-size:13px;
+  font-size:14px;
   font-weight:700;
 }
 .learn-status-pill.success{
@@ -3124,8 +3136,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   height:calc(100vh - 130px);
   min-height:520px;
 }
+/* The practice session is a fixed-height workspace — the footer below it
+   just adds a dead scroll strip, so hide it while a session is active. */
+body:has(.learn-session) .home-footer{
+  display:none;
+}
 .learn-question-col{
-  width:44%;
+  width:36%;
   min-width:280px;
   flex-shrink:0;
   display:flex;
@@ -3137,8 +3154,33 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex:1;
   display:flex;
   flex-direction:column;
-  gap:14px;
   min-width:0;
+  height:100%;
+}
+/* One card holds the header, the scrolling message list, and the input —
+   a single bordered container instead of three stacked panels, so there's
+   only one scrollbar (the message list's) instead of a nested pair. */
+.learn-chat-card{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+}
+.learn-chat-card-header{
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:18px 22px;
+  border-bottom:1px solid var(--border);
+}
+.learn-chat-card-input{
+  flex-shrink:0;
+  padding:16px 20px;
+  border-top:1px solid var(--border);
 }
 .learn-chat-messages{
   flex:1;
@@ -3148,10 +3190,16 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:14px;
   overflow-y:auto;
   padding:20px 22px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:16px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border-strong) transparent;
 }
+.learn-chat-messages::-webkit-scrollbar{width:8px}
+.learn-chat-messages::-webkit-scrollbar-track{background:transparent}
+.learn-chat-messages::-webkit-scrollbar-thumb{
+  background:var(--border-strong);
+  border-radius:999px;
+}
+.learn-chat-messages::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 .learn-chat-empty{
   flex:1;
   display:flex;
@@ -3176,21 +3224,21 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .learn-chat-empty strong{
   color:var(--text);
-  font-size:15px;
+  font-size:19px;
 }
 .learn-chat-empty p{
   margin:0;
-  max-width:320px;
+  max-width:380px;
   color:var(--muted);
-  font-size:13.5px;
+  font-size:16px;
   line-height:1.65;
 }
 .learn-chat-textarea{
   flex:1;
   resize:none;
-  padding:12px 14px;
+  padding:14px 18px;
   font-family:inherit;
-  font-size:14px;
+  font-size:16px;
   color:var(--text);
   background:var(--bg);
   border:1px solid var(--border-strong);
@@ -3215,6 +3263,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     height:auto;
   }
   .learn-chat-col{
+    height:auto;
     min-height:480px;
   }
   .learn-chat-messages{
@@ -3223,8 +3272,8 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 
 .chat-bubble{
-  max-width:80%;padding:10px 14px;border-radius:14px;
-  font-size:14px;line-height:1.55;
+  max-width:80%;padding:13px 17px;border-radius:14px;
+  font-size:16px;line-height:1.6;
 }
 .chat-bubble.user{
   align-self:flex-end;
