@@ -44,6 +44,12 @@
 *{box-sizing:border-box}
 html,body,#__next{height:100%}
 button,input,textarea,select{font-family:inherit}
+html{
+  /* Safety net: nothing in the layout should ever need horizontal
+     scroll — a stray long word/URL in dynamic content (skill names,
+     chat replies, etc.) shouldn't be able to widen the whole page. */
+  overflow-x:hidden;
+}
 body{
   margin:0;
   font-family: var(--font-sans);
@@ -51,6 +57,7 @@ body{
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
 }
 
 .app-shell{
@@ -525,6 +532,8 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--text-secondary);
   font-size:17px;
   line-height:1.8;
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 .teacher-eyebrow{
   margin:0;
@@ -3274,6 +3283,7 @@ body:has(.learn-session) .home-footer{
 .chat-bubble{
   max-width:80%;padding:13px 17px;border-radius:14px;
   font-size:16px;line-height:1.6;
+  overflow-wrap:break-word;word-break:break-word;
 }
 .chat-bubble.user{
   align-self:flex-end;
@@ -5142,8 +5152,11 @@ body:has(.learn-session) .home-footer{
   background:rgba(232,90,51,.045);
   box-shadow:0 0 0 3px rgba(232,90,51,.13);
 }
-.learn-skill-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.learn-skill-card-name{font-weight:700;font-size:15px;color:var(--text);line-height:1.35}
+.learn-skill-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-width:0}
+.learn-skill-card-name{
+  font-weight:700;font-size:15px;color:var(--text);line-height:1.35;
+  min-width:0;overflow-wrap:break-word;word-break:break-word;
+}
 .learn-skill-card-check{
   flex:none;width:20px;height:20px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -5156,6 +5169,7 @@ body:has(.learn-session) .home-footer{
 .learn-skill-card-desc{
   margin:0;font-size:12.5px;line-height:1.55;color:var(--muted);
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  overflow-wrap:break-word;word-break:break-word;
 }
 .learn-skill-card-desc.placeholder{font-style:italic;opacity:.8}
 
@@ -5628,6 +5642,22 @@ body:has(.learn-session) .home-footer{
   align-items:flex-start;
   gap:16px;
 }
+
+/* Learn skill-picker page — overall font-size increase.
+   Scoped to .learn-picker-page (not the shared .student-dash rules)
+   so dashboard/mastery/history keep their own sizes. */
+.learn-picker-page .teacher-eyebrow{font-size:13px}
+.learn-picker-page .teacher-hero p{font-size:19px}
+.learn-picker-page .teacher-panel-header h3,
+.learn-picker-page .teacher-actions h3{font-size:29px}
+.learn-picker-page .learn-skill-card-name{font-size:19px}
+.learn-picker-page .learn-skill-card-desc{font-size:16px}
+.learn-picker-page .learn-skill-empty p{font-size:16px}
+.learn-picker-page .learn-filter label{font-size:13px}
+.learn-picker-page .learn-filter select{font-size:16px}
+.learn-picker-page .teacher-action{font-size:16px}
+.learn-picker-page .teacher-action span{font-size:18px}
+.learn-picker-page .teacher-progress{height:9px}
 
 /* Mastery page: three KPI cards, so a three-track grid.
    Extra .teacher-dashboard qualifier outranks the generic .student-dash

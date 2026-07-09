@@ -1088,7 +1088,7 @@ export default function LearnPage() {
 
   if (!sessionId && !sessionEnded) {
     return (
-      <div className="teacher-dashboard student-dash">
+      <div className="teacher-dashboard student-dash learn-picker-page">
         <div className="teacher-layout">
           <section className="teacher-main">
             <section className="teacher-hero">
@@ -1174,7 +1174,7 @@ export default function LearnPage() {
                       type="button"
                       className={`learn-skill-card ${selectedSkill === s.id ? 'selected' : ''}`}
                       onClick={() => handleSkillSelect(s.id)}
-                      style={{ fontSize: 15 }}
+                      style={{ fontSize: 16 }}
                     // >
                     //   {s.name}
                     //   {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
@@ -1187,12 +1187,12 @@ export default function LearnPage() {
                       </div>
                       <div className="learn-skill-card-badges">
                         {s.difficulty_level != null && (
-                          <span className="badge neutral" style={{ fontSize: 11 }}>
+                          <span className="badge neutral" style={{ fontSize: 12 }}>
                             {DIFF_LABELS[s.difficulty_level] || `Level ${s.difficulty_level}`}
                           </span>
                         )}
                         {s.category && (
-                          <span className="badge neutral" style={{ fontSize: 11 }}>{s.category}</span>
+                          <span className="badge neutral" style={{ fontSize: 12 }}>{s.category}</span>
                         )}
                       </div>
                       {s.description ? (
@@ -1212,24 +1212,24 @@ export default function LearnPage() {
                   background: 'var(--bg)', border: '1px solid var(--border)',
                 }}>
                   {skillStatus.has_active_session ? (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
                       ▶️ <strong>Active session</strong> — {skillStatus.message_count} messages saved.
                       {skillStatus.mastery != null && ` Mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
                     </p>
                   ) : skillStatus.assessment_done ? (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
                       ✅ Assessment done.
                       {skillStatus.mastery != null && ` Current mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
                     </p>
                   ) : (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
                       📋 New skill — initial assessment will run first (3 questions).
                     </p>
                   )}
                 </div>
               )}
               {statusLoading && (
-                <p style={{ color: 'var(--muted)', margin: '12px 0 0', fontSize: 14 }}>Checking session…</p>
+                <p style={{ color: 'var(--muted)', margin: '12px 0 0', fontSize: 15 }}>Checking session…</p>
               )}
             </section>
 
@@ -1248,7 +1248,7 @@ export default function LearnPage() {
                   disabled={!selectedSkill || loading || statusLoading}
                   onClick={handleStartOrContinue}
                   style={{
-                    minHeight: 'unset', padding: '14px 32px', fontSize: 16,
+                    minHeight: 'unset', padding: '15px 34px', fontSize: 17,
                     ...(skillStatus?.has_active_session ? { background: '#7c3aed', borderColor: '#7c3aed' } : {}),
                   }}
                 >
@@ -1257,7 +1257,7 @@ export default function LearnPage() {
                    skillStatus?.has_active_session ? '▶ Continue Session' :
                    'Start Session'}
                 </button>
-                <p style={{ color: 'var(--muted)', fontSize: 15, margin: 0 }}>
+                <p style={{ color: 'var(--muted)', fontSize: 16, margin: 0 }}>
                   👁 Camera engagement tracking will start automatically
                 </p>
               </div>
@@ -1284,12 +1284,12 @@ export default function LearnPage() {
                   borderBottom: '1px solid var(--border)',
                 }}>
                   <span style={{
-                    fontSize: 18,
-                    fontWeight: 500, color: 'var(--muted)', minWidth: 24, paddingTop: 2,
+                    fontSize: 19,
+                    fontWeight: 500, color: 'var(--muted)', minWidth: 26, paddingTop: 2,
                   }}>{num}</span>
                   <div>
-                    <strong style={{ fontSize: 16, display: 'block', marginBottom: 4 }}>{title}</strong>
-                    <p style={{ margin: 0, fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>{desc}</p>
+                    <strong style={{ fontSize: 17, display: 'block', marginBottom: 4 }}>{title}</strong>
+                    <p style={{ margin: 0, fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>{desc}</p>
                   </div>
                 </div>
               ))}
