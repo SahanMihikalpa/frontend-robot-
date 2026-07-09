@@ -2250,25 +2250,27 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+/* Compact hero — matches the scale used across the redesigned dashboard/
+   roster/heatmap/skills pages instead of the old full-bleed landing size. */
 .questions-hero{
-  padding:48px 56px;
+  padding:30px 36px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-start;
 }
 .questions-hero h2{
-  margin:10px 0 16px;
+  margin:12px 0 12px;
   color:var(--text);
-  font-size:clamp(46px, 7vw, 82px);
-  line-height:.95;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
 }
 .questions-hero p{
   max-width:720px;
   margin:0;
   color:var(--muted);
-  font-size:16px;
-  line-height:1.8;
+  font-size:18px;
+  line-height:1.7;
 }
 .questions-hero-actions{
   display:flex;
@@ -2314,18 +2316,18 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .question-card h4{
   margin:8px 0 0;
   color:var(--text);
-  font-size:17px;
+  font-size:18px;
   line-height:1.45;
 }
 .question-type-pill{
   width:max-content;
   margin:0;
-  padding:5px 10px;
+  padding:6px 11px;
   color:var(--accent);
   background:rgba(232,90,51,.09);
   border:1px solid rgba(232,90,51,.22);
   border-radius:999px;
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.12em;
   text-transform:uppercase;
@@ -2333,7 +2335,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .question-meta{
   margin:12px 0 0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.6;
 }
 .question-options{
@@ -2351,7 +2353,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FBF7F1;
   border:1px solid var(--border);
   border-radius:8px;
-  font-size:13px;
+  font-size:14px;
   line-height:1.45;
 }
 .question-option strong{
@@ -2382,7 +2384,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .modal-section-label{
   margin:8px 30px -6px;
   color:var(--accent);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.2em;
   text-transform:uppercase;
@@ -4560,7 +4562,7 @@ body:has(.selflearn-session-view) .home-footer{
   .questions-hero,
   .questions-filter-panel,
   .questions-panel{padding:22px}
-  .questions-hero h2{font-size:44px}
+  .questions-hero h2{font-size:28px}
   .questions-hero-actions{width:100%}
   .question-card-main{flex-direction:column}
   .questions-modal-grid,
