@@ -669,11 +669,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   padding:18px 14px;
   border-bottom:1px solid var(--border);
   text-align:left;
-  font-size:14px;
+  font-size:15px;
 }
 .teacher-table th{
   color:var(--muted);
-  font-size:11px;
+  font-size:12px;
   font-weight:700;
   letter-spacing:.16em;
   text-transform:uppercase;
@@ -974,13 +974,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   letter-spacing:.16em;
 }
 .teacher-info-toggle span:first-child{
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
 .teacher-info-toggle span:last-child{
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
 }
 .teacher-info-content{
@@ -1039,21 +1039,21 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-status-card span{
   display:inline-flex;
-  padding:5px 12px;
+  padding:6px 13px;
   border-radius:999px;
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   letter-spacing:.03em;
 }
 .teacher-status-card p{
   margin:12px 0 4px;
   color:var(--text);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.5;
 }
 .teacher-status-card small{
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .teacher-column-guide{
@@ -1063,7 +1063,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-column-guide div{
   padding:12px 0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.55;
   border-bottom:1px solid var(--border);
 }
@@ -1096,20 +1096,20 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-sort-control span{
   padding:0 8px 0 10px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
 .teacher-sort-control button{
-  min-height:36px;
+  min-height:38px;
   padding:8px 16px;
   color:var(--muted);
   background:transparent;
   border:none;
   border-radius:999px;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   font-weight:700;
   transition:background .24s ease, color .24s ease, transform .18s ease, box-shadow .24s ease;
 }
@@ -1127,6 +1127,32 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-sort-control button:active{
   transform:translateY(0) scale(.98);
+}
+/* Mobile-only dropdown replacement for .teacher-sort-control — a row of
+   pill buttons doesn't fit a phone screen, so this native select takes
+   over below the breakpoint instead of stacking the buttons full-width. */
+.teacher-sort-select{
+  display:none;
+  width:100%;
+  min-height:44px;
+  padding:10px 40px 10px 16px;
+  color:var(--text);
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  font-size:15px;
+  font-weight:700;
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726A61' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  cursor:pointer;
+}
+.teacher-sort-select:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(232,90,51,.12);
 }
 .teacher-roster-table{
   min-width:980px;
@@ -1150,21 +1176,129 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-student-name{
   color:var(--text);
+  font-size:16px;
   font-weight:800;
   transition:color .2s ease;
 }
 .teacher-student-meta{
   margin-top:4px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.45;
+}
+
+/* Mobile: cards instead of a horizontally-scrolling table. Reuses the
+   existing markup — the <table> semantics just don't force column layout
+   below this width — with data-label attributes supplying each field's
+   caption, and a 2-column grid arranging the four numeric stats into
+   mini tiles instead of a flat, plain list. --row-accent is set inline
+   per row (the student's ZPD status color) and drives the left border
+   and the status-row tint. */
+@media(max-width:860px){
+  .teacher-roster-table{min-width:0;width:100%}
+  .teacher-table-wrap{overflow-x:visible}
+  .teacher-roster-table thead{display:none}
+  .teacher-roster-table,
+  .teacher-roster-table tbody{display:block;width:100%}
+  .teacher-roster-table tr{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0 12px;
+    margin-bottom:16px;
+    padding:20px;
+    border:1px solid var(--border);
+    border-left:4px solid var(--row-accent, var(--accent));
+    border-radius:16px;
+    background:linear-gradient(180deg,#FFFFFF 0%,#FCFAF8 100%);
+    box-shadow:0 1px 2px rgba(27,23,18,.04), 0 16px 32px -24px rgba(27,23,18,.2);
+  }
+  .teacher-roster-table tr:last-child{margin-bottom:0}
+  .teacher-roster-table tr:active{transform:scale(.99)}
+  .teacher-roster-table tbody tr:hover td{
+    background:none;
+    transform:none;
+    box-shadow:none;
+  }
+  .teacher-roster-table td{
+    display:block;
+    padding:0;
+    border:none !important;
+    text-align:left !important;
+  }
+  .teacher-roster-table td[data-label]::before{
+    content:attr(data-label);
+    display:block;
+    margin-bottom:6px;
+    color:var(--muted);
+    font-size:11.5px;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+  }
+
+  /* Header: name + username, full width */
+  .teacher-roster-cell-name{
+    grid-column:1 / -1;
+    padding-bottom:14px !important;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--border-strong) !important;
+  }
+  .teacher-roster-cell-name::before{display:none}
+  .teacher-roster-cell-name .teacher-student-name{font-size:18px}
+  .teacher-roster-cell-name .teacher-student-meta{font-size:14px}
+
+  /* ZPD status: full-width tinted strip, pill + description inline */
+  .teacher-roster-table td[data-label="ZPD Status"]{
+    grid-column:1 / -1;
+    padding:12px 14px !important;
+    margin-bottom:14px;
+    border-radius:10px;
+    background:rgba(27,23,18,.04);
+    background:color-mix(in srgb, var(--row-accent) 12%, transparent);
+  }
+  .teacher-roster-table td[data-label="ZPD Status"]::before{display:none}
+  .teacher-roster-table td[data-label="ZPD Status"] .teacher-status-pill{margin-bottom:6px}
+
+  /* Four numeric stats as 2x2 mini tiles instead of a flat list */
+  .teacher-roster-table td[data-label="Mastery"],
+  .teacher-roster-table td[data-label="Interactions"],
+  .teacher-roster-table td[data-label="Mastered"],
+  .teacher-roster-table td[data-label="Struggling"]{
+    padding:12px 14px !important;
+    margin-bottom:10px;
+    background:var(--bg);
+    border-radius:12px;
+    font-size:21px;
+  }
+
+  /* Last active: full width, its own line */
+  .teacher-roster-table td[data-label="Last active"]{
+    grid-column:1 / -1;
+    padding-top:2px !important;
+    font-size:15px;
+  }
+
+  /* Details link — no caption, full-width button, sits below a divider */
+  .teacher-roster-cell-action{
+    grid-column:1 / -1;
+    padding-top:16px !important;
+    margin-top:6px;
+    border-top:1px solid var(--border) !important;
+  }
+  .teacher-detail-link{
+    display:block;
+    width:100%;
+    min-height:44px;
+    text-align:center;
+    font-size:15px;
+  }
 }
 .teacher-status-pill{
   display:inline-flex;
-  padding:5px 12px;
+  padding:6px 13px;
   border:1px solid rgba(27,23,18,.06);
   border-radius:999px;
-  font-size:11.5px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.02em;
   white-space:nowrap;
@@ -1178,14 +1312,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:34px;
-  padding:8px 13px;
+  min-height:36px;
+  padding:8px 14px;
   color:var(--accent);
   background:rgba(232,90,51,.08);
   border:1px solid rgba(232,90,51,.24);
   border-radius:999px;
   text-decoration:none;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
   transition:background .2s ease, color .2s ease, transform .18s ease, box-shadow .2s ease;
 }
@@ -1201,7 +1335,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-roster-note{
   margin:0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.7;
 }
 .teacher-heatmap-page{
@@ -1234,13 +1368,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-align:left;
 }
 .teacher-heatmap-info-toggle span:first-child{
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.14em;
   text-transform:uppercase;
 }
 .teacher-heatmap-info-toggle span:last-child{
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-info-content{
@@ -1277,28 +1411,28 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-guide-card span{
   width:max-content;
-  padding:5px 10px;
+  padding:6px 11px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-guide-card p{
   margin:0;
   color:var(--text);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.5;
 }
 .teacher-heatmap-guide-card small{
   margin-top:auto;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .teacher-heatmap-hint,
 .teacher-heatmap-filter-note{
   margin:0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.6;
 }
 .teacher-heatmap-summary{
@@ -1312,7 +1446,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border:1px solid rgba(232,90,51,.24);
   border-radius:999px;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
 }
 .teacher-heatmap-filter-grid{
@@ -1337,9 +1471,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-align:left;
 }
 .teacher-heatmap-filter span{
-  padding:5px 10px;
+  padding:6px 11px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-filter strong{
@@ -1351,7 +1485,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-filter small{
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
 }
 .teacher-heatmap-filter.active{
   background:#FFF9F3;
@@ -1381,7 +1515,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-heatmap-table th{
   padding:10px 8px;
   color:var(--muted);
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   letter-spacing:.12em;
   text-align:center;
@@ -1398,7 +1532,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-table td{
   padding:6px 8px;
-  font-size:13px;
+  font-size:14px;
   vertical-align:middle;
 }
 .teacher-heatmap-table td:first-child{
@@ -1417,12 +1551,12 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--accent);
 }
 .teacher-heatmap-cell{
-  width:44px;
-  height:40px;
+  width:46px;
+  height:42px;
   padding:0 !important;
   border-radius:8px;
   text-align:center;
-  font-size:12px !important;
+  font-size:13px !important;
   font-weight:800;
   cursor:default;
 }
@@ -1433,9 +1567,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-row-status span{
   display:inline-flex;
-  padding:4px 9px;
+  padding:5px 10px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-row-status .danger{
@@ -1465,7 +1599,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-heatmap-tooltip p{
   margin:0;
   color:var(--accent);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .skills-page{
@@ -1473,28 +1607,30 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+/* Compact hero — matches the scale used across the redesigned dashboard/
+   roster/heatmap pages instead of the old full-bleed landing-page size. */
 .skills-hero{
-  padding:48px 56px;
+  padding:30px 36px;
 }
 .skills-hero-top{
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-start;
-  margin-bottom:28px;
+  margin-bottom:24px;
 }
 .skills-hero h2{
-  margin:10px 0 16px;
+  margin:12px 0 12px;
   color:var(--text);
-  font-size:clamp(46px, 7vw, 82px);
-  line-height:.95;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
 }
 .skills-hero p{
   max-width:710px;
   margin:0;
   color:var(--muted);
-  font-size:16px;
-  line-height:1.8;
+  font-size:18px;
+  line-height:1.7;
 }
 .skills-hero-actions{
   display:flex;
@@ -1513,7 +1649,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   align-items:center;
   justify-content:center;
   border-radius:999px;
-  font-size:13px;
+  font-size:15px;
   font-weight:800;
   text-decoration:none;
 }
@@ -1555,7 +1691,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FBF7F1 !important;
   border:1px solid var(--border) !important;
   border-radius:8px !important;
-  font-size:15px !important;
+  font-size:17px !important;
 }
 .skills-chip-row{
   display:flex;
@@ -1591,7 +1727,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-panel-header h3{
   margin:8px 0 0;
   color:var(--text);
-  font-size:34px;
+  font-size:36px;
   line-height:1.05;
 }
 .skills-graph-list{
@@ -1629,11 +1765,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border-bottom:1px solid var(--border);
   text-align:left;
   vertical-align:top;
-  font-size:14px;
+  font-size:16px;
 }
 .skills-table th{
   color:var(--muted);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.15em;
   text-transform:uppercase;
@@ -1654,7 +1790,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-name{
   display:block;
   color:var(--text);
-  font-size:15px;
+  font-size:17px;
 }
 .skills-question-pill{
   min-width:36px;
@@ -1730,7 +1866,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .skills-card-meta-label{
   color:var(--muted);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.1em;
   text-transform:uppercase;
@@ -1866,7 +2002,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-modal-kicker{
   margin:28px 30px 0;
   color:var(--accent);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.24em;
   text-transform:uppercase;
@@ -1875,7 +2011,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   margin:0 30px 18px;
   max-width:430px;
   color:var(--muted);
-  font-size:14px;
+  font-size:16px;
   line-height:1.65;
 }
 .skills-modal-scroll > .meta{
@@ -1895,7 +2031,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .modal.skills-modal .field label{
   color:var(--text);
-  font-size:12px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.13em;
   text-transform:uppercase;
@@ -1909,7 +2045,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FFFDF9 !important;
   border:1px solid var(--border-strong) !important;
   border-radius:8px !important;
-  font-size:14px !important;
+  font-size:16px !important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
 }
 .modal.skills-modal .field textarea{
@@ -1950,7 +2086,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border:1px solid var(--border);
   border-radius:999px;
   cursor:pointer;
-  font-size:14px;
+  font-size:16px;
   font-weight:800;
   box-shadow:0 8px 18px rgba(27,23,18,.05);
 }
@@ -2114,25 +2250,27 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+/* Compact hero — matches the scale used across the redesigned dashboard/
+   roster/heatmap/skills pages instead of the old full-bleed landing size. */
 .questions-hero{
-  padding:48px 56px;
+  padding:30px 36px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-start;
 }
 .questions-hero h2{
-  margin:10px 0 16px;
+  margin:12px 0 12px;
   color:var(--text);
-  font-size:clamp(46px, 7vw, 82px);
-  line-height:.95;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
 }
 .questions-hero p{
   max-width:720px;
   margin:0;
   color:var(--muted);
-  font-size:16px;
-  line-height:1.8;
+  font-size:18px;
+  line-height:1.7;
 }
 .questions-hero-actions{
   display:flex;
@@ -2178,18 +2316,18 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .question-card h4{
   margin:8px 0 0;
   color:var(--text);
-  font-size:17px;
+  font-size:18px;
   line-height:1.45;
 }
 .question-type-pill{
   width:max-content;
   margin:0;
-  padding:5px 10px;
+  padding:6px 11px;
   color:var(--accent);
   background:rgba(232,90,51,.09);
   border:1px solid rgba(232,90,51,.22);
   border-radius:999px;
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.12em;
   text-transform:uppercase;
@@ -2197,7 +2335,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .question-meta{
   margin:12px 0 0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.6;
 }
 .question-options{
@@ -2215,7 +2353,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FBF7F1;
   border:1px solid var(--border);
   border-radius:8px;
-  font-size:13px;
+  font-size:14px;
   line-height:1.45;
 }
 .question-option strong{
@@ -2246,7 +2384,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .modal-section-label{
   margin:8px 30px -6px;
   color:var(--accent);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.2em;
   text-transform:uppercase;
@@ -4416,7 +4554,7 @@ body:has(.selflearn-session-view) .home-footer{
   }
   .skills-hero,
   .skills-panel{padding:22px}
-  .skills-hero h2{font-size:44px}
+  .skills-hero h2{font-size:28px}
   .skills-action,
   .skills-count-pill{width:100%}
   .skills-hero-actions{width:100%}
@@ -4424,7 +4562,7 @@ body:has(.selflearn-session-view) .home-footer{
   .questions-hero,
   .questions-filter-panel,
   .questions-panel{padding:22px}
-  .questions-hero h2{font-size:44px}
+  .questions-hero h2{font-size:28px}
   .questions-hero-actions{width:100%}
   .question-card-main{flex-direction:column}
   .questions-modal-grid,
@@ -4454,14 +4592,8 @@ body:has(.selflearn-session-view) .home-footer{
   .history-hero h2{font-size:44px}
   .history-subject-card{width:100%}
   .history-card-main{flex-direction:column}
-  .teacher-sort-control{
-    width:100%;
-    align-items:stretch;
-    flex-direction:column;
-    border-radius:8px;
-  }
-  .teacher-sort-control span{padding:4px 8px}
-  .teacher-sort-control button{width:100%}
+  .teacher-sort-control{display:none}
+  .teacher-sort-select{display:block}
   .profile-name{display:none}
   .profile-badge{padding:5px 8px;gap:0}
   .modal{padding:16px}
@@ -5846,9 +5978,11 @@ body:has(.selflearn-session-view) .home-footer{
 /* Mastery page: three KPI cards, so a three-track grid.
    Extra .teacher-dashboard qualifier outranks the generic .student-dash
    media rules that appear later in the file. */
-.teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.teacher-dashboard.mastery-page .teacher-kpi-grid,
+.teacher-dashboard.teacher-home-page .teacher-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:600px){
-  .teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:1fr}
+  .teacher-dashboard.mastery-page .teacher-kpi-grid,
+  .teacher-dashboard.teacher-home-page .teacher-kpi-grid{grid-template-columns:1fr}
 }
 
 /* History page: the hero note shows a name, not a percentage */

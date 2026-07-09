@@ -49,8 +49,17 @@ function DiffBadge({ level }: { level?: number }) {
   const colors: Record<number, string> = {
     1: 'var(--success)', 2: '#86efac', 3: 'var(--warning)', 4: '#fb923c', 5: 'var(--danger)',
   }
+  const c = colors[level]
+  // color-mix() works for both the var(--x) and raw-hex entries above —
+  // string-concatenating a hex-alpha suffix directly (the old `c + '22'`
+  // pattern) is invalid CSS for the var() cases and silently drops the
+  // whole declaration, so 1/3/5 badges rendered with no background/border.
   return (
-    <span className="badge" style={{ background: colors[level] + '22', color: colors[level], border: `1px solid ${colors[level]}44` }}>
+    <span className="badge" style={{
+      background: `color-mix(in srgb, ${c} 13%, transparent)`,
+      color: c,
+      border: `1px solid color-mix(in srgb, ${c} 27%, transparent)`,
+    }}>
       {DIFF_LABELS[level] || level}
     </span>
   )
@@ -348,7 +357,7 @@ export default function SkillsPage() {
                   <div className="skills-graph-topline">
                     <strong>{node.name}</strong>
                     <DiffBadge level={node.difficulty_level} />
-                    {node.category && <span className="badge neutral" style={{ fontSize: 11 }}>{node.category}</span>}
+                    {node.category && <span className="badge neutral" style={{ fontSize: 14 }}>{node.category}</span>}
                   </div>
                   {node.prerequisites.length > 0 ? (
                     <p className="meta" style={{ marginTop: 4 }}>
@@ -410,7 +419,7 @@ export default function SkillsPage() {
                         <td>
                           <strong className="skills-name">{s.name}</strong>
                           {s.description && (
-                            <p className="meta" style={{ fontSize: 11, margin: '2px 0 0' }}>{s.description}</p>
+                            <p className="meta" style={{ fontSize: 14, margin: '2px 0 0' }}>{s.description}</p>
                           )}
                         </td>
                         <td>{s.category ? <span className="badge neutral">{s.category}</span> : '—'}</td>
@@ -422,9 +431,9 @@ export default function SkillsPage() {
                         </td>
                         <td>
                           {prereqs.length === 0
-                            ? <span className="meta" style={{ fontSize: 11 }}>None</span>
+                            ? <span className="meta" style={{ fontSize: 14 }}>None</span>
                             : (
-                              <span className="meta" style={{ fontSize: 11 }}>
+                              <span className="meta" style={{ fontSize: 14 }}>
                                 {prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
                               </span>
                             )}
@@ -471,7 +480,7 @@ export default function SkillsPage() {
                     </div>
 
                     {s.description && (
-                      <p className="meta" style={{ fontSize: 12, margin: '2px 0 0' }}>{s.description}</p>
+                      <p className="meta" style={{ fontSize: 14, margin: '2px 0 0' }}>{s.description}</p>
                     )}
 
                     <div className="skills-card-meta">
@@ -487,7 +496,7 @@ export default function SkillsPage() {
                       </div>
                       <div className="skills-card-meta-row">
                         <span className="skills-card-meta-label">Prerequisites</span>
-                        <span className="meta" style={{ fontSize: 12, textAlign: 'right' }}>
+                        <span className="meta" style={{ fontSize: 14, textAlign: 'right' }}>
                           {prereqs.length === 0 ? 'None' : prereqs.map((pid) => nameMap[pid] || `#${pid}`).join(', ')}
                         </span>
                       </div>
@@ -628,7 +637,7 @@ export default function SkillsPage() {
                   ).map(([key, label, hint]) => (
                     <div className="field" key={key}>
                       <label>{label}</label>
-                      <p className="meta" style={{ fontSize: 11, marginBottom: 4 }}>{hint}</p>
+                      <p className="meta" style={{ fontSize: 14, marginBottom: 4 }}>{hint}</p>
                       <div className="row" style={{ gap: 8 }}>
                         <input
                           type="range"

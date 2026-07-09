@@ -49,7 +49,7 @@ function InfoBox({
         <span className="student-info-box-title">
           <span
             className="student-info-box-icon"
-            style={{ background: accent + '1a', color: accent }}
+            style={{ background: `color-mix(in srgb, ${accent} 10%, transparent)`, color: accent }}
             aria-hidden="true"
           >
             i
