@@ -1607,28 +1607,30 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+/* Compact hero — matches the scale used across the redesigned dashboard/
+   roster/heatmap pages instead of the old full-bleed landing-page size. */
 .skills-hero{
-  padding:48px 56px;
+  padding:30px 36px;
 }
 .skills-hero-top{
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-start;
-  margin-bottom:28px;
+  margin-bottom:24px;
 }
 .skills-hero h2{
-  margin:10px 0 16px;
+  margin:12px 0 12px;
   color:var(--text);
-  font-size:clamp(46px, 7vw, 82px);
-  line-height:.95;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
 }
 .skills-hero p{
   max-width:710px;
   margin:0;
   color:var(--muted);
-  font-size:16px;
-  line-height:1.8;
+  font-size:18px;
+  line-height:1.7;
 }
 .skills-hero-actions{
   display:flex;
@@ -1647,7 +1649,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   align-items:center;
   justify-content:center;
   border-radius:999px;
-  font-size:13px;
+  font-size:15px;
   font-weight:800;
   text-decoration:none;
 }
@@ -1689,7 +1691,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FBF7F1 !important;
   border:1px solid var(--border) !important;
   border-radius:8px !important;
-  font-size:15px !important;
+  font-size:17px !important;
 }
 .skills-chip-row{
   display:flex;
@@ -1725,7 +1727,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-panel-header h3{
   margin:8px 0 0;
   color:var(--text);
-  font-size:34px;
+  font-size:36px;
   line-height:1.05;
 }
 .skills-graph-list{
@@ -1763,11 +1765,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border-bottom:1px solid var(--border);
   text-align:left;
   vertical-align:top;
-  font-size:14px;
+  font-size:16px;
 }
 .skills-table th{
   color:var(--muted);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.15em;
   text-transform:uppercase;
@@ -1788,7 +1790,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-name{
   display:block;
   color:var(--text);
-  font-size:15px;
+  font-size:17px;
 }
 .skills-question-pill{
   min-width:36px;
@@ -1864,7 +1866,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .skills-card-meta-label{
   color:var(--muted);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.1em;
   text-transform:uppercase;
@@ -2000,7 +2002,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-modal-kicker{
   margin:28px 30px 0;
   color:var(--accent);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.24em;
   text-transform:uppercase;
@@ -2009,7 +2011,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   margin:0 30px 18px;
   max-width:430px;
   color:var(--muted);
-  font-size:14px;
+  font-size:16px;
   line-height:1.65;
 }
 .skills-modal-scroll > .meta{
@@ -2029,7 +2031,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .modal.skills-modal .field label{
   color:var(--text);
-  font-size:12px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.13em;
   text-transform:uppercase;
@@ -2043,7 +2045,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FFFDF9 !important;
   border:1px solid var(--border-strong) !important;
   border-radius:8px !important;
-  font-size:14px !important;
+  font-size:16px !important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
 }
 .modal.skills-modal .field textarea{
@@ -2084,7 +2086,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border:1px solid var(--border);
   border-radius:999px;
   cursor:pointer;
-  font-size:14px;
+  font-size:16px;
   font-weight:800;
   box-shadow:0 8px 18px rgba(27,23,18,.05);
 }
@@ -4550,7 +4552,7 @@ body:has(.selflearn-session-view) .home-footer{
   }
   .skills-hero,
   .skills-panel{padding:22px}
-  .skills-hero h2{font-size:44px}
+  .skills-hero h2{font-size:28px}
   .skills-action,
   .skills-count-pill{width:100%}
   .skills-hero-actions{width:100%}
