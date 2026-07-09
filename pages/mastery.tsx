@@ -2,16 +2,20 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { getConceptMap, getCurrentUser, getMasterySummary, getNextSkill, getUnlockedSkills } from '../lib/api'
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  mastered: { label: 'Mastered', color: 'var(--success)' },
-  zpd:      { label: 'ZPD', color: 'var(--accent)' },
-  in_zpd:   { label: 'ZPD', color: 'var(--accent)' },
-  locked:   { label: 'Locked', color: 'var(--muted)' },
-  struggling: { label: 'Struggling', color: 'var(--danger)' },
+// `dim`/`border` are real CSS colors (not a `var(--x)` string with a hex-alpha
+// suffix bolted on — `var(--success)cc` isn't valid CSS and silently drops
+// the whole declaration, which was why the pill tint and progress bar fill
+// weren't rendering despite the percentage being correct).
+const STATUS_CONFIG: Record<string, { label: string; color: string; dim: string; border: string }> = {
+  mastered:   { label: 'Mastered', color: 'var(--success)', dim: 'var(--success-dim)', border: 'rgba(47,133,90,0.3)' },
+  zpd:        { label: 'ZPD', color: 'var(--accent)', dim: 'var(--accent-dim)', border: 'rgba(232,90,51,0.3)' },
+  in_zpd:     { label: 'ZPD', color: 'var(--accent)', dim: 'var(--accent-dim)', border: 'rgba(232,90,51,0.3)' },
+  locked:     { label: 'Locked', color: 'var(--muted)', dim: 'rgba(92,87,79,0.1)', border: 'rgba(92,87,79,0.25)' },
+  struggling: { label: 'Struggling', color: 'var(--danger)', dim: 'var(--danger-dim)', border: 'rgba(239,68,68,0.3)' },
 }
 
 function statusCfg(status: string) {
-  return STATUS_CONFIG[status] || { label: status, color: 'var(--muted)' }
+  return STATUS_CONFIG[status] || { label: status, color: 'var(--muted)', dim: 'rgba(92,87,79,0.1)', border: 'rgba(92,87,79,0.25)' }
 }
 
 export default function MasteryPage() {
@@ -132,7 +136,7 @@ export default function MasteryPage() {
                         <span
                           style={{
                             fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 999,
-                            color: cfg.color, background: `${cfg.color}1A`, border: `1px solid ${cfg.color}4D`,
+                            color: cfg.color, background: cfg.dim, border: `1px solid ${cfg.border}`,
                           }}
                         >
                           {cfg.label}
@@ -143,7 +147,7 @@ export default function MasteryPage() {
                         <span style={{ fontSize: 14, color: cfg.color, fontWeight: 600 }}>{pct}%</span>
                       </div>
                       <div className="teacher-progress">
-                        <span style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${cfg.color}, ${cfg.color}cc)` }} />
+                        <span style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   )
