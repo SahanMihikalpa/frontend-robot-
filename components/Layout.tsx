@@ -27,6 +27,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="app-shell">
+      <div className="header-blur-mask" aria-hidden="true" />
       <header className="site-header">
         <Link href="/" className="brand">
           <div className="logo" />
