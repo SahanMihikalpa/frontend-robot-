@@ -5846,9 +5846,11 @@ body:has(.selflearn-session-view) .home-footer{
 /* Mastery page: three KPI cards, so a three-track grid.
    Extra .teacher-dashboard qualifier outranks the generic .student-dash
    media rules that appear later in the file. */
-.teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.teacher-dashboard.mastery-page .teacher-kpi-grid,
+.teacher-dashboard.teacher-home-page .teacher-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:600px){
-  .teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:1fr}
+  .teacher-dashboard.mastery-page .teacher-kpi-grid,
+  .teacher-dashboard.teacher-home-page .teacher-kpi-grid{grid-template-columns:1fr}
 }
 
 /* History page: the hero note shows a name, not a percentage */

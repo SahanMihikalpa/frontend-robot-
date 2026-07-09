@@ -40,39 +40,42 @@ export default function TeacherDashboard() {
   const atRisk = students.filter((s) => { const sc = readScore(s); return sc != null && sc < 0.4 }).length
 
   return (
-    <div className="teacher-dashboard">
-      <section className="teacher-hero">
-        <div>
-          <p className="teacher-eyebrow">Class Studio</p>
-          <h2 className="editorial-title">Teacher Dashboard</h2>
-          <p>
-            Monitor class performance, spot learners who need support, and follow
-            skill movement across your classroom.
-          </p>
-        </div>
-        <div className="teacher-hero-note">
-          <span>Today</span>
-          <strong>{students.length}</strong>
-          <p>students tracked</p>
-        </div>
-      </section>
-
+    <div className="teacher-dashboard student-dash teacher-home-page">
       {error && <p className="feedback error">{error}</p>}
 
       <div className="teacher-layout">
         <section className="teacher-main">
+          <section className="teacher-hero">
+            <div>
+              <p className="teacher-eyebrow">Class Studio</p>
+              <h2 className="editorial-title">Teacher Dashboard</h2>
+              <p>
+                Monitor class performance, spot learners who need support, and follow
+                skill movement across your classroom.
+              </p>
+            </div>
+            <div className="teacher-hero-note">
+              <span>Today</span>
+              <strong>{students.length}</strong>
+              <p>students tracked</p>
+            </div>
+          </section>
+
           <div className="teacher-kpi-grid">
             <div className="teacher-kpi-card">
               <p>Students tracked</p>
               <strong>{students.length}</strong>
+              <small>in your classroom</small>
             </div>
             <div className="teacher-kpi-card">
               <p>Average score</p>
               <strong>{avgScore != null ? avgScore.toFixed(2) : '-'}</strong>
+              <small>across all students</small>
             </div>
             <div className="teacher-kpi-card">
               <p>At-risk</p>
               <strong style={{ color: atRisk > 0 ? 'var(--danger)' : undefined }}>{atRisk}</strong>
+              <small>scoring below 40%</small>
             </div>
           </div>
 
