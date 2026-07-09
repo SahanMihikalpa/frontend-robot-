@@ -120,6 +120,13 @@ export default function SelfLearn() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, pendingCheck, loading])
 
+  // Progress sidebar shows the concept breakdown at all times — no click
+  // needed — so fetch it as soon as a session is entered, and again each
+  // time a check is graded (mastery may have moved).
+  useEffect(() => {
+    if (sessionId) openReport()
+  }, [sessionId, messages.length])
+
   function enterSession(res: any) {
     setSessionId(res.session_id); setSkill(res.skill); setView('session')
     setReport(null); setDraft('')
@@ -340,7 +347,7 @@ export default function SelfLearn() {
           </p>
         )}
 
-        <div className="teacher-layout">
+        <div className="teacher-layout selflearn-start-layout">
           <section className="teacher-main">
             <section className="teacher-hero">
               <div>
@@ -460,7 +467,7 @@ export default function SelfLearn() {
             </div>
 
             <div className="field">
-              <label>Course material <span className="meta" style={{ fontWeight: 400 }}>(optional — PDF, TXT, MD)</span></label>
+              <label>Course material <span className="meta" style={{ fontWeight: 400, fontSize: 12, textTransform: 'none', letterSpacing: 'normal' }}>(optional — PDF, TXT, MD)</span></label>
               <label className="selflearn-file-drop">
                 <input
                   type="file"
@@ -509,198 +516,216 @@ export default function SelfLearn() {
 
   // ── SESSION VIEW ────────────────────────────────────────────────────────────
   return (
-    <div className="selflearn-page selflearn-session-page">
-      <section className="history-hero selflearn-session-hero">
-        <div>
-          <button className="btn ghost small" onClick={() => { setView('start'); loadCourses() }}>← New topic</button>
-          <h2 className="editorial-title selflearn-session-title">{skill?.canonical_name || 'Learning'}</h2>
-          {level && <span className="history-result-pill success">{level}</span>}
-        </div>
-        <div className="history-subject-card selflearn-session-status">
-          <span>Concept Mastery</span>
-          {conceptMastery != null && (
-            <strong className="selflearn-session-pct">{Math.round(conceptMastery * 100)}%</strong>
-          )}
-          <button className="btn ghost small selflearn-report-btn" onClick={openReport}>📊 Mastery report</button>
-        </div>
-      </section>
-
-      {report && (
-        <section className="history-panel">
-          <div className="skills-panel-header">
-            <div>
-              <p className="teacher-eyebrow">Report</p>
-              <h3 className="editorial-title">Mastery report — {(report.overall_mastery * 100).toFixed(0)}%</h3>
-            </div>
-            <button className="btn ghost small" onClick={() => setReport(null)}>✕</button>
-          </div>
-          <div className="selflearn-concept-list">
-            {(report.concepts || []).map((c: any, i: number) => (
-              <div key={i} className="selflearn-concept-row">
-                <span className="selflearn-concept-name">{c.mastered ? '✅' : '•'} {c.concept} <span className="meta">({c.level})</span></span>
-                <div className="selflearn-concept-bar"><MasteryBar pct={c.mastery * 100} /></div>
+    <div className="teacher-dashboard student-dash selflearn-session-view">
+      <div className="teacher-layout selflearn-session-layout">
+        <section className="teacher-main">
+          {/* One card holds the topic header, the scrolling conversation, and the
+              composer — a single bordered container instead of a separate hero,
+              so there's one scrollbar and the input is always reachable without
+              scrolling the page. */}
+          <section className="teacher-panel learn-chat-card selflearn-lesson-card">
+            <div className="learn-chat-card-header selflearn-lesson-header">
+              <div className="selflearn-lesson-header-title">
+                <p className="teacher-eyebrow" style={{ margin: 0 }}>Self-Paced Lesson</p>
+                <h2 className="editorial-title">
+                  {skill?.canonical_name || 'Learning'}
+                  {level && <span className="history-result-pill success selflearn-level-pill">{level}</span>}
+                </h2>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+              <button className="teacher-action selflearn-back-btn" onClick={() => { setView('start'); loadCourses() }}>← New topic</button>
+            </div>
 
-      <section className="history-panel">
-        <div className="skills-panel-header">
-          <div>
-            <p className="teacher-eyebrow">Conversation</p>
-            <h3 className="editorial-title">Lesson</h3>
-          </div>
-        </div>
-
-        <div ref={scrollRef} className="selflearn-chat-window">
-          {messages.length === 0 && !loading && (
-            <div className="empty-state"><p className="meta">The lesson will appear here.</p></div>
-          )}
-          {messages.map((m) => {
-            // Student turns (their messages and submitted answers).
-            if (m.sender === 'STUDENT') {
-              return (
-                <div key={m.id} className="selflearn-msg-row student">
-                  <div className="chat-bubble user selflearn-bubble">{m.content}</div>
-                </div>
-              )
-            }
-            // Graded feedback on a check.
-            if (m.type === 'FEEDBACK') {
-              const correct = !!m.metadata?.is_correct
-              const mastery = typeof m.metadata?.mastery === 'number' ? m.metadata.mastery : null
-              return (
-                <div key={m.id} className="selflearn-msg-row tutor">
-                  <div className={`chat-bubble assistant selflearn-bubble selflearn-feedback ${correct ? 'correct' : 'incorrect'}`}>
-                    <strong className={correct ? 'selflearn-feedback-correct' : 'selflearn-feedback-incorrect'}>
-                      {correct ? '✓ Correct' : '✗ Not quite'}
-                    </strong>
-                    {m.content && <p className="selflearn-feedback-text">{m.content}</p>}
-                    {mastery != null && <MasteryBar pct={mastery * 100} label="Mastery" />}
-                  </div>
-                </div>
-              )
-            }
-            // A comprehension check posed by the tutor.
-            if (m.type === 'CHECK') {
-              const isActive = pendingCheck?.question_id === m.metadata?.question_id
-              return (
-                <div key={m.id} className="chat-bubble assistant selflearn-bubble selflearn-check">
-                  <p className="meta selflearn-detail-label">Quick check</p>
-                  <p className="selflearn-check-text">{m.content}</p>
-                  {isActive && m.metadata?.qtype === 'mcq' && m.metadata?.options && (
-                    <div className="selflearn-options">
-                      {Object.entries(m.metadata.options as Record<string, string>).map(([k, v]) => (
-                        <button key={k} type="button" className="btn secondary selflearn-option-btn"
-                          onClick={() => send(k)} disabled={loading}>
-                          <strong className="selflearn-option-key">{k}.</strong> {v}
-                        </button>
-                      ))}
+            <div ref={scrollRef} className="learn-chat-messages selflearn-chat-window">
+              {messages.length === 0 && !loading && (
+                <div className="empty-state"><p className="meta">The lesson will appear here.</p></div>
+              )}
+              {messages.map((m) => {
+                // Student turns (their messages and submitted answers).
+                if (m.sender === 'STUDENT') {
+                  return (
+                    <div key={m.id} className="selflearn-msg-row student">
+                      <div className="chat-bubble user selflearn-bubble">{m.content}</div>
                     </div>
-                  )}
-                </div>
-              )
-            }
-            // Default tutor teaching / chat message.
-            const imageUrl = extractImageUrl(m.metadata)
-            return (
-              <div key={m.id} className="chat-bubble assistant selflearn-bubble">
-                {m.metadata?.concept && <p className="meta selflearn-detail-label">Tutor · {m.metadata.concept}</p>}
-                <p className="selflearn-teach-text">{m.content}</p>
-                {imageUrl && (
-                  <div style={{ marginTop: 10 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imageUrl}
-                      alt="AI-generated visual — click to enlarge"
-                      onClick={() => setLightboxSrc(imageUrl)}
-                      style={{
-                        maxWidth: '100%', maxHeight: 260, borderRadius: 8, display: 'block',
-                        border: '1px solid var(--border)', cursor: 'zoom-in',
-                      }}
-                    />
-                    <span style={{ fontSize: 10, marginTop: 4, display: 'block', color: 'var(--muted)' }}>
-                      🖼️ {m.metadata?.image_source === 'llm_decision'
-                        ? 'The tutor added a visual'
-                        : 'Visual generated for you'} — click to enlarge
-                    </span>
+                  )
+                }
+                // Graded feedback on a check.
+                if (m.type === 'FEEDBACK') {
+                  const correct = !!m.metadata?.is_correct
+                  const mastery = typeof m.metadata?.mastery === 'number' ? m.metadata.mastery : null
+                  return (
+                    <div key={m.id} className="selflearn-msg-row tutor">
+                      <div className={`chat-bubble assistant selflearn-bubble selflearn-feedback ${correct ? 'correct' : 'incorrect'}`}>
+                        <strong className={correct ? 'selflearn-feedback-correct' : 'selflearn-feedback-incorrect'}>
+                          {correct ? '✓ Correct' : '✗ Not quite'}
+                        </strong>
+                        {m.content && <p className="selflearn-feedback-text">{m.content}</p>}
+                        {mastery != null && <MasteryBar pct={mastery * 100} label="Mastery" />}
+                      </div>
+                    </div>
+                  )
+                }
+                // A comprehension check posed by the tutor.
+                if (m.type === 'CHECK') {
+                  const isActive = pendingCheck?.question_id === m.metadata?.question_id
+                  return (
+                    <div key={m.id} className="chat-bubble assistant selflearn-bubble selflearn-check">
+                      <p className="meta selflearn-detail-label">Quick check</p>
+                      <p className="selflearn-check-text">{m.content}</p>
+                      {isActive && m.metadata?.qtype === 'mcq' && m.metadata?.options && (
+                        <div className="selflearn-options">
+                          {Object.entries(m.metadata.options as Record<string, string>).map(([k, v]) => (
+                            <button key={k} type="button" className="btn secondary selflearn-option-btn"
+                              onClick={() => send(k)} disabled={loading}>
+                              <strong className="selflearn-option-key">{k}.</strong> {v}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+                // Default tutor teaching / chat message.
+                const imageUrl = extractImageUrl(m.metadata)
+                return (
+                  <div key={m.id} className="chat-bubble assistant selflearn-bubble">
+                    {m.metadata?.concept && <p className="meta selflearn-detail-label">Tutor · {m.metadata.concept}</p>}
+                    <p className="selflearn-teach-text">{m.content}</p>
+                    {imageUrl && (
+                      <div style={{ marginTop: 10 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={imageUrl}
+                          alt="AI-generated visual — click to enlarge"
+                          onClick={() => setLightboxSrc(imageUrl)}
+                          style={{
+                            maxWidth: '100%', maxHeight: 260, borderRadius: 8, display: 'block',
+                            border: '1px solid var(--border)', cursor: 'zoom-in',
+                          }}
+                        />
+                        <span style={{ fontSize: 12, marginTop: 4, display: 'block', color: 'var(--muted)' }}>
+                          🖼️ {m.metadata?.image_source === 'llm_decision'
+                            ? 'The tutor added a visual'
+                            : 'Visual generated for you'} — click to enlarge
+                        </span>
+                      </div>
+                    )}
+                    {!imageUrl && m.metadata?.image_error && (
+                      <p className="meta" style={{ fontSize: 12, marginTop: 8, fontStyle: 'italic' }}>
+                        🖼️ Couldn't generate a visual for this one.
+                      </p>
+                    )}
                   </div>
-                )}
-                {!imageUrl && m.metadata?.image_error && (
-                  <p className="meta" style={{ fontSize: 11, marginTop: 8, fontStyle: 'italic' }}>
-                    🖼️ Couldn't generate a visual for this one.
+                )
+              })}
+
+              {loading && <div className="chat-bubble assistant selflearn-bubble selflearn-thinking">Thinking…</div>}
+              {done && <div className="selflearn-complete-row"><span className="history-result-pill success">Topic complete 🎉</span></div>}
+            </div>
+
+            {error && <p className="feedback error" style={{ margin: '0 22px', flexShrink: 0 }}>{error}{error.includes('sign in') && <a href="/login" style={{ marginLeft: 8 }}>Sign in</a>}</p>}
+
+            {/* Always-on chat input: ask anything, or type your answer to a check —
+                pinned inside the same card, below the message list, so it's always
+                reachable without scrolling the page. */}
+            {!done && (
+              <div className="learn-chat-card-input">
+                {pendingCheck && voiceState === 'idle' && (
+                  <p className="meta selflearn-pending-hint">
+                    {pendingCheck.qtype === 'mcq'
+                      ? 'Pick an option above, type the letter (A/B/C/D), or say your answer.'
+                      : 'Answer the check above, or keep the conversation going.'}
                   </p>
                 )}
+                {voiceState !== 'idle' && (
+                  <p className="meta selflearn-pending-hint">
+                    {voiceState === 'recording'
+                      ? '🎙️ Recording… click ⏹ when done'
+                      : `⏳ ${voiceStatus || 'Processing your voice…'}`}
+                  </p>
+                )}
+                <div className="selflearn-composer-row">
+                  <textarea
+                    className="learn-chat-textarea"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(draft) } }}
+                    placeholder={pendingCheck ? 'Type your answer…' : 'Ask a question, or say "go on"…'}
+                    disabled={loading || voiceState !== 'idle'}
+                  />
+                  <div className="selflearn-composer-actions">
+                    {voiceState === 'recording' ? (
+                      <button
+                        className="teacher-action selflearn-mic-btn"
+                        onClick={stopVoiceRecording}
+                        title="Stop recording"
+                        style={{ minHeight: 'unset', fontSize: 15, color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                      >
+                        ⏹
+                      </button>
+                    ) : (
+                      <button
+                        className="teacher-action selflearn-mic-btn"
+                        onClick={startVoiceRecording}
+                        disabled={loading || voiceState !== 'idle'}
+                        title="Speak to the tutor"
+                        style={{ minHeight: 'unset', fontSize: 18, justifyContent: 'center' }}
+                      >
+                        🎙️
+                      </button>
+                    )}
+                    <button
+                      className="teacher-action primary selflearn-send-btn"
+                      onClick={() => send(draft)}
+                      disabled={loading || !draft.trim() || voiceState !== 'idle'}
+                      style={{ minHeight: 'unset', padding: '12px 22px', fontSize: 16 }}
+                    >
+                      Send
+                    </button>
+                  </div>
+                </div>
               </div>
-            )
-          })}
-
-          {loading && <div className="chat-bubble assistant selflearn-bubble selflearn-thinking">Thinking…</div>}
-          {done && <div className="selflearn-complete-row"><span className="history-result-pill success">Topic complete 🎉</span></div>}
-        </div>
-
-        {/* Always-on chat input: ask anything, or type your answer to a check. */}
-        {!done && (
-          <div className="selflearn-composer">
-            {pendingCheck && voiceState === 'idle' && (
-              <p className="meta selflearn-pending-hint">
-                {pendingCheck.qtype === 'mcq'
-                  ? 'Pick an option above, type the letter (A/B/C/D), or say your answer.'
-                  : 'Answer the check above, or keep the conversation going.'}
-              </p>
             )}
-            {voiceState !== 'idle' && (
-              <p className="meta selflearn-pending-hint">
-                {voiceState === 'recording'
-                  ? '🎙️ Recording… click ⏹ when done'
-                  : `⏳ ${voiceStatus || 'Processing your voice…'}`}
-              </p>
+          </section>
+        </section>
+
+        {/* Progress sidebar — always shows the concept breakdown, no click
+            required, so the student can see where they stand at a glance. */}
+        <aside className="teacher-actions selflearn-progress-panel">
+          <p className="teacher-eyebrow">Your Progress</p>
+          <h3 className="editorial-title">Concept Mastery</h3>
+
+          <div className="selflearn-progress-stat">
+            {conceptMastery != null ? (
+              <>
+                <strong>{Math.round(conceptMastery * 100)}%</strong>
+                <div className="teacher-progress"><span style={{ width: `${Math.round(conceptMastery * 100)}%` }} /></div>
+              </>
+            ) : (
+              <p className="meta" style={{ margin: 0 }}>Not enough signal yet — keep going.</p>
             )}
-            <div className="selflearn-composer-row">
-              <textarea
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(draft) } }}
-                placeholder={pendingCheck ? 'Type your answer…' : 'Ask a question, or say "go on"…'}
-                disabled={loading || voiceState !== 'idle'}
-              />
-              {voiceState === 'recording' ? (
-                <button
-                  className="btn"
-                  onClick={stopVoiceRecording}
-                  title="Stop recording"
-                  style={{ color: 'var(--danger)' }}
-                >
-                  ⏹ Stop
-                </button>
-              ) : (
-                <button
-                  className="btn secondary"
-                  onClick={startVoiceRecording}
-                  disabled={loading || voiceState !== 'idle'}
-                  title="Speak to the tutor"
-                >
-                  🎙️
-                </button>
-              )}
-              <button
-                className="btn"
-                onClick={() => send(draft)}
-                disabled={loading || !draft.trim() || voiceState !== 'idle'}
-              >
-                Send
-              </button>
-            </div>
           </div>
-        )}
 
-        {error && (
-          <p className="feedback error selflearn-error">
-            {error}{error.includes('sign in') && <a href="/login" style={{ marginLeft: 8 }}>Sign in</a>}
-          </p>
-        )}
-      </section>
+          <div className="selflearn-progress-detail">
+            {report ? (
+              <>
+                <p className="meta selflearn-detail-label" style={{ margin: '0 0 14px' }}>
+                  Overall — {(report.overall_mastery * 100).toFixed(0)}%
+                </p>
+                <div className="selflearn-concept-list">
+                  {(report.concepts || []).map((c: any, i: number) => (
+                    <div key={i} className="selflearn-concept-row">
+                      <span className="selflearn-concept-name">{c.mastered ? '✅' : '•'} {c.concept} <span className="meta">({c.level})</span></span>
+                      <div className="selflearn-concept-bar"><MasteryBar pct={c.mastery * 100} /></div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="meta" style={{ margin: 0 }}>Loading concept breakdown…</p>
+            )}
+          </div>
+        </aside>
+      </div>
 
       {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc('')} />}
     </div>
