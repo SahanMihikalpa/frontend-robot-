@@ -1128,6 +1128,32 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-sort-control button:active{
   transform:translateY(0) scale(.98);
 }
+/* Mobile-only dropdown replacement for .teacher-sort-control — a row of
+   pill buttons doesn't fit a phone screen, so this native select takes
+   over below the breakpoint instead of stacking the buttons full-width. */
+.teacher-sort-select{
+  display:none;
+  width:100%;
+  min-height:44px;
+  padding:10px 40px 10px 16px;
+  color:var(--text);
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  font-size:14px;
+  font-weight:700;
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726A61' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  cursor:pointer;
+}
+.teacher-sort-select:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(232,90,51,.12);
+}
 .teacher-roster-table{
   min-width:980px;
 }
@@ -1158,6 +1184,111 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--muted);
   font-size:12px;
   line-height:1.45;
+}
+
+/* Mobile: cards instead of a horizontally-scrolling table. Reuses the
+   existing markup — the <table> semantics just don't force column layout
+   below this width — with data-label attributes supplying each field's
+   caption, and a 2-column grid arranging the four numeric stats into
+   mini tiles instead of a flat, plain list. --row-accent is set inline
+   per row (the student's ZPD status color) and drives the left border
+   and the status-row tint. */
+@media(max-width:860px){
+  .teacher-roster-table{min-width:0;width:100%}
+  .teacher-table-wrap{overflow-x:visible}
+  .teacher-roster-table thead{display:none}
+  .teacher-roster-table,
+  .teacher-roster-table tbody{display:block;width:100%}
+  .teacher-roster-table tr{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0 12px;
+    margin-bottom:16px;
+    padding:20px;
+    border:1px solid var(--border);
+    border-left:4px solid var(--row-accent, var(--accent));
+    border-radius:16px;
+    background:linear-gradient(180deg,#FFFFFF 0%,#FCFAF8 100%);
+    box-shadow:0 1px 2px rgba(27,23,18,.04), 0 16px 32px -24px rgba(27,23,18,.2);
+  }
+  .teacher-roster-table tr:last-child{margin-bottom:0}
+  .teacher-roster-table tr:active{transform:scale(.99)}
+  .teacher-roster-table tbody tr:hover td{
+    background:none;
+    transform:none;
+    box-shadow:none;
+  }
+  .teacher-roster-table td{
+    display:block;
+    padding:0;
+    border:none !important;
+    text-align:left !important;
+  }
+  .teacher-roster-table td[data-label]::before{
+    content:attr(data-label);
+    display:block;
+    margin-bottom:6px;
+    color:var(--muted);
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+  }
+
+  /* Header: name + username, full width */
+  .teacher-roster-cell-name{
+    grid-column:1 / -1;
+    padding-bottom:14px !important;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--border-strong) !important;
+  }
+  .teacher-roster-cell-name::before{display:none}
+  .teacher-roster-cell-name .teacher-student-name{font-size:17px}
+
+  /* ZPD status: full-width tinted strip, pill + description inline */
+  .teacher-roster-table td[data-label="ZPD Status"]{
+    grid-column:1 / -1;
+    padding:12px 14px !important;
+    margin-bottom:14px;
+    border-radius:10px;
+    background:rgba(27,23,18,.04);
+    background:color-mix(in srgb, var(--row-accent) 12%, transparent);
+  }
+  .teacher-roster-table td[data-label="ZPD Status"]::before{display:none}
+  .teacher-roster-table td[data-label="ZPD Status"] .teacher-status-pill{margin-bottom:6px}
+
+  /* Four numeric stats as 2x2 mini tiles instead of a flat list */
+  .teacher-roster-table td[data-label="Mastery"],
+  .teacher-roster-table td[data-label="Interactions"],
+  .teacher-roster-table td[data-label="Mastered"],
+  .teacher-roster-table td[data-label="Struggling"]{
+    padding:12px 14px !important;
+    margin-bottom:10px;
+    background:var(--bg);
+    border-radius:12px;
+    font-size:19px;
+  }
+
+  /* Last active: full width, its own line */
+  .teacher-roster-table td[data-label="Last active"]{
+    grid-column:1 / -1;
+    padding-top:2px !important;
+  }
+
+  /* Details link — no caption, full-width button, sits below a divider */
+  .teacher-roster-cell-action{
+    grid-column:1 / -1;
+    padding-top:16px !important;
+    margin-top:6px;
+    border-top:1px solid var(--border) !important;
+  }
+  .teacher-detail-link{
+    display:block;
+    width:100%;
+    min-height:44px;
+    text-align:center;
+    font-size:14px;
+  }
 }
 .teacher-status-pill{
   display:inline-flex;
@@ -4454,14 +4585,8 @@ body:has(.selflearn-session-view) .home-footer{
   .history-hero h2{font-size:44px}
   .history-subject-card{width:100%}
   .history-card-main{flex-direction:column}
-  .teacher-sort-control{
-    width:100%;
-    align-items:stretch;
-    flex-direction:column;
-    border-radius:8px;
-  }
-  .teacher-sort-control span{padding:4px 8px}
-  .teacher-sort-control button{width:100%}
+  .teacher-sort-control{display:none}
+  .teacher-sort-select{display:block}
   .profile-name{display:none}
   .profile-badge{padding:5px 8px;gap:0}
   .modal{padding:16px}
