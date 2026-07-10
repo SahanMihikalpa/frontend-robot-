@@ -95,16 +95,7 @@ export default function TeacherStudents() {
         </div>
       </section>
 
-      <div className="teacher-roster-nav">
-        <Link href="/teacher/heatmap" className="teacher-action primary">
-          <span>01</span>
-          Skill Heatmap
-        </Link>
-        <Link href="/dashboard/teacher" className="teacher-action">
-          <span>02</span>
-          Dashboard
-        </Link>
-      </div>
+      
 
       <section className="teacher-kpi-grid teacher-roster-kpis">
         <div className="teacher-kpi-card">

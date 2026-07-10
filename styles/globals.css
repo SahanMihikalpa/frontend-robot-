@@ -1704,6 +1704,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--muted);
   background:var(--bg);
   border:1px solid var(--border);
+  font-size:15px;
   cursor:pointer;
 }
 .skills-chip.active{
@@ -6046,7 +6047,7 @@ body:has(.selflearn-session-view) .home-footer{
 .history-filter-label{
   margin:0 0 10px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
   letter-spacing:.14em;
   text-transform:uppercase;
@@ -6063,6 +6064,16 @@ body:has(.selflearn-session-view) .home-footer{
   gap:14px;
   margin-top:18px;
 }
+
+/* Readability pass — history page's own cards/labels ran noticeably
+   smaller than the rest of the (already-enlarged) teacher-dash type
+   scale, so bump them to match instead of touching the shared
+   .history-card/.history-result-pill classes other pages reuse. */
+.history-page .history-accuracy-block p{font-size:14px}
+.history-page .history-accuracy-block strong{font-size:16px}
+.history-page .history-card h4{font-size:18px;line-height:1.5}
+.history-page .history-card p{font-size:15px;line-height:1.7}
+.history-page .history-result-pill{font-size:13px;padding:6px 12px}
 
 /* History mobile: hero → session scope → metrics → timeline */
 @media(max-width:1180px){

@@ -140,16 +140,7 @@ export default function TeacherHeatmap() {
         </div>
       </section>
 
-      <div className="teacher-roster-nav teacher-heatmap-nav">
-        <Link href="/teacher/students" className="teacher-action primary">
-          <span>01</span>
-          Student Roster
-        </Link>
-        <Link href="/dashboard/teacher" className="teacher-action">
-          <span>02</span>
-          Dashboard
-        </Link>
-      </div>
+      
 
       <InfoBox title="How to read this heatmap" accent="var(--accent)" defaultOpen>
         <p>

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { getMyInteractions, getStudentInteractions, listStudentsAnalytics, listSkills } from '../lib/api'
 import { getStoredUser } from '../lib/session'
@@ -106,6 +107,8 @@ export default function HistoryPage() {
               </strong>
             </div>
           </section>
+
+          
 
           <section className="teacher-panel history-scope-panel">
             <div className="teacher-panel-header">

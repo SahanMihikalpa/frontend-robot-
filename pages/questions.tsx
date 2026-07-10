@@ -205,16 +205,7 @@ export default function QuestionsPage() {
         </div>
       </section>
 
-      <div className="teacher-roster-nav">
-        <Link href="/skills" className="teacher-action primary">
-          <span>01</span>
-          Manage Skills
-        </Link>
-        <Link href="/dashboard/teacher" className="teacher-action">
-          <span>02</span>
-          Dashboard
-        </Link>
-      </div>
+      
 
       <section className="teacher-kpi-grid teacher-roster-kpis">
         <div className="teacher-kpi-card">
