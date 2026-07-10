@@ -1704,6 +1704,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--muted);
   background:var(--bg);
   border:1px solid var(--border);
+  font-size:15px;
   cursor:pointer;
 }
 .skills-chip.active{
@@ -2524,6 +2525,40 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
   align-items:flex-start;
 }
+.knowledge-panel-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:24px;
+  align-items:start;
+}
+.knowledge-panel-row .teacher-panel{
+  height:100%;
+}
+.knowledge-kpi-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.knowledge-kpi-query{
+  gap:14px;
+}
+.knowledge-kpi-query input[type=text]{
+  min-height:44px;
+  padding:10px 12px;
+  font-size:13px;
+}
+.knowledge-kpi-query-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.knowledge-kpi-query-footer small{
+  color:var(--muted);
+  font-size:12px;
+}
+.knowledge-kpi-query .skills-action{
+  padding:9px 16px;
+  font-size:13px;
+}
 .knowledge-main{
   display:flex;
   flex-direction:column;
@@ -2589,6 +2624,19 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   margin-top:4px;
   padding-top:18px;
   border-top:1px solid rgba(27,23,18,.08);
+}
+.knowledge-kpi-row{
+  align-items:start;
+}
+.knowledge-kpi-upload-card{
+  min-height:0;
+  gap:14px;
+}
+.knowledge-kpi-upload-card .knowledge-form-group{
+  margin-bottom:0;
+}
+.knowledge-kpi-upload-card .knowledge-form-footer{
+  margin-top:0;
 }
 .knowledge-results-empty{
   padding:56px 24px;
@@ -4437,7 +4485,9 @@ body:has(.selflearn-session-view) .home-footer{
   .teacher-hero,
   .teacher-layout{grid-template-columns:minmax(0,1fr)}
   .teacher-actions{position:static}
+  .knowledge-panel-row{grid-template-columns:minmax(0,1fr)}
   .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .knowledge-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .teacher-roster-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .teacher-guide-grid{grid-template-columns:1fr}
   .teacher-heatmap-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -4694,6 +4744,15 @@ body:has(.selflearn-session-view) .home-footer{
   flex-direction:column;
   gap:24px;
 }
+.analytics-panel-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,2fr);
+  align-items:stretch;
+  gap:24px;
+}
+.analytics-panel-row .teacher-panel{
+  height:100%;
+}
 .analytics-hero{
   padding:48px 56px;
   display:flex;
@@ -4771,9 +4830,14 @@ body:has(.selflearn-session-view) .home-footer{
 .analytics-student-main h4{
   margin:0;
   color:var(--text);
-  font-size:16px;
+  font-size:18px;
   line-height:1.45;
 }
+/* Readability pass — analytics reuses .meta/.history-result-pill at their
+   site-wide (small) sizes; bump them here without touching the shared
+   classes other pages rely on. */
+.analytics-page .meta{font-size:15px}
+.analytics-page .history-result-pill{font-size:13px;padding:6px 12px}
 .analytics-student-right{
   display:flex;
   align-items:center;
@@ -4800,6 +4864,17 @@ body:has(.selflearn-session-view) .home-footer{
 .analytics-skill-row:last-child{
   border-bottom:none;
 }
+/* Long skill names + a percentage badge share one flex row — truncate the
+   name instead of letting it push the badge off narrow screens. */
+.analytics-skill-row .row .meta{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+}
+.analytics-skill-row .row > span{
+  flex-shrink:0;
+}
 .history-result-pill.warning{
   color:var(--warning);
   background:var(--warning-dim);
@@ -4808,6 +4883,7 @@ body:has(.selflearn-session-view) .home-footer{
 @media(max-width:960px){
   .analytics-hero{flex-direction:column;align-items:flex-start}
   .analytics-stat-grid{width:100%;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .analytics-panel-row{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:600px){
   .analytics-hero,
@@ -5997,7 +6073,7 @@ body:has(.selflearn-session-view) .home-footer{
 .history-filter-label{
   margin:0 0 10px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
   letter-spacing:.14em;
   text-transform:uppercase;
@@ -6014,6 +6090,16 @@ body:has(.selflearn-session-view) .home-footer{
   gap:14px;
   margin-top:18px;
 }
+
+/* Readability pass — history page's own cards/labels ran noticeably
+   smaller than the rest of the (already-enlarged) teacher-dash type
+   scale, so bump them to match instead of touching the shared
+   .history-card/.history-result-pill classes other pages reuse. */
+.history-page .history-accuracy-block p{font-size:14px}
+.history-page .history-accuracy-block strong{font-size:16px}
+.history-page .history-card h4{font-size:18px;line-height:1.5}
+.history-page .history-card p{font-size:15px;line-height:1.7}
+.history-page .history-result-pill{font-size:13px;padding:6px 12px}
 
 /* History mobile: hero → session scope → metrics → timeline */
 @media(max-width:1180px){
