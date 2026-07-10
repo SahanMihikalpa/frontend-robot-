@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
   listSkills, createSkill, updateSkill, deleteSkill,
@@ -272,21 +273,76 @@ export default function SkillsPage() {
     return m
   }, [skills])
 
+  const avgDifficulty = useMemo(() => {
+    const withLevel = skills.filter((s) => s.difficulty_level != null)
+    if (withLevel.length === 0) return null
+    return withLevel.reduce((sum, s) => sum + (s.difficulty_level || 0), 0) / withLevel.length
+  }, [skills])
+  const skillsWithQuestions = useMemo(
+    () => skills.filter((s) => (questionCounts[s.id] || 0) > 0).length,
+    [skills, questionCounts],
+  )
+
   return (
-    <div className="skills-page">
+    <div className="skills-page teacher-roster-page student-dash">
       {/* ── Header ── */}
-      <section className="skills-hero">
-        <div className="skills-hero-top">
+      <section className="teacher-hero">
+        <div>
+          <p className="teacher-eyebrow">Learning Map</p>
+          <h2 className="editorial-title">Skills</h2>
+          <p>
+            Manage learning skills, BKT parameters, and prerequisite relationships.
+            {canEdit ? ' Teachers can create and edit. Admins can also delete.' : ' Read-only view.'}
+          </p>
+        </div>
+        <div className="teacher-hero-note">
+          <span>Map</span>
+          <strong>{skills.length}</strong>
+          <p>skills total</p>
+        </div>
+      </section>
+
+      <div className="teacher-roster-nav">
+        <Link href="/questions" className="teacher-action primary">
+          <span>01</span>
+          Manage Questions
+        </Link>
+        <Link href="/knowledge" className="teacher-action">
+          <span>02</span>
+          Knowledge Base
+        </Link>
+      </div>
+
+      <section className="teacher-kpi-grid teacher-roster-kpis">
+        <div className="teacher-kpi-card">
+          <p>Total skills</p>
+          <strong>{skills.length}</strong>
+          <small>in the learning map</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Categories</p>
+          <strong>{categories.length}</strong>
+          <small>distinct skill categories</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>With questions</p>
+          <strong>{skillsWithQuestions}</strong>
+          <small>of {skills.length} skills</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Avg difficulty</p>
+          <strong>{avgDifficulty != null ? avgDifficulty.toFixed(1) : '-'}</strong>
+          <small>on a 1-5 scale</small>
+        </div>
+      </section>
+
+      <section className="teacher-panel">
+        <div className="teacher-panel-header">
           <div>
-            <p className="teacher-eyebrow">Learning Map</p>
-            <h2 className="editorial-title">Skills</h2>
-            <p>
-              Manage learning skills, BKT parameters, and prerequisite relationships.
-              {canEdit ? ' Teachers can create and edit. Admins can also delete.' : ' Read-only view.'}
-            </p>
+            <p className="teacher-eyebrow">Filters</p>
+            <h3 className="editorial-title">Search & category</h3>
           </div>
-          <div className="skills-hero-actions">
-            <span className="skills-count-pill">{skills.length} skills</span>
+          <div className="questions-hero-actions">
             <button
               type="button"
               className="skills-action secondary"
@@ -340,8 +396,8 @@ export default function SkillsPage() {
 
       {/* ── Dependency Graph ── */}
       {showGraph && (
-        <section className="skills-panel">
-          <div className="skills-panel-header">
+        <section className="teacher-panel">
+          <div className="teacher-panel-header">
             <div>
               <p className="teacher-eyebrow">Dependencies</p>
               <h3 className="editorial-title">Prerequisite graph</h3>
@@ -380,8 +436,8 @@ export default function SkillsPage() {
       )}
 
       {/* ── Skills table ── */}
-      <section className="skills-panel">
-        <div className="skills-panel-header">
+      <section className="teacher-panel">
+        <div className="teacher-panel-header">
           <div>
             <p className="teacher-eyebrow">Catalogue</p>
             <h3 className="editorial-title">Skill list</h3>
