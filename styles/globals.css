@@ -2820,54 +2820,54 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
 }
 .tutor-hero{
-  padding:48px 56px;
+  padding:30px 36px;
   display:flex;
   justify-content:space-between;
   gap:28px;
-  align-items:flex-end;
+  align-items:center;
 }
 .tutor-hero h2{
-  margin:10px 0 16px;
+  margin:12px 0 12px;
   color:var(--text);
-  font-size:clamp(46px, 7vw, 82px);
-  line-height:.95;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
 }
 .tutor-hero p{
   max-width:720px;
   margin:0;
   color:var(--muted);
-  font-size:16px;
-  line-height:1.8;
+  font-size:18px;
+  line-height:1.65;
 }
 .tutor-status-card{
   min-width:220px;
-  min-height:150px;
-  padding:20px;
+  min-height:0;
+  padding:22px 26px;
   display:flex;
   flex-direction:column;
-  justify-content:flex-end;
+  justify-content:center;
   background:var(--ink);
-  border-radius:8px;
+  border-radius:18px;
 }
 .tutor-status-card span{
   color:#D8C9BD;
-  font-size:12px;
+  font-size:11px;
   font-weight:800;
   letter-spacing:.18em;
   text-transform:uppercase;
 }
 .tutor-status-card strong{
-  margin-top:16px;
+  margin-top:12px;
   color:var(--surface);
   font-family:var(--font-sans);
-  font-size:42px;
+  font-size:50px;
   font-weight:500;
   line-height:1;
 }
 .tutor-status-card p{
-  margin:8px 0 0;
+  margin:6px 0 0;
   color:#D8C9BD;
-  font-size:13px;
+  font-size:14px;
 }
 .tutor-layout{
   display:grid;
@@ -2877,18 +2877,18 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .tutor-chat-panel,
 .tutor-side-panel{
-  padding:28px;
+  padding:28px 32px;
   background:linear-gradient(180deg,#FBF7F1 0%,var(--surface) 100%);
   border:1px solid var(--border);
-  border-radius:8px;
+  border-radius:18px;
 }
 .tutor-side-panel{
   position:sticky;
   top:112px;
 }
 .tutor-chat-window{
-  min-height:360px;
-  max-height:520px;
+  min-height:460px;
+  max-height:640px;
   padding:18px;
   display:flex;
   flex-direction:column;
@@ -2896,14 +2896,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   overflow-y:auto;
   background:var(--bg);
   border:1px solid var(--border);
-  border-radius:8px;
+  border-radius:14px;
 }
 .tutor-message{
   max-width:78%;
-  padding:12px 14px;
-  border-radius:8px;
-  font-size:14px;
-  line-height:1.6;
+  padding:14px 16px;
+  border-radius:14px;
+  font-size:16px;
+  line-height:1.7;
 }
 .tutor-message.user{
   align-self:flex-end;
@@ -2955,7 +2955,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border:1px solid var(--border);
   border-radius:999px;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
 }
 .tutor-stream-toggle{
@@ -2963,17 +2963,17 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   align-items:center;
   gap:8px;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
   cursor:pointer;
 }
 .tutor-info-card,
 .tutor-source-card,
 .tutor-path-item{
-  padding:14px;
+  padding:16px;
   background:var(--bg);
   border:1px solid var(--border);
-  border-radius:8px;
+  border-radius:14px;
   transition:transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .28s ease;
 }
 .tutor-info-card:hover,
@@ -2987,13 +2987,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .tutor-source-card p{
   margin:0;
   color:var(--muted);
-  font-size:13px;
-  line-height:1.55;
+  font-size:14px;
+  line-height:1.6;
 }
 .tutor-info-card strong{
   display:block;
   margin-top:6px;
   color:var(--text);
+  font-size:16px;
   line-height:1.5;
 }
 .tutor-source-block,
@@ -3022,8 +3023,8 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .tutor-path-item p{
   margin:0;
   color:var(--text);
-  font-size:13px;
-  line-height:1.45;
+  font-size:15px;
+  line-height:1.5;
 }
 .history-page{
   display:flex;
@@ -4629,10 +4630,16 @@ body:has(.selflearn-session-view) .home-footer{
   .knowledge-doc-card{align-items:flex-start;flex-direction:column}
   .tutor-hero,
   .tutor-chat-panel,
-  .tutor-side-panel{padding:22px}
-  .tutor-hero h2{font-size:44px}
-  .tutor-status-card{width:100%}
+  .tutor-side-panel{padding:18px 20px}
+  .tutor-hero h2{font-size:26px}
+  .tutor-hero p{font-size:15px}
+  .tutor-status-card{width:100%;min-width:0}
+  .tutor-status-card strong{font-size:36px}
   .tutor-message{max-width:92%}
+  /* Keep the composer within reach on first load — a tall chat window plus
+     the quick-prompt chips push it below the fold on phones. */
+  .tutor-chat-window{min-height:220px;max-height:320px}
+  .tutor-prompt-row{display:none}
   .tutor-toolbar{align-items:flex-start;flex-direction:column}
   .tutor-button-row,
   .tutor-button-row .skills-action,
