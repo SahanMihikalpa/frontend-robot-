@@ -44,6 +44,12 @@
 *{box-sizing:border-box}
 html,body,#__next{height:100%}
 button,input,textarea,select{font-family:inherit}
+html{
+  /* Safety net: nothing in the layout should ever need horizontal
+     scroll — a stray long word/URL in dynamic content (skill names,
+     chat replies, etc.) shouldn't be able to widen the whole page. */
+  overflow-x:hidden;
+}
 body{
   margin:0;
   font-family: var(--font-sans);
@@ -51,6 +57,7 @@ body{
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
 }
 
 .app-shell{
@@ -95,6 +102,22 @@ body{
   top:16px;
   z-index:100;
 }
+/* Fixed strip behind the pill header — blurs/fades scrolled content that
+   would otherwise show through the gap above the sticky header. */
+.header-blur-mask{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:76px;
+  z-index:99;
+  pointer-events:none;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  background:linear-gradient(180deg, var(--bg) 55%, rgba(248,247,244,0) 100%);
+  -webkit-mask-image:linear-gradient(180deg, #000 55%, transparent 100%);
+  mask-image:linear-gradient(180deg, #000 55%, transparent 100%);
+}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .2s ease}
 .brand:hover{opacity:.75}
 .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
@@ -129,7 +152,7 @@ body{
 }
 .profile-name{
   color:var(--text);
-  font-size:14px;
+  font-size:15px;
   font-weight:600;
 }
 .profile-role{
@@ -143,7 +166,7 @@ body{
 
   padding:4px 10px;
 
-  font-size:11px;
+  font-size:12px;
 }
 
 /* ─── Nav ─── */
@@ -153,7 +176,7 @@ body{
   text-decoration:none;
   padding:8px 10px;
   border-radius:0;
-  font-size:15px;
+  font-size:17px;
   font-weight:400;
   transition:all .2s ease;
 }
@@ -185,7 +208,7 @@ body{
 
   color:var(--accent); /* terracotta red */
 
-  font-size:15px;
+  font-size:17px;
   font-weight:500;
 
   padding:8px 10px;
@@ -509,6 +532,8 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--text-secondary);
   font-size:17px;
   line-height:1.8;
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 .teacher-eyebrow{
   margin:0;
@@ -644,11 +669,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   padding:18px 14px;
   border-bottom:1px solid var(--border);
   text-align:left;
-  font-size:14px;
+  font-size:15px;
 }
 .teacher-table th{
   color:var(--muted);
-  font-size:11px;
+  font-size:12px;
   font-weight:700;
   letter-spacing:.16em;
   text-transform:uppercase;
@@ -949,13 +974,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   letter-spacing:.16em;
 }
 .teacher-info-toggle span:first-child{
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
 .teacher-info-toggle span:last-child{
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
 }
 .teacher-info-content{
@@ -1014,21 +1039,21 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-status-card span{
   display:inline-flex;
-  padding:5px 12px;
+  padding:6px 13px;
   border-radius:999px;
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   letter-spacing:.03em;
 }
 .teacher-status-card p{
   margin:12px 0 4px;
   color:var(--text);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.5;
 }
 .teacher-status-card small{
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .teacher-column-guide{
@@ -1038,7 +1063,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-column-guide div{
   padding:12px 0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.55;
   border-bottom:1px solid var(--border);
 }
@@ -1071,20 +1096,20 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-sort-control span{
   padding:0 8px 0 10px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
 .teacher-sort-control button{
-  min-height:36px;
+  min-height:38px;
   padding:8px 16px;
   color:var(--muted);
   background:transparent;
   border:none;
   border-radius:999px;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   font-weight:700;
   transition:background .24s ease, color .24s ease, transform .18s ease, box-shadow .24s ease;
 }
@@ -1102,6 +1127,32 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-sort-control button:active{
   transform:translateY(0) scale(.98);
+}
+/* Mobile-only dropdown replacement for .teacher-sort-control — a row of
+   pill buttons doesn't fit a phone screen, so this native select takes
+   over below the breakpoint instead of stacking the buttons full-width. */
+.teacher-sort-select{
+  display:none;
+  width:100%;
+  min-height:44px;
+  padding:10px 40px 10px 16px;
+  color:var(--text);
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  font-size:15px;
+  font-weight:700;
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726A61' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  cursor:pointer;
+}
+.teacher-sort-select:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(232,90,51,.12);
 }
 .teacher-roster-table{
   min-width:980px;
@@ -1125,21 +1176,129 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-student-name{
   color:var(--text);
+  font-size:16px;
   font-weight:800;
   transition:color .2s ease;
 }
 .teacher-student-meta{
   margin-top:4px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.45;
+}
+
+/* Mobile: cards instead of a horizontally-scrolling table. Reuses the
+   existing markup — the <table> semantics just don't force column layout
+   below this width — with data-label attributes supplying each field's
+   caption, and a 2-column grid arranging the four numeric stats into
+   mini tiles instead of a flat, plain list. --row-accent is set inline
+   per row (the student's ZPD status color) and drives the left border
+   and the status-row tint. */
+@media(max-width:860px){
+  .teacher-roster-table{min-width:0;width:100%}
+  .teacher-table-wrap{overflow-x:visible}
+  .teacher-roster-table thead{display:none}
+  .teacher-roster-table,
+  .teacher-roster-table tbody{display:block;width:100%}
+  .teacher-roster-table tr{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0 12px;
+    margin-bottom:16px;
+    padding:20px;
+    border:1px solid var(--border);
+    border-left:4px solid var(--row-accent, var(--accent));
+    border-radius:16px;
+    background:linear-gradient(180deg,#FFFFFF 0%,#FCFAF8 100%);
+    box-shadow:0 1px 2px rgba(27,23,18,.04), 0 16px 32px -24px rgba(27,23,18,.2);
+  }
+  .teacher-roster-table tr:last-child{margin-bottom:0}
+  .teacher-roster-table tr:active{transform:scale(.99)}
+  .teacher-roster-table tbody tr:hover td{
+    background:none;
+    transform:none;
+    box-shadow:none;
+  }
+  .teacher-roster-table td{
+    display:block;
+    padding:0;
+    border:none !important;
+    text-align:left !important;
+  }
+  .teacher-roster-table td[data-label]::before{
+    content:attr(data-label);
+    display:block;
+    margin-bottom:6px;
+    color:var(--muted);
+    font-size:11.5px;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+  }
+
+  /* Header: name + username, full width */
+  .teacher-roster-cell-name{
+    grid-column:1 / -1;
+    padding-bottom:14px !important;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--border-strong) !important;
+  }
+  .teacher-roster-cell-name::before{display:none}
+  .teacher-roster-cell-name .teacher-student-name{font-size:18px}
+  .teacher-roster-cell-name .teacher-student-meta{font-size:14px}
+
+  /* ZPD status: full-width tinted strip, pill + description inline */
+  .teacher-roster-table td[data-label="ZPD Status"]{
+    grid-column:1 / -1;
+    padding:12px 14px !important;
+    margin-bottom:14px;
+    border-radius:10px;
+    background:rgba(27,23,18,.04);
+    background:color-mix(in srgb, var(--row-accent) 12%, transparent);
+  }
+  .teacher-roster-table td[data-label="ZPD Status"]::before{display:none}
+  .teacher-roster-table td[data-label="ZPD Status"] .teacher-status-pill{margin-bottom:6px}
+
+  /* Four numeric stats as 2x2 mini tiles instead of a flat list */
+  .teacher-roster-table td[data-label="Mastery"],
+  .teacher-roster-table td[data-label="Interactions"],
+  .teacher-roster-table td[data-label="Mastered"],
+  .teacher-roster-table td[data-label="Struggling"]{
+    padding:12px 14px !important;
+    margin-bottom:10px;
+    background:var(--bg);
+    border-radius:12px;
+    font-size:21px;
+  }
+
+  /* Last active: full width, its own line */
+  .teacher-roster-table td[data-label="Last active"]{
+    grid-column:1 / -1;
+    padding-top:2px !important;
+    font-size:15px;
+  }
+
+  /* Details link — no caption, full-width button, sits below a divider */
+  .teacher-roster-cell-action{
+    grid-column:1 / -1;
+    padding-top:16px !important;
+    margin-top:6px;
+    border-top:1px solid var(--border) !important;
+  }
+  .teacher-detail-link{
+    display:block;
+    width:100%;
+    min-height:44px;
+    text-align:center;
+    font-size:15px;
+  }
 }
 .teacher-status-pill{
   display:inline-flex;
-  padding:5px 12px;
+  padding:6px 13px;
   border:1px solid rgba(27,23,18,.06);
   border-radius:999px;
-  font-size:11.5px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.02em;
   white-space:nowrap;
@@ -1153,14 +1312,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:34px;
-  padding:8px 13px;
+  min-height:36px;
+  padding:8px 14px;
   color:var(--accent);
   background:rgba(232,90,51,.08);
   border:1px solid rgba(232,90,51,.24);
   border-radius:999px;
   text-decoration:none;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
   transition:background .2s ease, color .2s ease, transform .18s ease, box-shadow .2s ease;
 }
@@ -1176,7 +1335,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-roster-note{
   margin:0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.7;
 }
 .teacher-heatmap-page{
@@ -1209,13 +1368,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-align:left;
 }
 .teacher-heatmap-info-toggle span:first-child{
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.14em;
   text-transform:uppercase;
 }
 .teacher-heatmap-info-toggle span:last-child{
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-info-content{
@@ -1252,28 +1411,28 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-guide-card span{
   width:max-content;
-  padding:5px 10px;
+  padding:6px 11px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-guide-card p{
   margin:0;
   color:var(--text);
-  font-size:13px;
+  font-size:14.5px;
   line-height:1.5;
 }
 .teacher-heatmap-guide-card small{
   margin-top:auto;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .teacher-heatmap-hint,
 .teacher-heatmap-filter-note{
   margin:0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.6;
 }
 .teacher-heatmap-summary{
@@ -1287,7 +1446,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border:1px solid rgba(232,90,51,.24);
   border-radius:999px;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
 }
 .teacher-heatmap-filter-grid{
@@ -1312,9 +1471,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   text-align:left;
 }
 .teacher-heatmap-filter span{
-  padding:5px 10px;
+  padding:6px 11px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-filter strong{
@@ -1326,7 +1485,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-filter small{
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
 }
 .teacher-heatmap-filter.active{
   background:#FFF9F3;
@@ -1356,7 +1515,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-heatmap-table th{
   padding:10px 8px;
   color:var(--muted);
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   letter-spacing:.12em;
   text-align:center;
@@ -1373,7 +1532,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-table td{
   padding:6px 8px;
-  font-size:13px;
+  font-size:14px;
   vertical-align:middle;
 }
 .teacher-heatmap-table td:first-child{
@@ -1392,12 +1551,12 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--accent);
 }
 .teacher-heatmap-cell{
-  width:44px;
-  height:40px;
+  width:46px;
+  height:42px;
   padding:0 !important;
   border-radius:8px;
   text-align:center;
-  font-size:12px !important;
+  font-size:13px !important;
   font-weight:800;
   cursor:default;
 }
@@ -1408,9 +1567,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .teacher-heatmap-row-status span{
   display:inline-flex;
-  padding:4px 9px;
+  padding:5px 10px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
   font-weight:800;
 }
 .teacher-heatmap-row-status .danger{
@@ -1440,7 +1599,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .teacher-heatmap-tooltip p{
   margin:0;
   color:var(--accent);
-  font-size:12px;
+  font-size:13px;
   line-height:1.5;
 }
 .skills-page{
@@ -1448,28 +1607,30 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+/* Compact hero — matches the scale used across the redesigned dashboard/
+   roster/heatmap pages instead of the old full-bleed landing-page size. */
 .skills-hero{
-  padding:48px 56px;
+  padding:30px 36px;
 }
 .skills-hero-top{
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-start;
-  margin-bottom:28px;
+  margin-bottom:24px;
 }
 .skills-hero h2{
-  margin:10px 0 16px;
+  margin:12px 0 12px;
   color:var(--text);
-  font-size:clamp(46px, 7vw, 82px);
-  line-height:.95;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
 }
 .skills-hero p{
   max-width:710px;
   margin:0;
   color:var(--muted);
-  font-size:16px;
-  line-height:1.8;
+  font-size:18px;
+  line-height:1.7;
 }
 .skills-hero-actions{
   display:flex;
@@ -1488,7 +1649,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   align-items:center;
   justify-content:center;
   border-radius:999px;
-  font-size:13px;
+  font-size:15px;
   font-weight:800;
   text-decoration:none;
 }
@@ -1530,7 +1691,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FBF7F1 !important;
   border:1px solid var(--border) !important;
   border-radius:8px !important;
-  font-size:15px !important;
+  font-size:17px !important;
 }
 .skills-chip-row{
   display:flex;
@@ -1543,6 +1704,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--muted);
   background:var(--bg);
   border:1px solid var(--border);
+  font-size:15px;
   cursor:pointer;
 }
 .skills-chip.active{
@@ -1566,7 +1728,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-panel-header h3{
   margin:8px 0 0;
   color:var(--text);
-  font-size:34px;
+  font-size:36px;
   line-height:1.05;
 }
 .skills-graph-list{
@@ -1604,11 +1766,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border-bottom:1px solid var(--border);
   text-align:left;
   vertical-align:top;
-  font-size:14px;
+  font-size:16px;
 }
 .skills-table th{
   color:var(--muted);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.15em;
   text-transform:uppercase;
@@ -1629,7 +1791,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-name{
   display:block;
   color:var(--text);
-  font-size:15px;
+  font-size:17px;
 }
 .skills-question-pill{
   min-width:36px;
@@ -1705,7 +1867,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .skills-card-meta-label{
   color:var(--muted);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.1em;
   text-transform:uppercase;
@@ -1841,7 +2003,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .skills-modal-kicker{
   margin:28px 30px 0;
   color:var(--accent);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.24em;
   text-transform:uppercase;
@@ -1850,7 +2012,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   margin:0 30px 18px;
   max-width:430px;
   color:var(--muted);
-  font-size:14px;
+  font-size:16px;
   line-height:1.65;
 }
 .skills-modal-scroll > .meta{
@@ -1870,7 +2032,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .modal.skills-modal .field label{
   color:var(--text);
-  font-size:12px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.13em;
   text-transform:uppercase;
@@ -1884,7 +2046,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FFFDF9 !important;
   border:1px solid var(--border-strong) !important;
   border-radius:8px !important;
-  font-size:14px !important;
+  font-size:16px !important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
 }
 .modal.skills-modal .field textarea{
@@ -1925,7 +2087,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   border:1px solid var(--border);
   border-radius:999px;
   cursor:pointer;
-  font-size:14px;
+  font-size:16px;
   font-weight:800;
   box-shadow:0 8px 18px rgba(27,23,18,.05);
 }
@@ -2089,25 +2251,27 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+/* Compact hero — matches the scale used across the redesigned dashboard/
+   roster/heatmap/skills pages instead of the old full-bleed landing size. */
 .questions-hero{
-  padding:48px 56px;
+  padding:30px 36px;
   display:flex;
   justify-content:space-between;
   gap:28px;
   align-items:flex-start;
 }
 .questions-hero h2{
-  margin:10px 0 16px;
+  margin:12px 0 12px;
   color:var(--text);
-  font-size:clamp(46px, 7vw, 82px);
-  line-height:.95;
+  font-size:clamp(34px, 3.8vw, 52px);
+  line-height:1.05;
 }
 .questions-hero p{
   max-width:720px;
   margin:0;
   color:var(--muted);
-  font-size:16px;
-  line-height:1.8;
+  font-size:18px;
+  line-height:1.7;
 }
 .questions-hero-actions{
   display:flex;
@@ -2153,18 +2317,18 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .question-card h4{
   margin:8px 0 0;
   color:var(--text);
-  font-size:17px;
+  font-size:18px;
   line-height:1.45;
 }
 .question-type-pill{
   width:max-content;
   margin:0;
-  padding:5px 10px;
+  padding:6px 11px;
   color:var(--accent);
   background:rgba(232,90,51,.09);
   border:1px solid rgba(232,90,51,.22);
   border-radius:999px;
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.12em;
   text-transform:uppercase;
@@ -2172,7 +2336,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .question-meta{
   margin:12px 0 0;
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   line-height:1.6;
 }
 .question-options{
@@ -2190,7 +2354,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:#FBF7F1;
   border:1px solid var(--border);
   border-radius:8px;
-  font-size:13px;
+  font-size:14px;
   line-height:1.45;
 }
 .question-option strong{
@@ -2221,7 +2385,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .modal-section-label{
   margin:8px 30px -6px;
   color:var(--accent);
-  font-size:11px;
+  font-size:13px;
   font-weight:800;
   letter-spacing:.2em;
   text-transform:uppercase;
@@ -2361,6 +2525,40 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:24px;
   align-items:flex-start;
 }
+.knowledge-panel-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:24px;
+  align-items:start;
+}
+.knowledge-panel-row .teacher-panel{
+  height:100%;
+}
+.knowledge-kpi-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.knowledge-kpi-query{
+  gap:14px;
+}
+.knowledge-kpi-query input[type=text]{
+  min-height:44px;
+  padding:10px 12px;
+  font-size:13px;
+}
+.knowledge-kpi-query-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.knowledge-kpi-query-footer small{
+  color:var(--muted);
+  font-size:12px;
+}
+.knowledge-kpi-query .skills-action{
+  padding:9px 16px;
+  font-size:13px;
+}
 .knowledge-main{
   display:flex;
   flex-direction:column;
@@ -2426,6 +2624,19 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   margin-top:4px;
   padding-top:18px;
   border-top:1px solid rgba(27,23,18,.08);
+}
+.knowledge-kpi-row{
+  align-items:start;
+}
+.knowledge-kpi-upload-card{
+  min-height:0;
+  gap:14px;
+}
+.knowledge-kpi-upload-card .knowledge-form-group{
+  margin-bottom:0;
+}
+.knowledge-kpi-upload-card .knowledge-form-footer{
+  margin-top:0;
 }
 .knowledge-results-empty{
   padding:56px 24px;
@@ -3003,16 +3214,16 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .learn-option{
   display:flex;
   align-items:flex-start;
-  gap:12px;
+  gap:14px;
   width:100%;
   text-align:left;
-  padding:14px 16px;
+  padding:16px 18px;
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:12px;
   color:var(--text);
   font-family:inherit;
-  font-size:14.5px;
+  font-size:16px;
   line-height:1.55;
   cursor:pointer;
   transition:border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
@@ -3036,13 +3247,13 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:28px;
-  height:28px;
+  width:30px;
+  height:30px;
   border-radius:8px;
   background:var(--bg);
   border:1px solid var(--border);
   color:var(--muted);
-  font-size:13px;
+  font-size:14px;
   font-weight:800;
 }
 .learn-option.correct{
@@ -3078,13 +3289,25 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .learn-option.dimmed{
   color:var(--muted);
 }
+/* Exit session button — accent-tinted, with its own hover state since
+   inline styles (used for the base look) can't respond to :hover. */
+.learn-exit-btn{
+  color:var(--accent) !important;
+  border-color:var(--accent) !important;
+  background:var(--accent-light) !important;
+}
+.learn-exit-btn:hover{
+  color:#fff !important;
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+}
 .learn-status-pill{
   display:inline-flex;
   align-items:center;
   gap:6px;
-  padding:7px 14px;
+  padding:8px 16px;
   border-radius:999px;
-  font-size:13px;
+  font-size:14px;
   font-weight:700;
 }
 .learn-status-pill.success{
@@ -3108,8 +3331,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   height:calc(100vh - 130px);
   min-height:520px;
 }
+/* The practice session is a fixed-height workspace — the footer below it
+   just adds a dead scroll strip, so hide it while a session is active. */
+body:has(.learn-session) .home-footer,
+body:has(.selflearn-session-view) .home-footer{
+  display:none;
+}
 .learn-question-col{
-  width:44%;
+  width:36%;
   min-width:280px;
   flex-shrink:0;
   display:flex;
@@ -3121,8 +3350,33 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex:1;
   display:flex;
   flex-direction:column;
-  gap:14px;
   min-width:0;
+  height:100%;
+}
+/* One card holds the header, the scrolling message list, and the input —
+   a single bordered container instead of three stacked panels, so there's
+   only one scrollbar (the message list's) instead of a nested pair. */
+.learn-chat-card{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+}
+.learn-chat-card-header{
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:18px 22px;
+  border-bottom:1px solid var(--border);
+}
+.learn-chat-card-input{
+  flex-shrink:0;
+  padding:16px 20px;
+  border-top:1px solid var(--border);
 }
 .learn-chat-messages{
   flex:1;
@@ -3132,10 +3386,16 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:14px;
   overflow-y:auto;
   padding:20px 22px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:16px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border-strong) transparent;
 }
+.learn-chat-messages::-webkit-scrollbar{width:8px}
+.learn-chat-messages::-webkit-scrollbar-track{background:transparent}
+.learn-chat-messages::-webkit-scrollbar-thumb{
+  background:var(--border-strong);
+  border-radius:999px;
+}
+.learn-chat-messages::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 .learn-chat-empty{
   flex:1;
   display:flex;
@@ -3160,21 +3420,21 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .learn-chat-empty strong{
   color:var(--text);
-  font-size:15px;
+  font-size:19px;
 }
 .learn-chat-empty p{
   margin:0;
-  max-width:320px;
+  max-width:380px;
   color:var(--muted);
-  font-size:13.5px;
+  font-size:16px;
   line-height:1.65;
 }
 .learn-chat-textarea{
   flex:1;
   resize:none;
-  padding:12px 14px;
+  padding:14px 18px;
   font-family:inherit;
-  font-size:14px;
+  font-size:16px;
   color:var(--text);
   background:var(--bg);
   border:1px solid var(--border-strong);
@@ -3199,6 +3459,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     height:auto;
   }
   .learn-chat-col{
+    height:auto;
     min-height:480px;
   }
   .learn-chat-messages{
@@ -3207,8 +3468,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 
 .chat-bubble{
-  max-width:80%;padding:10px 14px;border-radius:14px;
-  font-size:14px;line-height:1.55;
+  max-width:80%;padding:13px 17px;border-radius:14px;
+  font-size:16px;line-height:1.6;
+  overflow-wrap:break-word;word-break:break-word;
 }
 .chat-bubble.user{
   align-self:flex-end;
@@ -4130,9 +4392,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 
 /* ─── Responsive ─── */
+/* Nav collapses into a hamburger once the link row can't fit — but how
+   much width that needs depends on how many links there are. Teacher/admin
+   have 8-10 links and need the wider 1470px threshold below; the student
+   nav (.compact — 6 or fewer links) only needs its own, much narrower
+   960px threshold, so it stays a normal row until much smaller windows. */
 @media(max-width:1470px){
-  .nav-toggle{display:flex}
-  .nav-links{
+  .nav-toggle:not(.compact){display:flex}
+  .nav-links:not(.compact){
     position:absolute;
     top:calc(100% + 8px);
     left:0;
@@ -4151,20 +4418,60 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
     pointer-events:none;
     transition:max-height .32s cubic-bezier(.16,1,.3,1), opacity .22s ease, padding .32s ease;
   }
-  .nav-links.open{
+  .nav-links:not(.compact).open{
     max-height:520px;
     opacity:1;
     pointer-events:auto;
     padding:8px 16px 16px;
   }
-  .nav-links a,
-  .nav-links .nav-button{
+  .nav-links:not(.compact) a,
+  .nav-links:not(.compact) .nav-button{
     width:100%;
     text-align:left;
     padding:12px 8px;
     font-size:16px;
   }
-  .nav-links .nav-button{
+  .nav-links:not(.compact) .nav-button{
+    border-top:1px solid var(--border);
+    margin-top:4px;
+    padding-top:14px;
+  }
+}
+@media(max-width:1120px){
+  .nav-toggle.compact{display:flex}
+  .nav-links.compact{
+    position:absolute;
+    top:calc(100% + 8px);
+    left:0;
+    right:0;
+    flex-direction:column;
+    align-items:stretch;
+    gap:2px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:24px;
+    box-shadow:0 16px 32px rgba(27,23,18,0.1);
+    padding:0 16px;
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    pointer-events:none;
+    transition:max-height .32s cubic-bezier(.16,1,.3,1), opacity .22s ease, padding .32s ease;
+  }
+  .nav-links.compact.open{
+    max-height:520px;
+    opacity:1;
+    pointer-events:auto;
+    padding:8px 16px 16px;
+  }
+  .nav-links.compact a,
+  .nav-links.compact .nav-button{
+    width:100%;
+    text-align:left;
+    padding:12px 8px;
+    font-size:16px;
+  }
+  .nav-links.compact .nav-button{
     border-top:1px solid var(--border);
     margin-top:4px;
     padding-top:14px;
@@ -4178,7 +4485,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .teacher-hero,
   .teacher-layout{grid-template-columns:minmax(0,1fr)}
   .teacher-actions{position:static}
+  .knowledge-panel-row{grid-template-columns:minmax(0,1fr)}
   .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .knowledge-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .teacher-roster-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .teacher-guide-grid{grid-template-columns:1fr}
   .teacher-heatmap-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -4295,7 +4604,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   }
   .skills-hero,
   .skills-panel{padding:22px}
-  .skills-hero h2{font-size:44px}
+  .skills-hero h2{font-size:28px}
   .skills-action,
   .skills-count-pill{width:100%}
   .skills-hero-actions{width:100%}
@@ -4303,7 +4612,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .questions-hero,
   .questions-filter-panel,
   .questions-panel{padding:22px}
-  .questions-hero h2{font-size:44px}
+  .questions-hero h2{font-size:28px}
   .questions-hero-actions{width:100%}
   .question-card-main{flex-direction:column}
   .questions-modal-grid,
@@ -4333,14 +4642,8 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .history-hero h2{font-size:44px}
   .history-subject-card{width:100%}
   .history-card-main{flex-direction:column}
-  .teacher-sort-control{
-    width:100%;
-    align-items:stretch;
-    flex-direction:column;
-    border-radius:8px;
-  }
-  .teacher-sort-control span{padding:4px 8px}
-  .teacher-sort-control button{width:100%}
+  .teacher-sort-control{display:none}
+  .teacher-sort-select{display:block}
   .profile-name{display:none}
   .profile-badge{padding:5px 8px;gap:0}
   .modal{padding:16px}
@@ -4441,6 +4744,15 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
+.analytics-panel-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,2fr);
+  align-items:stretch;
+  gap:24px;
+}
+.analytics-panel-row .teacher-panel{
+  height:100%;
+}
 .analytics-hero{
   padding:48px 56px;
   display:flex;
@@ -4518,9 +4830,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .analytics-student-main h4{
   margin:0;
   color:var(--text);
-  font-size:16px;
+  font-size:18px;
   line-height:1.45;
 }
+/* Readability pass — analytics reuses .meta/.history-result-pill at their
+   site-wide (small) sizes; bump them here without touching the shared
+   classes other pages rely on. */
+.analytics-page .meta{font-size:15px}
+.analytics-page .history-result-pill{font-size:13px;padding:6px 12px}
 .analytics-student-right{
   display:flex;
   align-items:center;
@@ -4547,6 +4864,17 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .analytics-skill-row:last-child{
   border-bottom:none;
 }
+/* Long skill names + a percentage badge share one flex row — truncate the
+   name instead of letting it push the badge off narrow screens. */
+.analytics-skill-row .row .meta{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+}
+.analytics-skill-row .row > span{
+  flex-shrink:0;
+}
 .history-result-pill.warning{
   color:var(--warning);
   background:var(--warning-dim);
@@ -4555,6 +4883,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 @media(max-width:960px){
   .analytics-hero{flex-direction:column;align-items:flex-start}
   .analytics-stat-grid{width:100%;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .analytics-panel-row{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:600px){
   .analytics-hero,
@@ -4571,29 +4900,145 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   flex-direction:column;
   gap:24px;
 }
-.selflearn-session-hero{
-  align-items:flex-start;
+/* Session — topic header merged into the top of the lesson card itself
+   (no separate hero): title on the left, back button on the right, both
+   on the same row so the button sits level with the title. */
+.selflearn-lesson-header{
+  align-items:flex-end !important;
+  gap:16px;
+  padding:18px 22px !important;
 }
-.selflearn-session-title{
-  margin:10px 0 12px;
-  font-size:clamp(34px, 5vw, 56px);
+.selflearn-lesson-header-title h2{
+  margin:4px 0 0;
+  font-size:26px;
+  line-height:1.15;
 }
-.selflearn-session-status{
-  min-width:240px;
-  gap:0;
+.selflearn-level-pill{
+  margin-left:14px;
+  vertical-align:middle;
+  font-size:14px;
 }
-.selflearn-session-pct{
-  margin-top:10px;
-  color:var(--surface);
+/* Accent-tinted back button, matching the Exit button used in the
+   practice session — its own class since inline styles can't :hover. */
+.selflearn-back-btn{
+  flex-shrink:0;
+  font-size:14px !important;
+  padding:10px 16px !important;
+  color:var(--accent) !important;
+  border-color:var(--accent) !important;
+  background:var(--accent-light) !important;
+}
+.selflearn-back-btn:hover{
+  color:#fff !important;
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+}
+
+/* Session layout — the row is pinned to a fixed viewport-relative height
+   (grid-template-rows forces the implicit row to actually fill the
+   container instead of the default content-sized auto row). The main
+   column keeps the default align-self:stretch so it's clipped to that
+   fixed height — that's what keeps the composer reachable without page
+   scroll. The sidebar gets align-self:start instead, so it does NOT
+   stretch/clip to that same height — it sizes to its own content and any
+   overflow past the row just flows into the normal page scroll, instead
+   of needing a second, competing internal scrollbar. */
+.selflearn-session-layout{
+  height:calc(100vh - 140px);
+  min-height:560px;
+  grid-template-rows:minmax(0,1fr);
+}
+.selflearn-session-layout .teacher-main{
+  height:100%;
+  min-height:0;
+}
+.selflearn-progress-panel{
+  align-self:start;
+}
+/* Wider sidebar for this page specifically — the concept list reads better
+   with more room. Three-class selector to reliably beat the shared
+   .student-dash .teacher-layout rule regardless of source order. */
+.student-dash .teacher-layout.selflearn-session-layout{
+  grid-template-columns:minmax(0,1fr) 460px;
+}
+.selflearn-lesson-card{
+  flex:1;
+  min-height:0;
+}
+@media(max-width:1180px){
+  .selflearn-session-layout{
+    height:auto;
+    min-height:0;
+    grid-template-rows:none;
+  }
+  .student-dash .teacher-layout.selflearn-session-layout{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .selflearn-session-layout .teacher-main{
+    height:auto;
+  }
+}
+/* Mobile: a true full-screen chat takeover (Claude/ChatGPT mobile
+   pattern) — the site header/footer/page padding were eating most of the
+   viewport, leaving a small message window no matter how the internal
+   heights were tuned. Instead the lesson card becomes a fixed layer that
+   covers the whole screen; its own header (topic + back button) acts as
+   the app bar, the message list fills all remaining space, and the
+   composer is pinned to the very bottom edge. The progress sidebar isn't
+   part of this screen — reachable again once the student is back on
+   the wider layout. */
+@media(max-width:600px){
+  body:has(.selflearn-session-view) .site-header,
+  body:has(.selflearn-session-view) .header-blur-mask{
+    display:none;
+  }
+  .selflearn-session-view .selflearn-progress-panel{
+    display:none;
+  }
+  .selflearn-lesson-card{
+    position:fixed;
+    inset:0;
+    z-index:150;
+    height:auto;
+    border-radius:0;
+    box-shadow:none;
+    border:none;
+  }
+  .selflearn-lesson-header{
+    padding:14px 16px !important;
+    padding-top:calc(14px + env(safe-area-inset-top)) !important;
+  }
+  .selflearn-lesson-header-title h2{
+    font-size:20px;
+  }
+  .learn-chat-card-input{
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Progress sidebar — always-visible concept breakdown. No internal scroll:
+   it sizes to its own content (see align-self:start above) and any
+   overflow past the lesson card's height is handled by the normal page
+   scroll, so there's a single extra scrollbar at most instead of a third
+   competing one squeezed into the sidebar itself. */
+.selflearn-progress-stat{
+  margin-top:18px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--border);
+}
+.selflearn-progress-stat strong{
+  display:block;
+  margin-bottom:10px;
+  color:var(--text);
   font-family:var(--font-sans);
-  font-size:38px;
+  font-size:44px;
   font-weight:500;
   line-height:1;
 }
-.selflearn-report-btn{
-  margin-top:14px;
-  align-self:flex-start;
-  color:#D8C9BD !important;
+.selflearn-progress-detail{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid var(--border);
 }
 
 /* New course form */
@@ -4678,7 +5123,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .selflearn-file-drop-text{
   color:var(--text);
   font-size:14px;
-  font-weight:700;
+  font-weight:600;
 }
 
 /* Field hints */
@@ -4817,7 +5262,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   font-weight:700;
   letter-spacing:.08em;
   text-transform:uppercase;
-  font-size:11px;
+  font-size:12px;
 }
 .selflearn-doc-list{
   margin-bottom:14px;
@@ -4829,14 +5274,14 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   display:flex;
   align-items:center;
   gap:8px;
-  font-size:13px;
+  font-size:14px;
   color:var(--text);
 }
 .selflearn-doc-name{
   flex:1;
 }
 .selflearn-doc-meta{
-  font-size:11px;
+  font-size:12px;
 }
 .selflearn-concept-list{
   display:flex;
@@ -4845,17 +5290,25 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .selflearn-concept-row{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   gap:14px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.selflearn-concept-row:last-child{
+  padding-bottom:0;
+  border-bottom:none;
 }
 .selflearn-concept-name{
   flex:1;
-  font-size:13px;
+  font-size:15px;
+  line-height:1.5;
   color:var(--text);
 }
 .selflearn-concept-bar{
-  width:150px;
+  width:160px;
   flex-shrink:0;
+  margin-top:3px;
 }
 
 /* Mastery bar (shared mini component) */
@@ -4866,31 +5319,24 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 .selflearn-mastery-label{
   white-space:nowrap;
-  font-size:12px;
+  font-size:13px;
 }
 .selflearn-mastery-track{
   flex:1;
-  height:6px;
+  height:7px;
 }
 .selflearn-mastery-pct{
-  font-size:12px;
-  min-width:34px;
+  font-size:13px;
+  min-width:38px;
   text-align:right;
   color:var(--muted);
 }
 
-/* Session / chat view */
+/* Session / chat view — height for .selflearn-lesson-card comes from the
+   flex:1 rule near .selflearn-session-layout above; sizing within the
+   scrolling message list comes from .learn-chat-messages. */
 .selflearn-chat-window{
-  min-height:360px;
-  max-height:56vh;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  overflow-y:auto;
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:8px;
+  min-height:200px;
 }
 .selflearn-msg-row{
   display:flex;
@@ -4928,9 +5374,9 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   color:var(--danger);
 }
 .selflearn-feedback-text{
-  margin:6px 0 10px;
-  font-size:14px;
-  line-height:1.55;
+  margin:8px 0 12px;
+  font-size:16px;
+  line-height:1.6;
   color:var(--text);
 }
 .selflearn-bubble.selflearn-check{
@@ -4940,27 +5386,44 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .selflearn-check-text{
   margin:0;
   white-space:pre-wrap;
-  line-height:1.55;
-  font-size:14px;
+  line-height:1.6;
+  font-size:16px;
   font-weight:700;
   color:var(--text);
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 .selflearn-teach-text{
   margin:0;
   white-space:pre-wrap;
-  line-height:1.65;
-  font-size:14px;
+  line-height:1.7;
+  font-size:16px;
   color:var(--text);
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 .selflearn-options{
   display:flex;
   flex-direction:column;
-  gap:8px;
-  margin-top:12px;
+  gap:10px;
+  margin-top:14px;
 }
 .selflearn-option-btn{
   justify-content:flex-start;
   text-align:left;
+  font-size:15px !important;
+  padding:12px 16px !important;
+  color:var(--text) !important;
+  background:var(--surface) !important;
+  border:1px solid var(--border) !important;
+}
+.selflearn-option-btn:hover:not(:disabled){
+  border-color:rgba(232,90,51,.45) !important;
+  background:var(--accent-light) !important;
+  color:var(--text) !important;
+}
+.selflearn-option-key{
+  color:var(--accent) !important;
 }
 .selflearn-option-key{
   margin-right:8px;
@@ -4969,43 +5432,47 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   align-self:flex-start;
   color:var(--muted);
   font-style:italic;
-  font-size:13px;
+  font-size:15px;
 }
 .selflearn-complete-row{
   text-align:center;
   margin-top:8px;
 }
-.selflearn-composer{
-  margin-top:18px;
-}
 .selflearn-pending-hint{
   margin-bottom:8px;
+  font-size:14px;
 }
 .selflearn-composer-row{
   display:flex;
   gap:10px;
   align-items:flex-end;
 }
-.selflearn-composer-row textarea{
-  flex:1;
+.selflearn-composer-row .learn-chat-textarea{
   min-height:54px;
   max-height:160px;
-  padding:14px !important;
-  color:var(--text) !important;
-  background:#FFFDF9 !important;
-  border:1px solid var(--border-strong) !important;
-  border-radius:8px !important;
   resize:vertical;
 }
-.selflearn-error{
-  margin-top:14px;
+/* Mic + Send always sit side by side in their own row, even when the
+   composer stacks to a column on narrow screens — the mic button is a
+   small fixed-size square icon button, Send fills the rest. */
+.selflearn-composer-actions{
+  display:flex;
+  gap:10px;
+  flex-shrink:0;
 }
-@media(max-width:960px){
-  .selflearn-session-hero{flex-direction:column;align-items:flex-start}
+.selflearn-mic-btn{
+  flex-shrink:0;
+  width:48px;
+  height:48px;
+  padding:0 !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.selflearn-send-btn{
+  flex:1;
 }
 @media(max-width:600px){
-  .selflearn-page > .history-hero,
-  .selflearn-page > .history-panel{padding:22px}
   .selflearn-course-title,
   .history-card-main.selflearn-course-title{flex-direction:column;align-items:flex-start}
   .selflearn-composer-row{flex-direction:column;align-items:stretch}
@@ -5077,8 +5544,11 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   background:rgba(232,90,51,.045);
   box-shadow:0 0 0 3px rgba(232,90,51,.13);
 }
-.learn-skill-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.learn-skill-card-name{font-weight:700;font-size:15px;color:var(--text);line-height:1.35}
+.learn-skill-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-width:0}
+.learn-skill-card-name{
+  font-weight:700;font-size:15px;color:var(--text);line-height:1.35;
+  min-width:0;overflow-wrap:break-word;word-break:break-word;
+}
 .learn-skill-card-check{
   flex:none;width:20px;height:20px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -5091,6 +5561,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .learn-skill-card-desc{
   margin:0;font-size:12.5px;line-height:1.55;color:var(--muted);
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  overflow-wrap:break-word;word-break:break-word;
 }
 .learn-skill-card-desc.placeholder{font-style:italic;opacity:.8}
 
@@ -5564,12 +6035,30 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   gap:16px;
 }
 
+/* Learn skill-picker page — overall font-size increase.
+   Scoped to .learn-picker-page (not the shared .student-dash rules)
+   so dashboard/mastery/history keep their own sizes. */
+.learn-picker-page .teacher-eyebrow{font-size:13px}
+.learn-picker-page .teacher-hero p{font-size:19px}
+.learn-picker-page .teacher-panel-header h3,
+.learn-picker-page .teacher-actions h3{font-size:29px}
+.learn-picker-page .learn-skill-card-name{font-size:19px}
+.learn-picker-page .learn-skill-card-desc{font-size:16px}
+.learn-picker-page .learn-skill-empty p{font-size:16px}
+.learn-picker-page .learn-filter label{font-size:13px}
+.learn-picker-page .learn-filter select{font-size:16px}
+.learn-picker-page .teacher-action{font-size:16px}
+.learn-picker-page .teacher-action span{font-size:18px}
+.learn-picker-page .teacher-progress{height:9px}
+
 /* Mastery page: three KPI cards, so a three-track grid.
    Extra .teacher-dashboard qualifier outranks the generic .student-dash
    media rules that appear later in the file. */
-.teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.teacher-dashboard.mastery-page .teacher-kpi-grid,
+.teacher-dashboard.teacher-home-page .teacher-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:600px){
-  .teacher-dashboard.mastery-page .teacher-kpi-grid{grid-template-columns:1fr}
+  .teacher-dashboard.mastery-page .teacher-kpi-grid,
+  .teacher-dashboard.teacher-home-page .teacher-kpi-grid{grid-template-columns:1fr}
 }
 
 /* History page: the hero note shows a name, not a percentage */
@@ -5584,7 +6073,7 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 .history-filter-label{
   margin:0 0 10px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
   font-weight:700;
   letter-spacing:.14em;
   text-transform:uppercase;
@@ -5602,8 +6091,18 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   margin-top:18px;
 }
 
+/* Readability pass — history page's own cards/labels ran noticeably
+   smaller than the rest of the (already-enlarged) teacher-dash type
+   scale, so bump them to match instead of touching the shared
+   .history-card/.history-result-pill classes other pages reuse. */
+.history-page .history-accuracy-block p{font-size:14px}
+.history-page .history-accuracy-block strong{font-size:16px}
+.history-page .history-card h4{font-size:18px;line-height:1.5}
+.history-page .history-card p{font-size:15px;line-height:1.7}
+.history-page .history-result-pill{font-size:13px;padding:6px 12px}
+
 /* History mobile: hero → session scope → metrics → timeline */
-@media(max-width:960px){
+@media(max-width:1180px){
   .history-page .teacher-main{display:contents}
   .history-page .teacher-layout .teacher-hero{order:1}
   .history-page .teacher-layout .history-scope-panel{order:2}
@@ -5612,23 +6111,45 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
 }
 
 /* Self-learn mobile: hero → new-course form → your learning */
-@media(max-width:960px){
+@media(max-width:1180px){
   .selflearn-page .teacher-main{display:contents}
   .selflearn-page .teacher-layout .teacher-hero{order:1}
   .selflearn-page .teacher-layout .teacher-actions{order:2}
   .selflearn-page .teacher-layout .selflearn-learning-panel{order:3}
 }
 
-/* Self-learn page: new-course form lives in the sidebar */
+/* Self-learn page: new-course form lives in the sidebar.
+   Hierarchy top to bottom: title (27px) > field labels (13px, the
+   section headings within the form) > field values/file-drop prompt
+   (14-15px, the actual content) > hints (12px fine print) — the hint
+   was previously 14px, i.e. bigger than the label above it. */
+/* Wider sidebar so the form's labels/hints wrap less and the card sits
+   shorter overall — narrows the "Your learning" column to compensate.
+   Three-class selector to reliably beat the shared .student-dash
+   .teacher-layout rule regardless of source order. */
+.student-dash .teacher-layout.selflearn-start-layout{
+  grid-template-columns:minmax(0,1fr) 480px;
+}
+@media(max-width:1180px){
+  .student-dash .teacher-layout.selflearn-start-layout{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
 .student-dash .teacher-actions .selflearn-form{margin-top:20px}
 .student-dash .teacher-actions .selflearn-start-btn{align-self:stretch;text-align:center}
 .student-dash .selflearn-form .field label{font-size:13px}
-.student-dash .selflearn-file-drop-text{font-size:15px}
-.student-dash .selflearn-field-hint{font-size:14px}
+.student-dash .selflearn-file-drop-text{font-size:14px}
+.student-dash .selflearn-field-hint{font-size:12px}
 .student-dash .selflearn-course-title h4{margin:0;font-size:18px}
 .student-dash .selflearn-course-card > p{font-size:15px}
 
-@media(max-width:960px){
+/* This is the key student-page breakpoint: the sidebar/hero-note are
+   fixed-width (380-480px), so as the viewport narrows toward 960px the
+   main column was left with very little room — long titles like a
+   student's full name would wrap into 3-4 cramped lines well before the
+   layout actually collapsed. Stacking to a single column much earlier
+   avoids that squeeze entirely. */
+@media(max-width:1180px){
   .student-dash .teacher-hero{grid-template-columns:minmax(0,1fr)}
   .student-dash .teacher-layout{grid-template-columns:minmax(0,1fr)}
   .student-dash .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -5639,9 +6160,21 @@ pre{background:rgba(0,0,0,0.15);padding:12px;border-radius:8px;overflow:auto;fon
   .student-dash .teacher-panel,
   .student-dash .teacher-actions{padding:18px 20px}
   .student-dash .teacher-hero h2{font-size:26px}
-  .student-dash .teacher-hero-note{min-height:0;width:100%}
-  .student-dash .teacher-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .student-progress-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .student-dash .teacher-hero p{font-size:15px}
+  .student-dash .teacher-hero-note{min-height:0;width:100%;padding:18px 20px}
+  .student-dash .teacher-hero-note strong{font-size:36px}
+  /* Four rich KPI cards (label + big number + caption) are too cramped
+     at 2-up on a phone-width screen — one per row, matching the sitewide
+     .kpi-grid convention at this breakpoint. */
+  .student-dash .teacher-kpi-grid{grid-template-columns:minmax(0,1fr)}
+  .student-dash .teacher-kpi-card strong{font-size:32px}
+  .student-dash .teacher-panel-header h3,
+  .student-dash .teacher-actions h3{font-size:22px}
+  .student-dash .teacher-skill-topline p{font-size:15px}
+  .student-progress-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .student-progress-stat strong{font-size:24px}
+  .student-dash .teacher-action{padding:13px 16px}
+  .student-dash .teacher-action span{font-size:15px}
 }
 
 /* Streaming lesson bubble — blinking caret + animated ellipsis */

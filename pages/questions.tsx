@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
   listQuestions, listSkills, createQuestion, updateQuestion, deleteQuestion,
@@ -80,6 +81,20 @@ export default function QuestionsPage() {
     if (selectedSkill === 'all') return questions
     return questions.filter((q) => Number(q.skill_id) === selectedSkill)
   }, [questions, selectedSkill])
+
+  const skillsCovered = useMemo(
+    () => new Set(questions.map((q) => q.skill_id)).size,
+    [questions],
+  )
+  const avgDifficulty = useMemo(() => {
+    const withDifficulty = questions.filter((q) => q.difficulty != null)
+    if (withDifficulty.length === 0) return null
+    return withDifficulty.reduce((sum, q) => sum + (q.difficulty || 0), 0) / withDifficulty.length
+  }, [questions])
+  const mcCount = useMemo(
+    () => questions.filter((q) => q.question_type === 'multiple_choice').length,
+    [questions],
+  )
 
   function openCreate() {
     setForm(BLANK_FORM)
@@ -172,8 +187,8 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className="questions-page">
-      <section className="questions-hero">
+    <div className="questions-page teacher-roster-page student-dash">
+      <section className="teacher-hero">
         <div>
           <p className="teacher-eyebrow">Question Bank</p>
           <h2 className="editorial-title">Questions</h2>
@@ -183,21 +198,40 @@ export default function QuestionsPage() {
             {canEdit ? ' Create, edit, and delete questions.' : ' Read-only view.'}
           </p>
         </div>
-        <div className="questions-hero-actions">
-          <span className="skills-count-pill">{questions.length} total</span>
-          {canEdit && (
-            <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
-              Import CSV
-            </button>
-          )}
-          {canEdit && (
-            <button type="button" className="skills-action primary" onClick={openCreate}>New question</button>
-          )}
+        <div className="teacher-hero-note">
+          <span>Bank</span>
+          <strong>{questions.length}</strong>
+          <p>questions total</p>
         </div>
       </section>
 
-      <section className="questions-filter-panel">
-        <div className="skills-panel-header">
+      
+
+      <section className="teacher-kpi-grid teacher-roster-kpis">
+        <div className="teacher-kpi-card">
+          <p>Total questions</p>
+          <strong>{questions.length}</strong>
+          <small>in the question bank</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Skills covered</p>
+          <strong>{skillsCovered}</strong>
+          <small>distinct skills with questions</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Multiple choice</p>
+          <strong>{mcCount}</strong>
+          <small>of {questions.length} questions</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Avg difficulty</p>
+          <strong>{avgDifficulty != null ? avgDifficulty.toFixed(1) : '-'}</strong>
+          <small>on a 1-5 scale</small>
+        </div>
+      </section>
+
+      <section className="teacher-panel">
+        <div className="teacher-panel-header">
           <div>
             <p className="teacher-eyebrow">Filter</p>
             <h3 className="editorial-title">Skill focus</h3>
@@ -219,13 +253,23 @@ export default function QuestionsPage() {
         {error && <p className="feedback error">{error}</p>}
       </section>
 
-      <section className="questions-panel">
-        <div className="skills-panel-header">
+      <section className="teacher-panel">
+        <div className="teacher-panel-header">
           <div>
             <p className="teacher-eyebrow">Catalogue</p>
             <h3 className="editorial-title">Question list</h3>
           </div>
-          <span className="skills-count-pill subtle">{filtered.length} shown</span>
+          <div className="questions-hero-actions">
+            <span className="skills-count-pill subtle">{filtered.length} shown</span>
+            {canEdit && (
+              <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
+                Import CSV
+              </button>
+            )}
+            {canEdit && (
+              <button type="button" className="skills-action primary" onClick={openCreate}>New question</button>
+            )}
+          </div>
         </div>
 
         {loading ? (

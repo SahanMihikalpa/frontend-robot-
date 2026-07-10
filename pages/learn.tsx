@@ -101,19 +101,25 @@ function extractOptions(raw: any): Record<string, string> | undefined {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function MasteryBar({ pct, label }: { pct: number; label?: string }) {
+function MasteryBar({ pct, label, big }: { pct: number; label?: string; big?: boolean }) {
   const clamped = Math.min(pct, 100)
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: big ? 16 : 10 }}>
       {label && (
-        <span style={{ whiteSpace: 'nowrap', fontSize: 12, color: 'var(--muted)', minWidth: 60 }}>
+        <span style={{
+          whiteSpace: 'nowrap', color: 'var(--muted)', fontWeight: 700,
+          fontSize: big ? 19 : 13, minWidth: big ? 112 : 66,
+        }}>
           {label}
         </span>
       )}
-      <div className="teacher-progress" style={{ flex: 1 }}>
+      <div className="teacher-progress" style={{ flex: 1, height: big ? 14 : undefined }}>
         <span style={{ width: `${clamped}%` }} />
       </div>
-      <span style={{ fontSize: 12, minWidth: 36, textAlign: 'right', fontWeight: 700, color: 'var(--text)' }}>
+      <span style={{
+        textAlign: 'right', fontWeight: 700, color: 'var(--text)',
+        fontSize: big ? 20 : 13, minWidth: big ? 60 : 40,
+      }}>
         {clamped.toFixed(0)}%
       </span>
     </div>
@@ -155,59 +161,59 @@ function QuestionPanel({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
       {/* Skill + metrics row */}
-      <div className="teacher-panel" style={{ padding: '14px 18px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+      <div className="teacher-panel" style={{ padding: '40px 32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
           <div>
-            <p className="teacher-eyebrow" style={{ margin: 0 }}>{skillName || 'Learning session'}</p>
+            <p className="teacher-eyebrow" style={{ margin: 0, fontSize: 17 }}>{skillName || 'Learning session'}</p>
           </div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <span style={{ fontSize: 18, color: 'var(--muted)', fontWeight: 600 }}>
               ⏱ {fmtTime(elapsed)}
             </span>
             {!cameraOn && (
               <button type="button" className="teacher-action" onClick={onEnableCamera}
-                style={{ minHeight: 'unset', padding: '6px 12px', fontSize: 11, gap: 6 }}
+                style={{ minHeight: 'unset', padding: '11px 18px', fontSize: 15, gap: 6 }}
                 title="Enable camera engagement tracking">
                 👁 Camera off
               </button>
             )}
             {cameraOn && (
               <button type="button" className="teacher-action primary" onClick={onDisableCamera}
-                style={{ minHeight: 'unset', padding: '6px 12px', fontSize: 11, gap: 6 }}
+                style={{ minHeight: 'unset', padding: '11px 18px', fontSize: 15, gap: 6 }}
                 title="Camera tracking active — click to disable">
                 👁 On
               </button>
             )}
-            <button type="button" className="teacher-action" onClick={onEnd}
-              style={{ minHeight: 'unset', padding: '6px 14px', fontSize: 12 }}>
-              ← Exit
+            <button type="button" className="teacher-action learn-exit-btn" onClick={onEnd}
+              style={{ minHeight: 'unset', padding: '11px 20px', fontSize: 15 }}>
+              Exit
             </button>
           </div>
         </div>
-        <div style={{ marginTop: 12 }}>
-          <MasteryBar pct={mastery} label="Mastery" />
+        <div style={{ marginTop: 32 }}>
+          <MasteryBar pct={mastery} label="Mastery" big />
         </div>
         {engagementScore != null && (
-          <div style={{ marginTop: 8 }}>
-            <MasteryBar pct={engagementScore * 100} label="Engagement" />
+          <div style={{ marginTop: 20 }}>
+            <MasteryBar pct={engagementScore * 100} label="Engagement" big />
           </div>
         )}
       </div>
 
       {/* Question display */}
-      <div className="teacher-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 18, overflowY: 'auto' }}>
+      <div className="teacher-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 18, padding: '22px 26px', overflowY: 'auto' }}>
         {!question ? (
           <div className="empty-state" style={{ flex: 1 }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 36, marginBottom: 10 }}>💬</div>
-              <p style={{ color: 'var(--muted)', margin: 0 }}>Waiting for the next question…</p>
+              <p style={{ color: 'var(--muted)', margin: 0, fontSize: 15 }}>Waiting for the next question…</p>
             </div>
           </div>
         ) : (
           <>
             <div>
-              <p className="teacher-eyebrow" style={{ marginBottom: 10 }}>Practice Question</p>
-              <p style={{ fontSize: 17, lineHeight: 1.65, margin: 0, fontWeight: 600, color: 'var(--text)' }}>
+              <p className="teacher-eyebrow" style={{ marginBottom: 10, fontSize: 13 }}>Practice Question</p>
+              <p style={{ fontSize: 19, lineHeight: 1.6, margin: 0, fontWeight: 600, color: 'var(--text)' }}>
                 {question.content}
               </p>
             </div>
@@ -273,13 +279,13 @@ function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: isStudent ? 'flex-end' : 'flex-start', gap: 4 }}>
-      <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+      <span style={{ fontSize: 13, color: 'var(--muted)' }}>
         {isStudent ? 'You' : 'Tutor AI'} · {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </span>
       <div
         className={`chat-bubble ${isStudent ? 'user' : 'assistant'}`}
         style={{
-          maxWidth: '88%',
+          maxWidth: '92%',
           background: isStudent ? 'var(--accent)' : 'var(--surface)',
           color: isStudent ? '#fff' : 'var(--text)',
           border: isStudent ? 'none' : '1px solid var(--border)',
@@ -289,17 +295,17 @@ function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: 
         }}
       >
         {msg.type === 'FEEDBACK' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-            <span style={{ fontSize: 16 }}>{msg.isCorrect ? '✅' : '❌'}</span>
-            <strong style={{ color: msg.isCorrect ? 'var(--success)' : 'var(--danger)', fontSize: 13 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontSize: 19 }}>{msg.isCorrect ? '✅' : '❌'}</span>
+            <strong style={{ color: msg.isCorrect ? 'var(--success)' : 'var(--danger)', fontSize: 16 }}>
               {msg.isCorrect ? 'Correct!' : 'Not quite'}
             </strong>
           </div>
         )}
         {msg.type === 'HINT' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-            <span style={{ fontSize: 14 }}>💡</span>
-            <strong style={{ fontSize: 12, color: 'var(--warning)' }}>Hint</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontSize: 17 }}>💡</span>
+            <strong style={{ fontSize: 15, color: 'var(--warning)' }}>Hint</strong>
           </div>
         )}
         {msg.type === 'LESSON' && (
@@ -345,23 +351,23 @@ function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: 
                 border: '1px solid var(--border)', cursor: 'zoom-in',
               }}
             />
-            <span style={{ fontSize: 10, marginTop: 4, display: 'block', color: 'var(--muted)' }}>
+            <span style={{ fontSize: 12, marginTop: 4, display: 'block', color: 'var(--muted)' }}>
               🖼️ AI-generated visual — click to enlarge
             </span>
           </div>
         )}
 
         {!msg.imageUrl && msg.imageError && (
-          <p style={{ fontSize: 11, marginTop: 8, fontStyle: 'italic', color: 'var(--muted)', margin: 0 }}>
+          <p style={{ fontSize: 13, marginTop: 8, fontStyle: 'italic', color: 'var(--muted)', margin: 0 }}>
             🖼️ Couldn't generate a visual for this one.
           </p>
         )}
 
         {msg.type === 'FEEDBACK' && msg.masteryAfter != null && (
-          <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
             <MasteryBar pct={msg.masteryAfter * 100} label="Mastery" />
             {msg.masteryBefore != null && (
-              <p style={{ fontSize: 11, marginTop: 4, color: 'var(--muted)', margin: '4px 0 0' }}>
+              <p style={{ fontSize: 13, marginTop: 4, color: 'var(--muted)', margin: '4px 0 0' }}>
                 {msg.masteryBefore < msg.masteryAfter ? '↑' : '→'} {(msg.masteryBefore * 100).toFixed(0)}% → {(msg.masteryAfter * 100).toFixed(0)}%
               </p>
             )}
@@ -371,8 +377,8 @@ function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: 
         {msg.type === 'ANSWER' && msg.isCorrect != null && (
           <span
             style={{
-              marginTop: 6, display: 'inline-flex', fontSize: 11,
-              padding: '3px 10px', borderRadius: 999, fontWeight: 700,
+              marginTop: 6, display: 'inline-flex', fontSize: 13,
+              padding: '5px 14px', borderRadius: 999, fontWeight: 700,
               background: msg.isCorrect ? 'rgba(22,163,74,0.12)' : 'rgba(239,68,68,0.12)',
               color: msg.isCorrect ? 'var(--success)' : 'var(--danger)',
               border: `1px solid ${msg.isCorrect ? 'rgba(22,163,74,0.3)' : 'rgba(239,68,68,0.3)'}`,
@@ -1175,7 +1181,7 @@ export default function LearnPage() {
 
   if (!sessionId && !sessionEnded) {
     return (
-      <div className="teacher-dashboard student-dash">
+      <div className="teacher-dashboard student-dash learn-picker-page">
         <div className="teacher-layout">
           <section className="teacher-main">
             <section className="teacher-hero">
@@ -1261,7 +1267,7 @@ export default function LearnPage() {
                       type="button"
                       className={`learn-skill-card ${selectedSkill === s.id ? 'selected' : ''}`}
                       onClick={() => handleSkillSelect(s.id)}
-                      style={{ fontSize: 15 }}
+                      style={{ fontSize: 16 }}
                     // >
                     //   {s.name}
                     //   {skillStatus && selectedSkill === s.id && skillStatus.has_active_session && (
@@ -1274,12 +1280,12 @@ export default function LearnPage() {
                       </div>
                       <div className="learn-skill-card-badges">
                         {s.difficulty_level != null && (
-                          <span className="badge neutral" style={{ fontSize: 11 }}>
+                          <span className="badge neutral" style={{ fontSize: 12 }}>
                             {DIFF_LABELS[s.difficulty_level] || `Level ${s.difficulty_level}`}
                           </span>
                         )}
                         {s.category && (
-                          <span className="badge neutral" style={{ fontSize: 11 }}>{s.category}</span>
+                          <span className="badge neutral" style={{ fontSize: 12 }}>{s.category}</span>
                         )}
                       </div>
                       {s.description ? (
@@ -1299,24 +1305,24 @@ export default function LearnPage() {
                   background: 'var(--bg)', border: '1px solid var(--border)',
                 }}>
                   {skillStatus.has_active_session ? (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
                       ▶️ <strong>Active session</strong> — {skillStatus.message_count} messages saved.
                       {skillStatus.mastery != null && ` Mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
                     </p>
                   ) : skillStatus.assessment_done ? (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
                       ✅ Assessment done.
                       {skillStatus.mastery != null && ` Current mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
                     </p>
                   ) : (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 15 }}>
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
                       📋 New skill — initial assessment will run first (3 questions).
                     </p>
                   )}
                 </div>
               )}
               {statusLoading && (
-                <p style={{ color: 'var(--muted)', margin: '12px 0 0', fontSize: 14 }}>Checking session…</p>
+                <p style={{ color: 'var(--muted)', margin: '12px 0 0', fontSize: 15 }}>Checking session…</p>
               )}
             </section>
 
@@ -1335,7 +1341,7 @@ export default function LearnPage() {
                   disabled={!selectedSkill || loading || statusLoading}
                   onClick={handleStartOrContinue}
                   style={{
-                    minHeight: 'unset', padding: '14px 32px', fontSize: 16,
+                    minHeight: 'unset', padding: '15px 34px', fontSize: 17,
                     ...(skillStatus?.has_active_session ? { background: '#7c3aed', borderColor: '#7c3aed' } : {}),
                   }}
                 >
@@ -1344,7 +1350,7 @@ export default function LearnPage() {
                    skillStatus?.has_active_session ? '▶ Continue Session' :
                    'Start Session'}
                 </button>
-                <p style={{ color: 'var(--muted)', fontSize: 15, margin: 0 }}>
+                <p style={{ color: 'var(--muted)', fontSize: 16, margin: 0 }}>
                   👁 Camera engagement tracking will start automatically
                 </p>
               </div>
@@ -1371,12 +1377,12 @@ export default function LearnPage() {
                   borderBottom: '1px solid var(--border)',
                 }}>
                   <span style={{
-                    fontSize: 18,
-                    fontWeight: 500, color: 'var(--muted)', minWidth: 24, paddingTop: 2,
+                    fontSize: 19,
+                    fontWeight: 500, color: 'var(--muted)', minWidth: 26, paddingTop: 2,
                   }}>{num}</span>
                   <div>
-                    <strong style={{ fontSize: 16, display: 'block', marginBottom: 4 }}>{title}</strong>
-                    <p style={{ margin: 0, fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>{desc}</p>
+                    <strong style={{ fontSize: 17, display: 'block', marginBottom: 4 }}>{title}</strong>
+                    <p style={{ margin: 0, fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>{desc}</p>
                   </div>
                 </div>
               ))}
@@ -1507,24 +1513,23 @@ export default function LearnPage() {
         />
       </div>
 
-      {/* ── RIGHT: Tutor chat panel ── */}
+      {/* ── RIGHT: Tutor chat panel — one card, one scrollbar ── */}
       <div className="learn-chat-col">
-        {/* Chat header */}
-        <div className="teacher-panel" style={{ padding: '14px 20px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div className="teacher-panel learn-chat-card">
+          {/* Chat header */}
+          <div className="learn-chat-card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <p className="teacher-eyebrow" style={{ margin: 0 }}>AI Tutor</p>
+              <p className="teacher-eyebrow" style={{ margin: 0, fontSize: 14 }}>AI Tutor</p>
               <span className="status-dot online" title="Tutor ready" />
             </div>
             {voiceStatus ? (
-              <span style={{ fontSize: 13, color: 'var(--accent)', fontStyle: 'italic', fontWeight: 600 }}>
+              <span style={{ fontSize: 15, color: 'var(--accent)', fontStyle: 'italic', fontWeight: 600 }}>
                 🔄 {voiceStatus}
               </span>
             ) : (
-              <span style={{ fontSize: 13, color: 'var(--muted)' }}>Type or use voice</span>
+              <span style={{ fontSize: 15, color: 'var(--muted)' }}></span>
             )}
           </div>
-        </div>
 
         {/* Chat messages */}
         <div className="learn-chat-messages" ref={chatScrollRef} onScroll={handleChatScroll}>
@@ -1540,91 +1545,92 @@ export default function LearnPage() {
           )}
           {chatMessages.map((msg) => <ChatBubble key={msg.id} msg={msg} onImageClick={setLightboxSrc} />)}
 
-          {/* Live LLM streaming from voice pipeline */}
-          {voiceStreamText && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
-              <span style={{ fontSize: 11, color: 'var(--muted)' }}>Tutor AI · live</span>
-              <div style={{
-                background: 'var(--surface)', border: '1px solid var(--border)',
-                borderRadius: 14, borderBottomLeftRadius: 4,
-                padding: '10px 14px', maxWidth: '88%',
-              }}>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14, color: 'var(--text)' }}>
-                  {voiceStreamText}
-                </p>
+            {/* Live LLM streaming from voice pipeline */}
+            {voiceStreamText && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                <span style={{ fontSize: 13, color: 'var(--muted)' }}>Tutor AI · live</span>
+                <div style={{
+                  background: 'var(--surface)', border: '1px solid var(--border)',
+                  borderRadius: 14, borderBottomLeftRadius: 4,
+                  padding: '14px 18px', maxWidth: '92%',
+                }}>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: 16, color: 'var(--text)' }}>
+                    {voiceStreamText}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {(loading || pendingAnswer) && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{
-                background: 'var(--surface)', border: '1px solid var(--border)',
-                borderRadius: 14, borderBottomLeftRadius: 4,
-                padding: '10px 14px', color: 'var(--muted)', fontStyle: 'italic', fontSize: 13,
-              }}>
-                Thinking…
+            {(loading || pendingAnswer) && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{
+                  background: 'var(--surface)', border: '1px solid var(--border)',
+                  borderRadius: 14, borderBottomLeftRadius: 4,
+                  padding: '14px 18px', color: 'var(--muted)', fontStyle: 'italic', fontSize: 15,
+                }}>
+                  Thinking…
+                </div>
               </div>
-            </div>
-          )}
-          <div ref={chatBottomRef} />
-        </div>
-
-        {error && <p className="feedback error" style={{ margin: 0, flexShrink: 0 }}>{error}</p>}
-
-        {/* Input + voice */}
-        <div className="teacher-panel" style={{ padding: '14px 18px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
-            <textarea
-              rows={2}
-              className="learn-chat-textarea"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={
-                voiceState === 'recording' ? '🎙️ Recording… click Stop when done'
-                : voiceState === 'processing' ? '⏳ Processing voice…'
-                : 'Ask the tutor anything — or use the mic'
-              }
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-              disabled={loading || pendingAnswer || voiceState !== 'idle'}
-            />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {/* Text send */}
-              <button type="button" className="teacher-action primary"
-                onClick={handleSend}
-                disabled={!input.trim() || loading || pendingAnswer || voiceState !== 'idle'}
-                style={{ minHeight: 'unset', padding: '10px 18px', fontSize: 14 }}>
-                Send
-              </button>
-
-              {/* Voice button */}
-              {voiceState === 'idle' && (
-                <button type="button" className="teacher-action" onClick={startVoiceRecording}
-                  title="Start voice input"
-                  style={{ minHeight: 'unset', padding: '8px 14px', fontSize: 16, justifyContent: 'center' }}>
-                  🎙️
-                </button>
-              )}
-              {voiceState === 'recording' && (
-                <button type="button" className="teacher-action"
-                  onClick={stopVoiceRecording}
-                  style={{ minHeight: 'unset', padding: '8px 14px', fontSize: 13, color: 'var(--danger)', borderColor: 'var(--danger)', animation: 'pulse 1s infinite' }}>
-                  ⏹ Stop
-                </button>
-              )}
-              {voiceState === 'processing' && (
-                <button type="button" className="teacher-action" disabled
-                  style={{ minHeight: 'unset', padding: '8px 14px', fontSize: 13, opacity: 0.5 }}>
-                  ⏳
-                </button>
-              )}
-            </div>
+            )}
+            <div ref={chatBottomRef} />
           </div>
-          <p style={{ fontSize: 12, marginTop: 8, margin: '8px 0 0', color: 'var(--muted)' }}>
-            {voiceState === 'recording'
-              ? 'Speak now — click Stop when done · Cancel: refresh page'
-              : 'Enter to send · 🎙️ for voice input (STT → LLM → TTS)'}
-          </p>
+
+          {error && <p className="feedback error" style={{ margin: '0 22px', flexShrink: 0 }}>{error}</p>}
+
+          {/* Input + voice — pinned inside the same card, below the message list */}
+          <div className="learn-chat-card-input">
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+              <textarea
+                rows={2}
+                className="learn-chat-textarea"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={
+                  voiceState === 'recording' ? '🎙️ Recording… click Stop when done'
+                  : voiceState === 'processing' ? '⏳ Processing voice…'
+                  : 'Ask the tutor anything — or use the mic'
+                }
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+                disabled={loading || pendingAnswer || voiceState !== 'idle'}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {/* Text send */}
+                <button type="button" className="teacher-action primary"
+                  onClick={handleSend}
+                  disabled={!input.trim() || loading || pendingAnswer || voiceState !== 'idle'}
+                  style={{ minHeight: 'unset', padding: '12px 22px', fontSize: 16 }}>
+                  Send
+                </button>
+
+                {/* Voice button */}
+                {voiceState === 'idle' && (
+                  <button type="button" className="teacher-action" onClick={startVoiceRecording}
+                    title="Start voice input"
+                    style={{ minHeight: 'unset', padding: '10px 18px', fontSize: 18, justifyContent: 'center' }}>
+                    🎙️
+                  </button>
+                )}
+                {voiceState === 'recording' && (
+                  <button type="button" className="teacher-action"
+                    onClick={stopVoiceRecording}
+                    style={{ minHeight: 'unset', padding: '10px 18px', fontSize: 15, color: 'var(--danger)', borderColor: 'var(--danger)', animation: 'pulse 1s infinite' }}>
+                    ⏹ Stop
+                  </button>
+                )}
+                {voiceState === 'processing' && (
+                  <button type="button" className="teacher-action" disabled
+                    style={{ minHeight: 'unset', padding: '10px 18px', fontSize: 15, opacity: 0.5 }}>
+                    ⏳
+                  </button>
+                )}
+              </div>
+            </div>
+            <p style={{ fontSize: 14, marginTop: 8, margin: '8px 0 0', color: 'var(--muted)' }}>
+              {voiceState === 'recording'
+                ? 'Speak now — click Stop when done · Cancel: refresh page'
+                : 'Enter to send · 🎙️ for voice input '}
+            </p>
+          </div>
         </div>
       </div>
 

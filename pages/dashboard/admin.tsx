@@ -33,9 +33,10 @@ export default function AdminDashboard() {
   const camActive = hardware?.camera_active ?? hardware?.camera?.active
   const micActive = hardware?.microphone_active ?? hardware?.microphone?.active
   const spkActive = hardware?.speaker_active ?? hardware?.speaker?.active
+  const devicesOnline = [camActive, micActive, spkActive].filter(Boolean).length
 
   return (
-    <div className="admin-dashboard">
+    <div className="admin-dashboard student-dash">
       <section className="teacher-hero admin-hero">
         <div>
           <p className="teacher-eyebrow">Operations</p>
@@ -65,6 +66,10 @@ export default function AdminDashboard() {
             <div className="teacher-kpi-card">
               <p>KB chunks</p>
               <strong>{kbStats?.total_chunks ?? '-'}</strong>
+            </div>
+            <div className="teacher-kpi-card">
+              <p>Hardware online</p>
+              <strong style={{ color: devicesOnline < 3 ? 'var(--warning)' : 'var(--success)' }}>{devicesOnline}/3</strong>
             </div>
           </div>
 

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { listStudentsAnalytics, getStudentAnalytics, getSkillsAnalytics } from '../lib/api'
 
@@ -67,98 +68,96 @@ export default function AnalyticsPage() {
   const selectedStudent = students.find((s) => (s.user_id || s.id) === selected)
 
   return (
-    <div className="analytics-page">
+    <div className="analytics-page teacher-roster-page student-dash">
 
       {/* ── Hero ── */}
-      <section className="analytics-hero">
+      <section className="teacher-hero">
         <div>
           <p className="teacher-eyebrow">Performance Analytics</p>
-          <h2 className="editorial-title">Classroom Insights.</h2>
+          <h2 className="editorial-title">Classroom Insights</h2>
           <p>Monitor classroom performance, identify learning gaps, and explore mastery trends across every student.</p>
         </div>
-        <div className="analytics-stat-grid">
-          <div>
-            <span>Students</span>
-            <strong>{students.length}</strong>
-          </div>
-          <div>
-            <span>Avg Score</span>
-            <strong>{avgScore != null ? `${Math.round(avgScore * 100)}%` : '—'}</strong>
-          </div>
-          <div>
-            <span>At Risk</span>
-            <strong style={{ color: atRisk > 0 ? 'var(--accent)' : undefined }}>{atRisk}</strong>
-          </div>
-          <div>
-            <span>Strong</span>
-            <strong style={{ color: 'var(--success)' }}>{strong}</strong>
-          </div>
+        <div className="teacher-hero-note">
+          <span>Class</span>
+          <strong>{students.length}</strong>
+          <p>students tracked</p>
+        </div>
+      </section>
+
+      
+
+      <section className="teacher-kpi-grid teacher-roster-kpis">
+        <div className="teacher-kpi-card">
+          <p>Total students</p>
+          <strong>{students.length}</strong>
+          <small>in your classroom</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Average score</p>
+          <strong>{avgScore != null ? `${Math.round(avgScore * 100)}%` : '—'}</strong>
+          <small>across all students</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Need attention</p>
+          <strong style={{ color: atRisk > 0 ? 'var(--danger)' : undefined }}>{atRisk}</strong>
+          <small>scoring below 40%</small>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Strong</p>
+          <strong style={{ color: 'var(--success)' }}>{strong}</strong>
+          <small>scoring 70% or above</small>
         </div>
       </section>
 
       {error && <p className="feedback error">{error}</p>}
 
-      {/* ── Filters panel ── */}
-      <section className="history-panel">
-        <div className="skills-panel-header">
-          <div>
-            <p className="teacher-eyebrow">Filters</p>
-            <h3 className="editorial-title">Student scope</h3>
-          </div>
-        </div>
-
-        <div className="teacher-kpi-grid analytics-kpis">
-          <div className="teacher-kpi-card">
-            <p>Total Students</p>
-            <strong>{students.length}</strong>
-          </div>
-          <div className="teacher-kpi-card">
-            <p>Average Score</p>
-            <strong>{avgScore != null ? `${Math.round(avgScore * 100)}%` : '—'}</strong>
-          </div>
-          <div className="teacher-kpi-card">
-            <p>Need Attention</p>
-            <strong style={{ color: atRisk > 0 ? 'var(--danger)' : undefined }}>{atRisk}</strong>
-          </div>
-        </div>
-
-        {students.length > 0 && (
-          <div className="history-accuracy-block">
+      <div className="analytics-panel-row">
+        {/* ── Filters panel ── */}
+        <section className="teacher-panel">
+          <div className="teacher-panel-header">
             <div>
-              <p>Class average score</p>
-              <strong>{avgScore != null ? `${(avgScore * 100).toFixed(1)}%` : '—'}</strong>
+              <p className="teacher-eyebrow">Filters</p>
+              <h3 className="editorial-title">Student scope</h3>
             </div>
-            {avgScore != null && (
-              <div className="teacher-progress">
-                <span style={{ width: `${avgScore * 100}%` }} />
+          </div>
+
+          {students.length > 0 && (
+            <div className="history-accuracy-block">
+              <div>
+                <p>Class average score</p>
+                <strong>{avgScore != null ? `${(avgScore * 100).toFixed(1)}%` : '—'}</strong>
               </div>
-            )}
-          </div>
-        )}
+              {avgScore != null && (
+                <div className="teacher-progress">
+                  <span style={{ width: `${avgScore * 100}%` }} />
+                </div>
+              )}
+            </div>
+          )}
 
-        <div className="history-chip-row">
-          {(['all', 'at-risk', 'strong'] as const).map((f) => (
-            <button
-              key={f}
-              type="button"
-              className={`skills-chip ${activeFilter === f ? 'active' : ''}`}
-              onClick={() => setActiveFilter(f)}
-            >
-              {f === 'all' ? 'All students' : f === 'at-risk' ? 'At risk (<40%)' : 'Strong (≥70%)'}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Students panel ── */}
-      <section className="history-panel">
-        <div className="skills-panel-header">
-          <div>
-            <p className="teacher-eyebrow">Student Performance</p>
-            <h3 className="editorial-title">Classroom Overview</h3>
+          <div className="history-chip-row">
+            {(['all', 'at-risk', 'strong'] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                className={`skills-chip ${activeFilter === f ? 'active' : ''}`}
+                onClick={() => setActiveFilter(f)}
+              >
+                {f === 'all' ? 'All students' : f === 'at-risk' ? 'At risk (<40%)' : 'Strong (≥70%)'}
+              </button>
+            ))}
           </div>
-          <span className="skills-count-pill subtle">{filtered.length} students</span>
-        </div>
+        </section>
+
+        {/* ── Students panel ── */}
+        <section className="teacher-panel">
+          <div className="teacher-panel-header">
+            <div>
+              <p className="teacher-eyebrow">Student Performance</p>
+              <h3 className="editorial-title">Classroom Overview</h3>
+            </div>
+            <span className="skills-count-pill subtle">{filtered.length} students</span>
+          </div>
 
         {filtered.length === 0 ? (
           <div className="empty-state">
@@ -223,7 +222,7 @@ export default function AnalyticsPage() {
                                   <div key={i} className="analytics-skill-row">
                                     <div className="row" style={{ marginBottom: 4 }}>
                                       <p className="meta">{sk.skill_name || sk.name || `Skill ${i + 1}`}</p>
-                                      <span style={{ fontSize: 13, fontWeight: 700, color: scoreColor(sc) }}>
+                                      <span style={{ fontSize: 15, fontWeight: 700, color: scoreColor(sc) }}>
                                         {skPct != null ? `${skPct}%` : '—'}
                                       </span>
                                     </div>
@@ -253,11 +252,12 @@ export default function AnalyticsPage() {
             })}
           </div>
         )}
-      </section>
+        </section>
+      </div>
 
       {/* ── Skill Trends panel ── */}
-      <section className="history-panel">
-        <div className="skills-panel-header">
+      <section className="teacher-panel">
+        <div className="teacher-panel-header">
           <div>
             <p className="teacher-eyebrow">Analytics</p>
             <h3 className="editorial-title">Skill Trends</h3>
@@ -286,7 +286,7 @@ export default function AnalyticsPage() {
                 <div key={k.skill_id || i} className="analytics-skill-row">
                   <div className="row" style={{ marginBottom: 6 }}>
                     <p className="meta">{k.skill_name || k.name || `Skill ${i + 1}`}</p>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: scoreColor(score) }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: scoreColor(score) }}>
                       {pct != null ? `${pct}%` : '—'}
                     </span>
                   </div>

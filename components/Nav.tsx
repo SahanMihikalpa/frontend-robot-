@@ -76,11 +76,16 @@ export default function Nav() {
     router.push('/')
   }
 
+  // The student nav has far fewer links than teacher/admin, so it can stay
+  // as a full row down to a much narrower window before it needs to
+  // collapse into the hamburger menu.
+  const compact = links.length <= 6
+
   return (
     <>
       <button
         type="button"
-        className={`nav-toggle${open ? ' open' : ''}`}
+        className={`nav-toggle${compact ? ' compact' : ''}${open ? ' open' : ''}`}
         aria-label="Toggle menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
@@ -90,7 +95,7 @@ export default function Nav() {
         <span />
       </button>
 
-      <div className={`nav-links${open ? ' open' : ''}`}>
+      <div className={`nav-links${compact ? ' compact' : ''}${open ? ' open' : ''}`}>
         {links.map((link) => (
           <Link
             key={link.href}

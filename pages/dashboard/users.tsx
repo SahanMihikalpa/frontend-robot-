@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
   listUsers, updateUser, deleteUser,
@@ -125,23 +126,62 @@ export default function UsersManagementPage() {
   }
 
   return (
-    <div className="skills-page">
-      <section className="skills-hero">
-        <div className="skills-hero-top">
+    <div className="admin-dashboard student-dash">
+      <section className="teacher-hero">
+        <div>
+          <p className="teacher-eyebrow">Operations</p>
+          <h2 className="editorial-title">User management</h2>
+          <p>
+            Assign roles, activate or deactivate accounts, and bulk-create users from a CSV.
+            You cannot change your own role or remove the last admin.
+          </p>
+        </div>
+        <div className="teacher-hero-note">
+          <span>Accounts</span>
+          <strong>{users.length}</strong>
+          <p>users total</p>
+        </div>
+      </section>
+
+      <div className="teacher-roster-nav">
+        <Link href="/dashboard/admin" className="teacher-action primary">
+          <span>01</span>
+          Admin Dashboard
+        </Link>
+        <Link href="/analytics" className="teacher-action">
+          <span>02</span>
+          Analytics
+        </Link>
+      </div>
+
+      <section className="teacher-kpi-grid">
+        <div className="teacher-kpi-card">
+          <p>Total users</p>
+          <strong>{users.length}</strong>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Students</p>
+          <strong>{counts.student || 0}</strong>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Teachers</p>
+          <strong>{counts.teacher || 0}</strong>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Admins</p>
+          <strong>{counts.admin || 0}</strong>
+        </div>
+      </section>
+
+      <section className="teacher-panel">
+        <div className="teacher-panel-header">
           <div>
-            <p className="teacher-eyebrow">Operations</p>
-            <h2 className="editorial-title">User management</h2>
-            <p>
-              Assign roles, activate or deactivate accounts, and bulk-create users from a CSV.
-              You cannot change your own role or remove the last admin.
-            </p>
+            <p className="teacher-eyebrow">Filters</p>
+            <h3 className="editorial-title">Search & scope</h3>
           </div>
-          <div className="skills-hero-actions">
-            <span className="skills-count-pill">{users.length} users</span>
-            <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
-              Bulk upload
-            </button>
-          </div>
+          <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
+            Bulk upload
+          </button>
         </div>
 
         <div className="skills-search-row">
@@ -176,8 +216,8 @@ export default function UsersManagementPage() {
         {error && <p className="feedback error">{error}</p>}
       </section>
 
-      <section className="skills-panel">
-        <div className="skills-panel-header">
+      <section className="teacher-panel">
+        <div className="teacher-panel-header">
           <div>
             <p className="teacher-eyebrow">Accounts</p>
             <h3 className="editorial-title">User list</h3>

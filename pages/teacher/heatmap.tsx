@@ -57,18 +57,22 @@ function InfoBox({ title, children, accent = 'var(--accent)', defaultOpen = fals
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  // color-mix() blends the (always var(--x)) accent with transparent to get
+  // a tint/border — string-concatenating a hex-alpha suffix directly onto a
+  // var() reference (the old `${accent}33` pattern) isn't valid CSS and
+  // silently drops the whole declaration, so nothing rendered.
   return (
-    <div className="teacher-heatmap-info" style={{ borderColor: `${accent}33` }}>
+    <div className="teacher-heatmap-info" style={{ borderColor: `color-mix(in srgb, ${accent} 20%, transparent)` }}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         className="teacher-heatmap-info-toggle"
-        style={{ background: accent + '10' }}>
+        style={{ background: `color-mix(in srgb, ${accent} 10%, transparent)` }}>
         <span style={{ color: accent }}>{title}</span>
         <span style={{ color: accent }}>{open ? 'Close' : 'Expand'}</span>
       </button>
       {open && (
-        <div className="teacher-heatmap-info-content" style={{ borderTopColor: `${accent}22` }}>
+        <div className="teacher-heatmap-info-content" style={{ borderTopColor: `color-mix(in srgb, ${accent} 13%, transparent)` }}>
           {children}
         </div>
       )}
@@ -119,7 +123,7 @@ export default function TeacherHeatmap() {
   }
 
   return (
-    <div className="teacher-heatmap-page">
+    <div className="teacher-heatmap-page student-dash">
       <section className="teacher-hero teacher-heatmap-hero">
         <div>
           <p className="teacher-eyebrow">Skill Coverage</p>
@@ -136,16 +140,7 @@ export default function TeacherHeatmap() {
         </div>
       </section>
 
-      <div className="teacher-roster-nav teacher-heatmap-nav">
-        <Link href="/teacher/students" className="teacher-action primary">
-          <span>01</span>
-          Student Roster
-        </Link>
-        <Link href="/dashboard/teacher" className="teacher-action">
-          <span>02</span>
-          Dashboard
-        </Link>
-      </div>
+      
 
       <InfoBox title="How to read this heatmap" accent="var(--accent)" defaultOpen>
         <p>
@@ -154,7 +149,7 @@ export default function TeacherHeatmap() {
         </p>
         <div className="teacher-heatmap-guide-grid">
           {Object.entries(ACTION_GUIDE).map(([key, val]) => (
-            <div key={key} className="teacher-heatmap-guide-card" style={{ borderColor: `${cellBg(key)}55` }}>
+            <div key={key} className="teacher-heatmap-guide-card" style={{ borderColor: `color-mix(in srgb, ${cellBg(key)} 33%, transparent)` }}>
               <span style={{ background: cellBg(key), color: cellText(key) }}>{val.label}</span>
               <p>{val.description}</p>
               <small>{val.teacher_action}</small>

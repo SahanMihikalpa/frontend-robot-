@@ -17,21 +17,25 @@ function InfoBox({ title, children, accent = 'var(--accent-secondary)', defaultO
   title: string; children: React.ReactNode; accent?: string; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  // color-mix() blends the (always var(--x)) accent with transparent to get
+  // a tint/border — string-concatenating a hex-alpha suffix directly onto a
+  // var() reference (the old `${accent}33` pattern) isn't valid CSS and
+  // silently drops the whole declaration, so nothing rendered.
   return (
-    <div className="teacher-info-box" style={{ borderColor: `${accent}33` }}>
+    <div className="teacher-info-box" style={{ borderColor: `color-mix(in srgb, ${accent} 20%, transparent)` }}>
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(o => !o)}
         className="teacher-info-toggle"
-        style={{ background: accent + '12' }}>
+        style={{ background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>
         <span style={{ color: accent }}>{title}</span>
         <span style={{ color: accent }}>{open ? 'Close' : 'Expand'}</span>
       </button>
       <div
         className={`teacher-info-body ${open ? 'open' : ''}`}
         aria-hidden={!open}
-        style={{ borderTopColor: `${accent}22` }}
+        style={{ borderTopColor: `color-mix(in srgb, ${accent} 13%, transparent)` }}
       >
         <div className="teacher-info-content">
           <div className="teacher-info-content-inner">
@@ -74,7 +78,7 @@ export default function TeacherStudents() {
     : null
 
   return (
-    <div className="teacher-roster-page">
+    <div className="teacher-roster-page student-dash">
       <section className="teacher-hero teacher-roster-hero">
         <div>
           <p className="teacher-eyebrow">Class Roster</p>
@@ -91,16 +95,7 @@ export default function TeacherStudents() {
         </div>
       </section>
 
-      <div className="teacher-roster-nav">
-        <Link href="/teacher/heatmap" className="teacher-action primary">
-          <span>01</span>
-          Skill Heatmap
-        </Link>
-        <Link href="/dashboard/teacher" className="teacher-action">
-          <span>02</span>
-          Dashboard
-        </Link>
-      </div>
+      
 
       <section className="teacher-kpi-grid teacher-roster-kpis">
         <div className="teacher-kpi-card">
@@ -138,7 +133,7 @@ export default function TeacherStudents() {
               <div
                 key={key}
                 className="teacher-status-card"
-                style={{ borderColor: `${val.color}30`, animationDelay: `${idx * 45}ms` }}
+                style={{ borderColor: `color-mix(in srgb, ${val.color} 19%, transparent)`, animationDelay: `${idx * 45}ms` }}
               >
                 <span style={{ background: val.color + '22', color: val.color }}>
                   {statusLabel(key)}
@@ -180,6 +175,20 @@ export default function TeacherStudents() {
               </button>
             ))}
           </div>
+
+          {/* Mobile: the button group is too wide for a phone screen, so a
+              native dropdown replaces it below the .teacher-sort-control
+              breakpoint (see globals.css). */}
+          <select
+            className="teacher-sort-select"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as 'score' | 'name' | 'active')}
+            aria-label="Sort students by"
+          >
+            <option value="score">Sort by: Mastery</option>
+            <option value="name">Sort by: Name</option>
+            <option value="active">Sort by: Last Active</option>
+          </select>
         </div>
 
         <div className="teacher-table-wrap">
@@ -202,12 +211,12 @@ export default function TeacherStudents() {
               ) : sorted.length === 0 ? (
                 <tr><td colSpan={8} className="teacher-empty-cell">No students found</td></tr>
               ) : sorted.map((s, idx) => (
-                <tr key={s.user_id} style={{ animationDelay: `${idx * 35}ms` }}>
-                  <td>
+                <tr key={s.user_id} style={{ animationDelay: `${idx * 35}ms`, ['--row-accent' as any]: statusColor(s.zpd_status) }}>
+                  <td data-label="Student" className="teacher-roster-cell-name">
                     <div className="teacher-student-name">{s.full_name}</div>
                     <div className="teacher-student-meta">{s.username}</div>
                   </td>
-                  <td>
+                  <td data-label="ZPD Status">
                     <span
                       className="teacher-status-pill"
                       style={{
@@ -221,19 +230,19 @@ export default function TeacherStudents() {
                       {STATUS_DESCRIPTIONS[s.zpd_status]?.action}
                     </div>
                   </td>
-                  <td style={{ textAlign: 'right', color: scoreColor(s.overall_score), fontWeight: 700 }}>
+                  <td data-label="Mastery" style={{ textAlign: 'right', color: scoreColor(s.overall_score), fontWeight: 700 }}>
                     {s.overall_score != null ? `${Math.round(s.overall_score * 100)}%` : '-'}
                   </td>
-                  <td style={{ textAlign: 'right' }}>{s.total_interactions}</td>
-                  <td style={{ textAlign: 'right', color: 'var(--success)', fontWeight: s.mastered_skills > 0 ? 700 : 400 }}>
+                  <td data-label="Interactions" style={{ textAlign: 'right' }}>{s.total_interactions}</td>
+                  <td data-label="Mastered" style={{ textAlign: 'right', color: 'var(--success)', fontWeight: s.mastered_skills > 0 ? 700 : 400 }}>
                     {s.mastered_skills || '-'}
                   </td>
-                  <td style={{ textAlign: 'right', color: s.struggling_skills > 0 ? 'var(--danger)' : undefined, fontWeight: s.struggling_skills > 0 ? 700 : 400 }}>
+                  <td data-label="Struggling" style={{ textAlign: 'right', color: s.struggling_skills > 0 ? 'var(--danger)' : undefined, fontWeight: s.struggling_skills > 0 ? 700 : 400 }}>
                     {s.struggling_skills > 0
                       ? <span title="Click View to see which skills need attention">Alert {s.struggling_skills}</span>
                       : '-'}
                   </td>
-                  <td>
+                  <td data-label="Last active">
                     {s.last_active
                       ? (() => {
                           const days = Math.floor((Date.now() - new Date(s.last_active).getTime()) / 86400000)
@@ -246,7 +255,7 @@ export default function TeacherStudents() {
                         })()
                       : <span style={{ color: 'var(--muted)' }}>Never</span>}
                   </td>
-                  <td>
+                  <td className="teacher-roster-cell-action">
                     <Link href={`/teacher/students/${s.user_id}`} className="teacher-detail-link">
                       Details
                     </Link>
