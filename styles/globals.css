@@ -4744,6 +4744,15 @@ body:has(.selflearn-session-view) .home-footer{
   flex-direction:column;
   gap:24px;
 }
+.analytics-panel-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,2fr);
+  align-items:stretch;
+  gap:24px;
+}
+.analytics-panel-row .teacher-panel{
+  height:100%;
+}
 .analytics-hero{
   padding:48px 56px;
   display:flex;
@@ -4821,9 +4830,14 @@ body:has(.selflearn-session-view) .home-footer{
 .analytics-student-main h4{
   margin:0;
   color:var(--text);
-  font-size:16px;
+  font-size:18px;
   line-height:1.45;
 }
+/* Readability pass — analytics reuses .meta/.history-result-pill at their
+   site-wide (small) sizes; bump them here without touching the shared
+   classes other pages rely on. */
+.analytics-page .meta{font-size:15px}
+.analytics-page .history-result-pill{font-size:13px;padding:6px 12px}
 .analytics-student-right{
   display:flex;
   align-items:center;
@@ -4850,6 +4864,17 @@ body:has(.selflearn-session-view) .home-footer{
 .analytics-skill-row:last-child{
   border-bottom:none;
 }
+/* Long skill names + a percentage badge share one flex row — truncate the
+   name instead of letting it push the badge off narrow screens. */
+.analytics-skill-row .row .meta{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+}
+.analytics-skill-row .row > span{
+  flex-shrink:0;
+}
 .history-result-pill.warning{
   color:var(--warning);
   background:var(--warning-dim);
@@ -4858,6 +4883,7 @@ body:has(.selflearn-session-view) .home-footer{
 @media(max-width:960px){
   .analytics-hero{flex-direction:column;align-items:flex-start}
   .analytics-stat-grid{width:100%;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .analytics-panel-row{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:600px){
   .analytics-hero,
