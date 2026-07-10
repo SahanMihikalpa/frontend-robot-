@@ -639,9 +639,83 @@ export async function completeAssessment(payload: {
   return data as { skill_id: number; mastery: number; correct: number; total: number; accuracy: number; assessment_done: boolean }
 }
 
-export async function startChatSession(payload: { skill_id: number; user_id: number }) {
+export async function startChatSession(
+  payload: { skill_id: number; user_id: number; defer_lesson?: boolean },
+) {
   const { data } = await apiClient.post('/api/v1/chat/session', payload)
   return data
+}
+
+/**
+ * Stream a deferred full lesson over Server-Sent Events.
+ * Uses fetch (not EventSource) so the Authorization header can be sent.
+ * Calls onDelta for each token chunk, onDone when the lesson completes.
+ * Returns an abort function to cancel the stream.
+ */
+export function streamLesson(
+  sessionId: string,
+  handlers: {
+    onDelta?: (text: string) => void
+    onDone?: (full: string, llmAvailable: boolean) => void
+    onError?: (message: string) => void
+  },
+): () => void {
+  const controller = new AbortController()
+  const token = readToken()
+
+  ;(async () => {
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/v1/chat/session/${sessionId}/lesson/stream`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'text/event-stream',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          signal: controller.signal,
+        },
+      )
+      if (!res.ok || !res.body) {
+        handlers.onError?.(`Lesson stream failed (HTTP ${res.status})`)
+        return
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+
+        // SSE frames are separated by a blank line.
+        let sep: number
+        while ((sep = buffer.indexOf('\n\n')) !== -1) {
+          const frame = buffer.slice(0, sep)
+          buffer = buffer.slice(sep + 2)
+          const line = frame.split('\n').find((l) => l.startsWith('data:'))
+          if (!line) continue
+          const jsonStr = line.slice(5).trim()
+          if (!jsonStr) continue
+          try {
+            const evt = JSON.parse(jsonStr)
+            if (evt.error) { handlers.onError?.(evt.error); continue }
+            if (evt.delta) handlers.onDelta?.(evt.delta)
+            if (evt.done) handlers.onDone?.(evt.content || '', evt.llm_available !== false)
+          } catch { /* ignore malformed frame */ }
+        }
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        handlers.onError?.(err?.message || 'Lesson stream error')
+      }
+    }
+  })()
+
+  return () => controller.abort()
 }
 
 export async function sendChatMessage(payload: {

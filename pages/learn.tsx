@@ -4,6 +4,7 @@ import {
   startChatSession, sendChatMessage, endChatSession,
   analyzeVisualEngagement, getAuthToken,
   getSessionStatus, getAssessmentQuestions, completeAssessment,
+  streamLesson,
 } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
 
@@ -49,6 +50,7 @@ type ChatMsg = {
   masteryAfter?: number
   imageUrl?: string        // data: URL for a Gemini-generated infographic
   imageError?: string      // set when a visual was requested but generation failed
+  streaming?: boolean      // true while a LESSON bubble is still receiving tokens
   timestamp: number
 }
 
@@ -304,14 +306,32 @@ function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 16 }}>📘</span>
             <strong style={{ fontSize: 13, color: 'var(--accent)' }}>Lesson</strong>
+            {msg.streaming && (
+              <span style={{ fontSize: 11, color: 'var(--muted)', fontStyle: 'italic' }}>
+                ✍️ writing…
+              </span>
+            )}
           </div>
         )}
 
-        <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14 }}>
-          {msg.type === 'FEEDBACK'
-            ? safeStr(msg.content).replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || safeStr(msg.content)
-            : safeStr(msg.content)}
-        </p>
+        {msg.type === 'LESSON' && msg.streaming && !safeStr(msg.content) ? (
+          <p style={{ margin: 0, color: 'var(--muted)', fontStyle: 'italic', fontSize: 14 }}>
+            Preparing your personalized lesson<span className="dot-ellipsis" />
+          </p>
+        ) : (
+          <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14 }}>
+            {msg.type === 'FEEDBACK'
+              ? safeStr(msg.content).replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || safeStr(msg.content)
+              : safeStr(msg.content)}
+            {msg.type === 'LESSON' && msg.streaming && (
+              <span style={{
+                display: 'inline-block', width: 7, height: 14, marginLeft: 2,
+                background: 'var(--accent)', verticalAlign: 'text-bottom',
+                animation: 'blink 1s step-start infinite',
+              }} />
+            )}
+          </p>
+        )}
 
         {msg.imageUrl && (
           <div style={{ marginTop: 10 }}>
@@ -444,7 +464,13 @@ export default function LearnPage() {
   const userRef = useRef<any>(null)
 
   const chatBottomRef = useRef<HTMLDivElement>(null)
+  const chatScrollRef = useRef<HTMLDivElement>(null)
+  // "stick to bottom": true while the user is parked at the bottom of the chat.
+  // If they scroll up (to re-read earlier text), this flips false and we stop
+  // auto-scrolling so streaming tokens don't yank them back down.
+  const stickToBottomRef = useRef(true)
   const activeQuestionRef = useRef<ChatMsg | null>(null)
+  const lessonStreamAbortRef = useRef<null | (() => void)>(null)
 
   // ─── Voice pipeline state ─────────────────────────────────────────────────
   const [voiceState, setVoiceState] = useState<VoiceState>('idle')
@@ -476,13 +502,33 @@ export default function LearnPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Track whether the user is parked at the bottom. Only auto-scroll when they
+  // are — so scrolling up during a streaming lesson is never interrupted.
+  function handleChatScroll() {
+    const el = chatScrollRef.current
+    if (!el) return
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    stickToBottomRef.current = distanceFromBottom < 80
+  }
+
   useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = chatScrollRef.current
+    if (!el) return
+    // When the student just sent something, always snap them to the bottom (and
+    // re-arm auto-scroll) — they took an action and expect to see the reply.
+    const last = messages[messages.length - 1]
+    if (last?.role === 'student') stickToBottomRef.current = true
+    if (!stickToBottomRef.current) return
+    // Scroll the chat container itself (not scrollIntoView, which also drags the
+    // whole page/window down). This keeps the browser scroll position untouched.
+    el.scrollTop = el.scrollHeight
   }, [messages])
 
   function cleanup() {
     stopEngagementCapture()
     if (timerRef.current) clearInterval(timerRef.current)
+    lessonStreamAbortRef.current?.()
+    lessonStreamAbortRef.current = null
   }
 
   // ─── Skill select → fetch status ──────────────────────────────────────────
@@ -579,7 +625,7 @@ export default function LearnPage() {
     setError('')
     setLoading(true)
     try {
-      const res = await startChatSession({ skill_id: selectedSkill, user_id: user.id })
+      const res = await startChatSession({ skill_id: selectedSkill, user_id: user.id, defer_lesson: true })
       const sid = res.session_id || res.id || `local-${Date.now()}`
       setSessionId(sid)
       sessionIdRef.current = sid
@@ -633,12 +679,46 @@ export default function LearnPage() {
         if (resumedMastery != null) setMastery(resumedMastery * 100)
       } else {
         setMessages([])
-        // Welcome + full lesson content appear in the chat before the first
-        // practice question, so the student reads the topic before practising.
+        // Welcome shows instantly. The full lesson is DEFERRED (generation takes
+        // ~1 min on the LLM) — we drop a streaming placeholder bubble and fill it
+        // token-by-token via SSE, so the student sees the lesson being written
+        // instead of a frozen screen.
         if (res.welcome_message) addSystemMsg(res.welcome_message)
-        if (res.lesson_message) addSystemMsg(res.lesson_message)
+
+        const lessonPending = res.lesson_message?.metadata?.pending
+        let lessonId: string | null = null
+        if (res.lesson_message) {
+          lessonId = uid()
+          setMessages((prev) => [...prev, {
+            id: lessonId!, role: 'system', type: 'LESSON',
+            content: '', streaming: !!lessonPending, timestamp: Date.now(),
+          }])
+        }
+
+        // First practice question appears immediately (left panel + chat).
         const firstMsg = res.first_message || res.message || res
         addSystemMsg(firstMsg)
+
+        // Stream the lesson into its placeholder bubble.
+        if (lessonId && lessonPending) {
+          lessonStreamAbortRef.current?.()
+          lessonStreamAbortRef.current = streamLesson(sid, {
+            onDelta: (t) => setMessages((prev) => prev.map((m) =>
+              m.id === lessonId ? { ...m, content: m.content + t } : m)),
+            onDone: (full) => setMessages((prev) => prev.map((m) =>
+              m.id === lessonId ? { ...m, content: full || m.content, streaming: false } : m)),
+            onError: () => setMessages((prev) => prev.map((m) =>
+              m.id === lessonId ? {
+                ...m, streaming: false,
+                content: m.content || '⚠️ The lesson could not be generated right now — but you can still ask me anything about this topic and try the practice question.',
+              } : m)),
+          })
+        } else if (res.lesson_message?.content && lessonId) {
+          // Non-deferred fallback: lesson already generated server-side.
+          const full = res.lesson_message.content
+          setMessages((prev) => prev.map((m) =>
+            m.id === lessonId ? { ...m, content: full, streaming: false } : m))
+        }
       }
       setPhase('session')
       // Auto-start camera engagement capture when session begins.
@@ -785,6 +865,9 @@ export default function LearnPage() {
     // The session stays active (is_active=True) so the student can resume it later.
     // History is already persisted in the DB message-by-message.
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+    // Cancel any in-flight lesson stream so it doesn't write into a closed view.
+    lessonStreamAbortRef.current?.()
+    lessonStreamAbortRef.current = null
     stopEngagementCapture()
     // Exit to skill picker — keep session live in DB
     setSessionId(null)
@@ -1444,7 +1527,7 @@ export default function LearnPage() {
         </div>
 
         {/* Chat messages */}
-        <div className="learn-chat-messages">
+        <div className="learn-chat-messages" ref={chatScrollRef} onScroll={handleChatScroll}>
           {chatMessages.length === 0 && voiceStreamText === '' && (
             <div className="learn-chat-empty">
               <span className="learn-chat-empty-icon" aria-hidden="true">💬</span>
