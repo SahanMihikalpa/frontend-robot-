@@ -49,7 +49,7 @@ export default function Nav() {
         { href: '/skills', label: 'Skills' },
         { href: '/questions', label: 'Questions' },
         { href: '/history', label: 'History' },
-        { href: '/tutor', label: 'Tutor' },
+        //{ href: '/tutor', label: 'Tutor' },
         //{ href: '/engagement', label: 'Engagement' },
         { href: '/hardware', label: 'Hardware' },
         { href: '/voice', label: 'Voice' },

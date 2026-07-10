@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { createVoiceSocket, getCurrentUser } from '../lib/api'
 
@@ -110,7 +111,7 @@ export default function VoicePage() {
   }
 
   return (
-    <div className="teacher-dashboard">
+    <div className="teacher-dashboard student-dash">
       <section className="teacher-hero">
         <div>
           <p className="teacher-eyebrow">Realtime Audio</p>
@@ -130,6 +131,40 @@ export default function VoicePage() {
         </div>
       </section>
 
+      <div className="teacher-roster-nav">
+        <Link href="/dashboard/admin" className="teacher-action primary">
+          <span>01</span>
+          Admin Dashboard
+        </Link>
+        <Link href="/hardware" className="teacher-action">
+          <span>02</span>
+          Hardware
+        </Link>
+      </div>
+
+      <section className="teacher-kpi-grid">
+        <div className="teacher-kpi-card">
+          <p>Connection</p>
+          <strong style={{ color: connected ? 'var(--success)' : 'var(--danger)' }}>
+            {connected ? 'Connected' : 'Disconnected'}
+          </strong>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Microphone</p>
+          <strong style={{ color: streaming ? 'var(--success)' : 'var(--muted)' }}>
+            {streaming ? 'Streaming' : 'Idle'}
+          </strong>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Transcripts</p>
+          <strong>{finalTranscripts.length}</strong>
+        </div>
+        <div className="teacher-kpi-card">
+          <p>Events logged</p>
+          <strong>{logs.length}</strong>
+        </div>
+      </section>
+
       <div className="teacher-layout">
         <section className="teacher-main">
           <section className="teacher-panel">
@@ -141,30 +176,26 @@ export default function VoicePage() {
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
-              <button type="button" className="teacher-action primary" onClick={connect} disabled={connected}
-                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+              <button type="button" className="skills-action primary" onClick={connect} disabled={connected}>
                 Connect WS
               </button>
-              <button type="button" className="teacher-action" onClick={disconnect} disabled={!connected}
-                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+              <button type="button" className="skills-action secondary" onClick={disconnect} disabled={!connected}>
                 Disconnect
               </button>
             </div>
 
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" className="teacher-action primary" onClick={startStreaming} disabled={!connected || streaming}
-                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+              <button type="button" className="skills-action primary" onClick={startStreaming} disabled={!connected || streaming}>
                 Start microphone
               </button>
-              <button type="button" className="teacher-action" onClick={stopStreaming} disabled={!streaming}
-                style={{ minHeight: 'unset', padding: '10px 22px' }}>
+              <button type="button" className="skills-action secondary" onClick={stopStreaming} disabled={!streaming}>
                 Stop microphone
               </button>
             </div>
 
             {streaming && (
               <p style={{
-                marginTop: 16, marginBottom: 0, fontSize: 13, fontWeight: 600,
+                marginTop: 16, marginBottom: 0, fontSize: 14, fontWeight: 600,
                 color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 8,
               }}>
                 🎙️ Streaming PCM16 audio to server…
@@ -180,13 +211,13 @@ export default function VoicePage() {
               </div>
             </div>
             <div style={{
-              padding: '14px 18px', borderRadius: 8, minHeight: 48,
+              padding: '14px 18px', borderRadius: 14, minHeight: 48,
               background: 'var(--bg)', border: '1px solid var(--border)',
             }}>
               {transcript ? (
-                <p style={{ margin: 0, color: 'var(--text)', fontSize: 15, lineHeight: 1.6 }}>{transcript}</p>
+                <p style={{ margin: 0, color: 'var(--text)', fontSize: 16, lineHeight: 1.6 }}>{transcript}</p>
               ) : (
-                <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>Waiting for speech…</p>
+                <p style={{ margin: 0, color: 'var(--muted)', fontSize: 15 }}>Waiting for speech…</p>
               )}
             </div>
           </section>
@@ -205,9 +236,9 @@ export default function VoicePage() {
               }}>
                 {finalTranscripts.map((t, i) => (
                   <div key={i} style={{
-                    padding: '10px 14px', borderRadius: 8,
+                    padding: '10px 14px', borderRadius: 14,
                     background: 'var(--surface)', border: '1px solid var(--border)',
-                    fontSize: 13, color: 'var(--text)', lineHeight: 1.5,
+                    fontSize: 14, color: 'var(--text)', lineHeight: 1.5,
                   }}>
                     {t}
                   </div>
@@ -224,8 +255,7 @@ export default function VoicePage() {
               <h3 className="editorial-title" style={{ margin: 0 }}>Event log</h3>
             </div>
             {logs.length > 0 && (
-              <button type="button" className="teacher-action" onClick={() => setLogs([])}
-                style={{ minHeight: 'unset', padding: '6px 14px', fontSize: 12 }}>
+              <button type="button" className="skills-mini-action" onClick={() => setLogs([])}>
                 Clear
               </button>
             )}
@@ -236,15 +266,15 @@ export default function VoicePage() {
             maxHeight: 280, overflowY: 'auto',
           }}>
             {logs.length === 0 ? (
-              <p style={{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>
+              <p style={{ color: 'var(--muted)', fontSize: 14, margin: 0 }}>
                 Events will appear here after connecting.
               </p>
             ) : (
               logs.map((l, i) => (
                 <div key={i} style={{
-                  padding: '8px 12px', borderRadius: 6,
+                  padding: '8px 12px', borderRadius: 10,
                   background: 'var(--bg)', border: '1px solid var(--border)',
-                  fontSize: 12, color: 'var(--muted)', fontFamily: 'monospace', lineHeight: 1.5,
+                  fontSize: 13, color: 'var(--muted)', fontFamily: 'monospace', lineHeight: 1.5,
                 }}>
                   {l}
                 </div>
@@ -257,12 +287,12 @@ export default function VoicePage() {
               style={{
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
-                fontSize: 11,
+                fontSize: 12,
                 color: 'var(--muted)',
                 margin: '0 0 10px'
               }}
             >How it works</p>
-            <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.8, fontSize: 13, color: 'var(--muted)' }}>
+            <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.8, fontSize: 14, color: 'var(--muted)' }}>
               <li>Click <strong style={{ color: 'var(--text)' }}>Connect WS</strong> to open a WebSocket to the backend voice endpoint.</li>
               <li>Click <strong style={{ color: 'var(--text)' }}>Start microphone</strong> to capture audio from your browser mic.</li>
               <li>Audio is converted to PCM16 and streamed frame-by-frame over WebSocket.</li>
