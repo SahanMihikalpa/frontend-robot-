@@ -4,13 +4,15 @@ import { useRouter } from 'next/router'
 import { getCurrentUser, loginUser, registerUser } from '../lib/api'
 import { getRoleHome, setStoredUser } from '../lib/session'
 import Image from 'next/image'
+import PasswordInput from '../components/PasswordInput'
+import HelpTip from '../components/HelpTip'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,30}$/
 
-type FieldErrors = Partial<Record<'full_name' | 'username' | 'email' | 'password', string>>
+type FieldErrors = Partial<Record<'full_name' | 'username' | 'email' | 'password' | 'confirm_password', string>>
 
-function validateRegister(form: { full_name: string; username: string; email: string; password: string }): FieldErrors {
+function validateRegister(form: { full_name: string; username: string; email: string; password: string; confirm_password: string }): FieldErrors {
   const errs: FieldErrors = {}
   if (form.full_name.trim().length < 2) {
     errs.full_name = 'Please enter your full name (at least 2 characters).'
@@ -32,6 +34,11 @@ function validateRegister(form: { full_name: string; username: string; email: st
   } else if (!/[a-zA-Z]/.test(form.password) || !/\d/.test(form.password)) {
     errs.password = 'Password must contain at least one letter and one number.'
   }
+  if (!form.confirm_password) {
+    errs.confirm_password = 'Please re-enter your password.'
+  } else if (form.confirm_password !== form.password) {
+    errs.confirm_password = 'Passwords do not match.'
+  }
   return errs
 }
 
@@ -42,6 +49,7 @@ export default function Register() {
     username: '',
     email: '',
     password: '',
+    confirm_password: '',
     role: 'student' as 'student' | 'teacher' | 'admin',
   })
   const [loading, setLoading] = useState(false)
@@ -150,7 +158,10 @@ export default function Register() {
         </h2>
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-row">
-            <label className="form-label" htmlFor="register-full-name">Full name</label>
+            <div className="form-label-row">
+              <label className="form-label" htmlFor="register-full-name">Full name</label>
+              <HelpTip label="Full name" text="Your real name — this is shown on your dashboard and in the classroom." />
+            </div>
             <input
               id="register-full-name"
               className="editorial-input"
@@ -164,7 +175,10 @@ export default function Register() {
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
-            <label className="form-label" htmlFor="register-username">Username</label>
+            <div className="form-label-row">
+              <label className="form-label" htmlFor="register-username">Username</label>
+              <HelpTip label="Username" text="3–30 characters. Letters, numbers, and underscores only — you'll use this to sign in." />
+            </div>
             <input
               id="register-username"
               className="editorial-input"
@@ -179,7 +193,10 @@ export default function Register() {
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
-            <label className="form-label" htmlFor="register-email">Email</label>
+            <div className="form-label-row">
+              <label className="form-label" htmlFor="register-email">Email</label>
+              <HelpTip label="Email" text="A valid address like name@example.com. We'll send your welcome email here." />
+            </div>
             <input
               id="register-email"
               className="editorial-input"
@@ -194,24 +211,33 @@ export default function Register() {
           </div>
 
           <div className="form-row" style={{ marginTop: 24 }}>
-            <label className="form-label" htmlFor="register-password">Password</label>
-            <input
+            <div className="form-label-row">
+              <label className="form-label" htmlFor="register-password">Password</label>
+              <HelpTip label="Password" text="At least 8 characters, including at least one letter and one number." />
+            </div>
+            <PasswordInput
               id="register-password"
-              className="editorial-input"
-              type="password"
               value={form.password}
-              onChange={(e) => update('password', e.target.value)}
-              aria-invalid={!!fieldErrors.password}
+              onChange={(v) => update('password', v)}
+              ariaInvalid={!!fieldErrors.password}
               autoComplete="new-password"
-              required
             />
-            {fieldErrors.password ? (
-              <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.password}</p>
-            ) : (
-              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-                At least 8 characters, with a letter and a number.
-              </p>
-            )}
+            {fieldErrors.password && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.password}</p>}
+          </div>
+
+          <div className="form-row" style={{ marginTop: 24 }}>
+            <div className="form-label-row">
+              <label className="form-label" htmlFor="register-confirm-password">Confirm password</label>
+              <HelpTip label="Confirm password" text="Re-enter the same password to make sure it matches." />
+            </div>
+            <PasswordInput
+              id="register-confirm-password"
+              value={form.confirm_password}
+              onChange={(v) => update('confirm_password', v)}
+              ariaInvalid={!!fieldErrors.confirm_password}
+              autoComplete="new-password"
+            />
+            {fieldErrors.confirm_password && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.confirm_password}</p>}
           </div>
 
           {/* Role selection temporarily disabled.

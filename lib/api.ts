@@ -796,4 +796,65 @@ export async function slGetProviders() {
   return data
 }
 
+export type SlAssessmentQuestion = {
+  concept_id: number
+  concept_name: string
+  question_text: string
+  options: Record<string, string> | null
+  correct_answer: string
+  difficulty: number | null
+}
+
+// Build the course (concept map) if needed + return a diagnostic quiz. No session yet.
+export async function slStartAssessment(payload: { topic: string; teaching_provider?: string; dynamic_skill_id?: number }) {
+  const { data } = await apiClient.post('/api/v1/selflearn/assessment', payload)
+  return data as {
+    skill: { id: number; canonical_name: string; slug: string; description?: string }
+    dynamic_skill_id: number
+    questions: SlAssessmentQuestion[]
+  }
+}
+
+// Grade the diagnostic → seed per-concept mastery so known concepts are skipped.
+export async function slCompleteAssessment(payload: {
+  dynamic_skill_id: number
+  answers: Array<{ concept_id: number; is_correct: boolean }>
+}) {
+  const { data } = await apiClient.post('/api/v1/selflearn/assessment/complete', payload)
+  return data as {
+    dynamic_skill_id: number
+    concepts_assessed: number
+    concepts_known: number
+    concepts_to_learn: number
+  }
+}
+
+export type SlRoadmapConcept = {
+  concept_id: number
+  name: string
+  description?: string | null
+  level: string | null
+  difficulty: number | null
+  order_index: number
+  mastery: number
+  mastered: boolean
+  is_current: boolean
+}
+
+export async function slGetRoadmap(session_id: string) {
+  const { data } = await apiClient.get(`/api/v1/selflearn/roadmap/${session_id}`)
+  return data as {
+    session_id: string
+    concepts: SlRoadmapConcept[]
+    current_concept_id: number | null
+    completed: boolean
+  }
+}
+
+// Jump ahead to a chosen concept (marks earlier concepts as known).
+export async function slSkipToConcept(payload: { session_id: string; concept_id: number }) {
+  const { data } = await apiClient.post('/api/v1/selflearn/skip', payload)
+  return data
+}
+
 export default apiClient
