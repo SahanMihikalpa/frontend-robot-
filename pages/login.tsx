@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { getCurrentUser, loginUser } from '../lib/api'
 import { getRoleHome, setStoredUser } from '../lib/session'
 import Image from 'next/image'
+import PasswordInput from '../components/PasswordInput'
 
 type LoginErrors = Partial<Record<'username' | 'password', string>>
 
@@ -147,15 +148,12 @@ export default function Login() {
             <label className="form-label" htmlFor="login-password">
               Password
             </label>
-            <input
+            <PasswordInput
               id="login-password"
-              className="editorial-input"
-              type="password"
               value={password}
-              onChange={e => onPassword(e.target.value)}
-              aria-invalid={!!fieldErrors.password}
+              onChange={onPassword}
+              ariaInvalid={!!fieldErrors.password}
               autoComplete="current-password"
-              required
             />
             {fieldErrors.password && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.password}</p>}
           </div>
