@@ -6215,3 +6215,92 @@ body:has(.selflearn-session-view) .home-footer{
 }
 .dot-ellipsis { display: inline-block; width: 0; overflow: visible; }
 .dot-ellipsis::after { content: '…'; animation: dotEllipsis 1.4s steps(1) infinite; }
+
+/* ─────────────────────────────
+   Self-learn — placement quiz + roadmap
+───────────────────────────── */
+.selflearn-assess-wrap{max-width:680px;margin:0 auto;width:100%}
+.selflearn-assess-card{display:flex;flex-direction:column;gap:14px}
+.selflearn-assess-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.selflearn-assess-sub{margin:0;font-size:13px;line-height:1.55}
+.selflearn-assess-progress{height:6px}
+.selflearn-assess-body{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.selflearn-assess-question{margin:0;font-size:17px;line-height:1.5;font-weight:600;color:var(--text)}
+.selflearn-assess-options{display:flex;flex-direction:column;gap:10px}
+.selflearn-option-btn.correct{
+  border-color:var(--success) !important;background:rgba(22,163,74,.10) !important;color:var(--text) !important;
+}
+.selflearn-option-btn.incorrect{
+  border-color:var(--danger) !important;background:rgba(239,68,68,.10) !important;color:var(--text) !important;
+}
+.selflearn-assess-verdict{margin:0;font-weight:700}
+.selflearn-assess-verdict.ok{color:var(--success)}
+.selflearn-assess-verdict.no{color:var(--danger)}
+.selflearn-assess-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:6px}
+
+/* Roadmap rows in the session progress sidebar */
+.selflearn-roadmap-row{padding:8px 0;border-bottom:1px solid var(--border)}
+.selflearn-roadmap-row:last-child{border-bottom:none}
+.selflearn-roadmap-row.current{
+  background:rgba(232,90,51,.05);border-radius:8px;padding:8px 10px;margin:0 -10px;
+  border-bottom:1px solid transparent;
+}
+.selflearn-roadmap-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.selflearn-skip-btn{flex:none;font-size:11px;padding:3px 10px;white-space:nowrap}
+.selflearn-here-pill{flex:none;font-size:10px;padding:2px 8px}
+
+/* ─────────────────────────────
+   Password field — show/hide eye toggle
+───────────────────────────── */
+.password-field{position:relative;display:block}
+.password-field .password-field-input{padding-right:48px !important}
+.password-toggle{
+  position:absolute;top:0;right:6px;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  width:38px;padding:0;margin:0;
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);border-radius:8px;
+  transition:color .15s ease;
+}
+.password-toggle:hover{color:var(--text)}
+.password-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+/* ─────────────────────────────
+   Field label help tooltip ("?")
+───────────────────────────── */
+.form-label-row{display:flex;align-items:center;gap:6px}
+.help-tip{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  cursor:help;outline:none;
+}
+.help-tip-mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--border-strong);color:var(--surface);
+  font-size:11px;font-weight:700;line-height:1;
+  transition:background .15s ease,color .15s ease;
+}
+.help-tip:hover .help-tip-mark,
+.help-tip:focus-visible .help-tip-mark{background:var(--accent);color:#fff}
+.help-tip:focus-visible{outline:none}
+.help-tip:focus-visible .help-tip-mark{box-shadow:0 0 0 3px var(--accent-dim)}
+.help-tip-bubble{
+  position:absolute;left:50%;bottom:calc(100% + 9px);
+  transform:translateX(-50%) translateY(4px);
+  min-width:180px;max-width:240px;width:max-content;
+  background:var(--ink);color:#fff;
+  font-size:12px;font-weight:400;line-height:1.5;
+  letter-spacing:normal;text-transform:none;text-align:left;
+  padding:8px 11px;border-radius:8px;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .15s ease,transform .15s ease;
+  z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.22);
+}
+.help-tip-bubble::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--ink);
+}
+.help-tip:hover .help-tip-bubble,
+.help-tip:focus-visible .help-tip-bubble{
+  opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);
+}

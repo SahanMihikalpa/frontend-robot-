@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import {
   slStartSession, slSendMessage, slGetMastery, slGetProgress,
   slGetProviders, slResumeSession, slCreatePack,
+  slStartAssessment, slCompleteAssessment, slGetRoadmap, slSkipToConcept,
   getAuthToken,
 } from '../lib/api'
+import type { SlAssessmentQuestion, SlRoadmapConcept } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
 
 type VoiceState = 'idle' | 'recording' | 'processing'
+type SlView = 'start' | 'assessment' | 'session'
 
 // One transcript entry as persisted by the backend (learning_messages).
 type LMsg = {
@@ -60,7 +63,7 @@ function MasteryBar({ pct, label }: { pct: number; label?: string }) {
 }
 
 export default function SelfLearn() {
-  const [view, setView] = useState<'start' | 'session'>('start')
+  const [view, setView] = useState<SlView>('start')
   const [topic, setTopic] = useState('')
   const [providers, setProviders] = useState<{ available: string[]; teaching_default: string } | null>(null)
   const [provider, setProvider] = useState('')
@@ -84,6 +87,19 @@ export default function SelfLearn() {
   const [files, setFiles] = useState<File[]>([])
   const [packMsg, setPackMsg] = useState('')
   const [lightboxSrc, setLightboxSrc] = useState('')
+
+  // Initial diagnostic assessment (before a new course's first lesson)
+  const [assessQs, setAssessQs] = useState<SlAssessmentQuestion[]>([])
+  const [assessIdx, setAssessIdx] = useState(0)
+  const [assessAnswers, setAssessAnswers] = useState<Array<{ concept_id: number; is_correct: boolean }>>([])
+  const [assessSelected, setAssessSelected] = useState<string | null>(null)
+  const [assessSkillId, setAssessSkillId] = useState<number | null>(null)
+  const [assessSkillName, setAssessSkillName] = useState('')
+  const [assessSubmitting, setAssessSubmitting] = useState(false)
+
+  // Roadmap (session view) — concepts with skip-ahead
+  const [roadmap, setRoadmap] = useState<{ concepts: SlRoadmapConcept[]; current_concept_id: number | null } | null>(null)
+  const [skipping, setSkipping] = useState(false)
 
   const [voiceState, setVoiceState] = useState<VoiceState>('idle')
   const [voiceStatus, setVoiceStatus] = useState('')
@@ -120,11 +136,11 @@ export default function SelfLearn() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, pendingCheck, loading])
 
-  // Progress sidebar shows the concept breakdown at all times — no click
-  // needed — so fetch it as soon as a session is entered, and again each
-  // time a check is graded (mastery may have moved).
+  // Progress sidebar shows the roadmap at all times — no click needed — so
+  // fetch it as soon as a session is entered, and again each time a check is
+  // graded or the student skips (mastery / position may have moved).
   useEffect(() => {
-    if (sessionId) openReport()
+    if (sessionId) { openReport(); loadRoadmap() }
   }, [sessionId, messages.length])
 
   function enterSession(res: any) {
@@ -137,6 +153,9 @@ export default function SelfLearn() {
     setDone(!!res.completed)
   }
 
+  // Build the course (concept map + optional material pack), then offer the
+  // diagnostic quiz. If the course has no gradeable questions, fall straight
+  // through to the session.
   async function start(t?: string) {
     const val = (t ?? topic).trim()
     if (!val || loading) return
@@ -153,10 +172,84 @@ export default function SelfLearn() {
         if (skipped.length) bits.push(`${skipped.length} skipped — ${skipped.map((d) => `${d.filename}: ${d.warning || d.status}`).join('; ')}`)
         setPackMsg(bits.join(' '))
       }
-      enterSession(await slStartSession({
-        topic: val, teaching_provider: provider || undefined, dynamic_skill_id: skillId,
-      }))
+      setPackMsg((m) => m ? m + ' Preparing a quick placement quiz…' : 'Preparing a quick placement quiz…')
+      const res = await slStartAssessment({ topic: val, teaching_provider: provider || undefined, dynamic_skill_id: skillId })
+      if (!res.questions || res.questions.length === 0) {
+        // No gradeable questions — skip the diagnostic, start the session directly.
+        enterSession(await slStartSession({ topic: val, teaching_provider: provider || undefined, dynamic_skill_id: res.dynamic_skill_id }))
+        return
+      }
+      setAssessQs(res.questions)
+      setAssessIdx(0)
+      setAssessAnswers([])
+      setAssessSelected(null)
+      setAssessSkillId(res.dynamic_skill_id)
+      setAssessSkillName(res.skill?.canonical_name || val)
+      setPackMsg('')
+      setView('assessment')
     } catch (e) { setError(errDetail(e)); setPackMsg('') } finally { setLoading(false) }
+  }
+
+  // ── Diagnostic assessment ────────────────────────────────────────────────────
+  function answerAssessment(key: string) {
+    if (assessSelected) return
+    setAssessSelected(key)
+  }
+
+  async function nextAssessment() {
+    const q = assessQs[assessIdx]
+    const isCorrect = assessSelected === q.correct_answer
+    const answers = [...assessAnswers, { concept_id: q.concept_id, is_correct: isCorrect }]
+    setAssessAnswers(answers)
+
+    if (assessIdx + 1 < assessQs.length) {
+      setAssessIdx((i) => i + 1)
+      setAssessSelected(null)
+      return
+    }
+    // Last question → grade + seed mastery + start the session.
+    setAssessSubmitting(true)
+    setError('')
+    try {
+      if (assessSkillId != null) {
+        await slCompleteAssessment({ dynamic_skill_id: assessSkillId, answers })
+      }
+      enterSession(await slStartSession({
+        topic: assessSkillName, teaching_provider: provider || undefined,
+        dynamic_skill_id: assessSkillId ?? undefined,
+      }))
+    } catch (e) { setError(errDetail(e)) } finally { setAssessSubmitting(false) }
+  }
+
+  async function skipAssessment() {
+    if (assessSubmitting || loading) return
+    setAssessSubmitting(true)
+    setError('')
+    try {
+      enterSession(await slStartSession({
+        topic: assessSkillName, teaching_provider: provider || undefined,
+        dynamic_skill_id: assessSkillId ?? undefined,
+      }))
+    } catch (e) { setError(errDetail(e)) } finally { setAssessSubmitting(false) }
+  }
+
+  // ── Roadmap / skip-ahead ─────────────────────────────────────────────────────
+  async function loadRoadmap() {
+    try { setRoadmap(await slGetRoadmap(sessionId)) } catch { /* keep last roadmap on error */ }
+  }
+
+  async function skipTo(conceptId: number) {
+    if (skipping || loading || done) return
+    setSkipping(true); setError('')
+    try {
+      const res = await slSkipToConcept({ session_id: sessionId, concept_id: conceptId })
+      const incoming: LMsg[] = Array.isArray(res.messages) ? res.messages : []
+      setMessages((p) => [...p, ...incoming])
+      setPendingCheck(res.pending_check || null)
+      if (typeof res.mastery === 'number') setConceptMastery(res.mastery)
+      if (res.level) setLevel(res.level)
+      await loadRoadmap()
+    } catch (e) { setError(errDetail(e)) } finally { setSkipping(false) }
   }
 
   async function resume(id: string) {
@@ -514,7 +607,73 @@ export default function SelfLearn() {
     )
   }
 
+  // ── ASSESSMENT VIEW ─────────────────────────────────────────────────────────
+  if (view === 'assessment') {
+    const q = assessQs[assessIdx]
+    const total = assessQs.length
+    const pct = Math.round((assessIdx / total) * 100)
+    return (
+      <div className="teacher-dashboard student-dash selflearn-page">
+        <div className="selflearn-assess-wrap">
+          <section className="teacher-panel selflearn-assess-card">
+            <div className="selflearn-assess-head">
+              <div>
+                <p className="teacher-eyebrow" style={{ margin: 0 }}>Placement Quiz</p>
+                <h2 className="editorial-title" style={{ margin: '4px 0 0' }}>{assessSkillName}</h2>
+              </div>
+              <span className="skills-count-pill">{assessIdx + 1} / {total}</span>
+            </div>
+            <p className="meta selflearn-assess-sub">
+              A few quick questions so the tutor starts you at the right place — you'll skip
+              anything you already know. Not sure? Just pick your best guess.
+            </p>
+            <div className="teacher-progress selflearn-assess-progress"><span style={{ width: `${pct}%` }} /></div>
+
+            <div className="selflearn-assess-body">
+              <p className="meta selflearn-detail-label">{q.concept_name}</p>
+              <p className="selflearn-assess-question">{q.question_text}</p>
+
+              <div className="selflearn-options selflearn-assess-options">
+                {Object.entries(q.options || {}).map(([k, v]) => {
+                  let cls = 'btn secondary selflearn-option-btn'
+                  if (assessSelected) {
+                    if (k === q.correct_answer) cls += ' correct'
+                    else if (k === assessSelected) cls += ' incorrect'
+                  }
+                  return (
+                    <button key={k} type="button" className={cls}
+                      onClick={() => answerAssessment(k)} disabled={!!assessSelected}>
+                      <strong className="selflearn-option-key">{k}.</strong> {v}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {assessSelected && (
+                <p className={`meta selflearn-assess-verdict ${assessSelected === q.correct_answer ? 'ok' : 'no'}`}>
+                  {assessSelected === q.correct_answer ? '✓ Correct' : '✗ Not quite'}
+                </p>
+              )}
+            </div>
+
+            {error && <p className="feedback error">{error}</p>}
+
+            <div className="selflearn-assess-actions">
+              <button className="btn ghost small" onClick={skipAssessment} disabled={assessSubmitting}>
+                Skip quiz →
+              </button>
+              <button className="btn" onClick={nextAssessment} disabled={!assessSelected || assessSubmitting}>
+                {assessSubmitting ? 'Starting…' : assessIdx + 1 < total ? 'Next →' : 'Start learning →'}
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+    )
+  }
+
   // ── SESSION VIEW ────────────────────────────────────────────────────────────
+  const currentConceptIdx = roadmap?.concepts.find((c) => c.is_current)?.order_index ?? -1
   return (
     <div className="teacher-dashboard student-dash selflearn-session-view">
       <div className="teacher-layout selflearn-session-layout">
@@ -706,22 +865,37 @@ export default function SelfLearn() {
           </div>
 
           <div className="selflearn-progress-detail">
-            {report ? (
-              <>
-                <p className="meta selflearn-detail-label" style={{ margin: '0 0 14px' }}>
-                  Overall — {(report.overall_mastery * 100).toFixed(0)}%
-                </p>
-                <div className="selflearn-concept-list">
-                  {(report.concepts || []).map((c: any, i: number) => (
-                    <div key={i} className="selflearn-concept-row">
-                      <span className="selflearn-concept-name">{c.mastered ? '✅' : '•'} {c.concept} <span className="meta">({c.level})</span></span>
+            <p className="meta selflearn-detail-label" style={{ margin: '0 0 4px' }}>Roadmap</p>
+            <p className="meta" style={{ margin: '0 0 14px', fontSize: 11 }}>
+              Already know something? Jump ahead — earlier concepts are marked as known.
+            </p>
+            {roadmap ? (
+              <div className="selflearn-concept-list">
+                {roadmap.concepts.map((c) => {
+                  const canSkip = !done && !skipping && !c.is_current && !c.mastered && c.order_index > currentConceptIdx
+                  return (
+                    <div key={c.concept_id} className={`selflearn-roadmap-row ${c.is_current ? 'current' : ''}`}>
+                      <div className="selflearn-roadmap-top">
+                        <span className="selflearn-concept-name">
+                          {c.mastered ? '✅' : c.is_current ? '📍' : '•'} {c.name}
+                          {c.level && <span className="meta"> ({c.level})</span>}
+                        </span>
+                        {c.is_current ? (
+                          <span className="history-result-pill success selflearn-here-pill">here</span>
+                        ) : canSkip ? (
+                          <button className="btn ghost small selflearn-skip-btn"
+                            onClick={() => skipTo(c.concept_id)} disabled={skipping}>
+                            {skipping ? '…' : 'Skip here'}
+                          </button>
+                        ) : null}
+                      </div>
                       <div className="selflearn-concept-bar"><MasteryBar pct={c.mastery * 100} /></div>
                     </div>
-                  ))}
-                </div>
-              </>
+                  )
+                })}
+              </div>
             ) : (
-              <p className="meta" style={{ margin: 0 }}>Loading concept breakdown…</p>
+              <p className="meta" style={{ margin: 0 }}>Loading roadmap…</p>
             )}
           </div>
         </aside>
