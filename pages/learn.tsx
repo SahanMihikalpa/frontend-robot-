@@ -1316,7 +1316,7 @@ export default function LearnPage() {
                     </p>
                   ) : (
                     <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
-                      📋 New skill — initial assessment will run first (3 questions).
+                      📋 New skill — initial assessment will run first (up to 10 questions).
                     </p>
                   )}
                 </div>
