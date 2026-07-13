@@ -61,7 +61,7 @@ export default function StudentDashboard() {
               <h2 className="editorial-title">
                 {sriLankaGreeting()},
                 <span style={{ display: 'block', color: 'var(--accent)', fontStyle: 'italic' }}>
-                  {me?.full_name || me?.username || 'Student'}
+                  {me?.username || me?.full_name || 'Student'}
                   <span style={{ color: 'var(--text)', fontStyle: 'normal' }}>.</span>
                 </span>
               </h2>
