@@ -5,6 +5,7 @@ import { getCurrentUser, loginUser } from '../lib/api'
 import { getRoleHome, setStoredUser } from '../lib/session'
 import Image from 'next/image'
 import PasswordInput from '../components/PasswordInput'
+import { useToast } from '../components/ToastProvider'
 
 type LoginErrors = Partial<Record<'username' | 'password', string>>
 
@@ -18,11 +19,11 @@ function validateLogin(username: string, password: string): LoginErrors {
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<LoginErrors>({})
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
+  const toast = useToast()
 
   function onUsername(v: string) {
     setUsername(v)
@@ -37,7 +38,6 @@ export default function Login() {
   async function handleSubmit(e: any) {
     e.preventDefault()
     setSubmitted(true)
-    setError('')
 
     const errs = validateLogin(username, password)
     setFieldErrors(errs)
@@ -48,9 +48,10 @@ export default function Login() {
       await loginUser(username.trim(), password)
       const me = await getCurrentUser()
       setStoredUser(me)
+      toast.success({ title: `Welcome back, ${me?.full_name || me?.username || 'there'}`, message: 'You are signed in.' })
       router.push(getRoleHome(me?.role))
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Login failed')
+      toast.error({ title: 'Sign in failed', message: err?.response?.data?.detail || 'Check your username and password.' })
     } finally {
       setLoading(false)
     }
@@ -157,8 +158,6 @@ export default function Login() {
             />
             {fieldErrors.password && <p className="form-error" style={{ marginTop: 6 }}>{fieldErrors.password}</p>}
           </div>
-
-          {error && <p className="form-error">{error}</p>}
 
           <button
             className="btn"

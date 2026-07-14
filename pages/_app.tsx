@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { SWRConfig } from 'swr'
 import axios from 'axios'
 import Layout from '../components/Layout'
+import { ToastProvider } from '../components/ToastProvider'
 import { getCurrentUser } from '../lib/api'
 import {
   canAccessPath,
@@ -95,9 +96,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <SWRConfig value={{ fetcher: (url: string) => axios.get(url).then(r => r.data) }}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <ToastProvider>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </ToastProvider>
     </SWRConfig>
   )
 }

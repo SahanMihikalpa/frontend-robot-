@@ -6,6 +6,7 @@ import {
   listSkills,
 } from '../lib/api'
 import ModalMobileHeader from '../components/ModalMobileHeader'
+import { useToast } from '../components/ToastProvider'
 
 /** Private self-learn course packs are namespaced "sl:{user}:{skill}". */
 function isPrivatePack(subject?: string) {
@@ -13,6 +14,7 @@ function isPrivatePack(subject?: string) {
 }
 
 export default function KnowledgePage() {
+  const toast = useToast()
   const [file, setFile] = useState<File | null>(null)
   const [subject, setSubject] = useState('general')
   const [skills, setSkills] = useState<any[]>([])
@@ -55,15 +57,19 @@ export default function KnowledgePage() {
     setUploading(true)
     setUploadMsg('')
     setError('')
+    const name = file.name
     try {
       await uploadKnowledgeDocument(file, subject || 'general')
       setUploadMsg('Uploaded successfully')
       setUploadOk(true)
       setFile(null)
       await loadDocs()
+      toast.success({ title: 'Document added', message: `${name} is now in the knowledge base.` })
     } catch (err: any) {
-      setUploadMsg(err?.response?.data?.detail || 'Upload failed')
+      const detail = err?.response?.data?.detail || 'Upload failed'
+      setUploadMsg(detail)
       setUploadOk(false)
+      toast.error({ title: 'Upload failed', message: detail })
     } finally {
       setUploading(false)
     }
@@ -92,13 +98,16 @@ export default function KnowledgePage() {
 
   async function confirmDelete() {
     if (!deleteTarget) return
+    const name = deleteTarget
     try {
       await deleteKnowledgeDocument(deleteTarget)
       setDeleteTarget(null)
       await loadDocs()
+      toast.success({ title: 'Document removed', message: name })
     } catch {
       setError('Delete failed')
       setDeleteTarget(null)
+      toast.error('Couldn’t remove document')
     }
   }
 
