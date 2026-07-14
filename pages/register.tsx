@@ -6,6 +6,7 @@ import { getRoleHome, setStoredUser } from '../lib/session'
 import Image from 'next/image'
 import PasswordInput from '../components/PasswordInput'
 import HelpTip from '../components/HelpTip'
+import { useToast } from '../components/ToastProvider'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,30}$/
@@ -44,6 +45,7 @@ function validateRegister(form: { full_name: string; username: string; email: st
 
 export default function Register() {
   const router = useRouter()
+  const toast = useToast()
   const [form, setForm] = useState({
     full_name: '',
     username: '',
@@ -53,7 +55,6 @@ export default function Register() {
     role: 'student' as 'student' | 'teacher' | 'admin',
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [submitted, setSubmitted] = useState(false)
 
@@ -69,7 +70,6 @@ export default function Register() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSubmitted(true)
-    setError('')
 
     const errs = validateRegister(form)
     setFieldErrors(errs)
@@ -85,12 +85,13 @@ export default function Register() {
         role: form.role,
       })
 
+      toast.success({ title: 'Account created', message: `Welcome to Atlas, ${form.full_name.trim() || form.username.trim()}!` })
       await loginUser(form.username.trim(), form.password)
       const me = await getCurrentUser()
       setStoredUser(me)
       router.push(getRoleHome(me?.role))
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Registration failed')
+      toast.error({ title: 'Registration failed', message: err?.response?.data?.detail || 'Please check your details and try again.' })
     } finally {
       setLoading(false)
     }
@@ -289,8 +290,6 @@ export default function Register() {
             </div>
           </div>
           */}
-
-          {error && <p className="form-error">{error}</p>}
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
             <button className="btn" type="submit" disabled={loading}>

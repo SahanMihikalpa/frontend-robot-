@@ -9,6 +9,7 @@ import {
 import { getStoredUser } from '../lib/session'
 import CsvImportModal from '../components/CsvImportModal'
 import ModalMobileHeader from '../components/ModalMobileHeader'
+import { useToast } from '../components/ToastProvider'
 
 type Skill = {
   id: number
@@ -96,6 +97,7 @@ export default function SkillsPage() {
   const role = getStoredUser()?.role || ''
   const canEdit = role === 'teacher' || role === 'admin'
   const canDelete = role === 'admin'
+  const toast = useToast()
 
   async function load() {
     setLoading(true)
@@ -185,13 +187,17 @@ export default function SkillsPage() {
       }
       if (editId != null) {
         await updateSkill(editId, payload)
+        toast.success({ title: 'Skill updated', message: payload.name })
       } else {
         await createSkill(payload)
+        toast.success({ title: 'Skill created', message: payload.name })
       }
       setShowForm(false)
       await load()
     } catch (err: any) {
-      setFormError(err?.response?.data?.detail || 'Save failed')
+      const detail = err?.response?.data?.detail || 'Save failed'
+      setFormError(detail)
+      toast.error({ title: editId != null ? 'Couldn’t update skill' : 'Couldn’t create skill', message: detail })
     } finally {
       setSaving(false)
     }
@@ -199,13 +205,17 @@ export default function SkillsPage() {
 
   async function confirmDelete() {
     if (!deleteTarget) return
+    const name = deleteTarget.name
     try {
       await deleteSkill(deleteTarget.id)
       setDeleteTarget(null)
       await load()
+      toast.success({ title: 'Skill deleted', message: name })
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Delete failed')
+      const detail = err?.response?.data?.detail || 'Delete failed'
+      setError(detail)
       setDeleteTarget(null)
+      toast.error({ title: 'Couldn’t delete skill', message: detail })
     }
   }
 

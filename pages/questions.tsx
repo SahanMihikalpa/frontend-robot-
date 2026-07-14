@@ -7,6 +7,7 @@ import {
 import { getStoredUser } from '../lib/session'
 import CsvImportModal from '../components/CsvImportModal'
 import ModalMobileHeader from '../components/ModalMobileHeader'
+import { useToast } from '../components/ToastProvider'
 
 type Question = {
   id: number
@@ -55,6 +56,7 @@ export default function QuestionsPage() {
 
   const role = getStoredUser()?.role || ''
   const canEdit = role === 'teacher' || role === 'admin'
+  const toast = useToast()
 
   async function load() {
     setLoading(true)
@@ -145,13 +147,17 @@ export default function QuestionsPage() {
       }
       if (editId != null) {
         await updateQuestion(editId, payload)
+        toast.success('Question updated')
       } else {
         await createQuestion(payload)
+        toast.success('Question created')
       }
       setShowForm(false)
       await load()
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Save failed')
+      const detail = err?.response?.data?.detail || 'Save failed'
+      setError(detail)
+      toast.error({ title: editId != null ? 'Couldn’t update question' : 'Couldn’t create question', message: detail })
     } finally {
       setSaving(false)
     }
@@ -163,9 +169,11 @@ export default function QuestionsPage() {
       await deleteQuestion(deleteTarget.id)
       setDeleteTarget(null)
       await load()
+      toast.success('Question deleted')
     } catch {
       setError('Delete failed')
       setDeleteTarget(null)
+      toast.error('Couldn’t delete question')
     }
   }
 
