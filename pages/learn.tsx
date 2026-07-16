@@ -7,6 +7,7 @@ import {
   streamLesson,
 } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
+import { useSpeech } from '../lib/speech'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,7 @@ type ChatMsg = {
   imageUrl?: string        // data: URL for a Gemini-generated infographic
   imageError?: string      // set when a visual was requested but generation failed
   streaming?: boolean      // true while a LESSON bubble is still receiving tokens
+  noTts?: boolean          // skip auto read-aloud (voice pipeline already spoke it)
   timestamp: number
 }
 
@@ -266,7 +268,11 @@ function QuestionPanel({
 }
 
 // Right panel — chat bubbles
-function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: string) => void }) {
+function ChatBubble({ msg, onImageClick, onSpeak }: {
+  msg: ChatMsg
+  onImageClick?: (src: string) => void
+  onSpeak?: (msg: ChatMsg) => void
+}) {
   const isStudent = msg.role === 'student'
 
   let bubbleExtra: React.CSSProperties = {}
@@ -279,8 +285,19 @@ function ChatBubble({ msg, onImageClick }: { msg: ChatMsg; onImageClick?: (src: 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: isStudent ? 'flex-end' : 'flex-start', gap: 4 }}>
-      <span style={{ fontSize: 13, color: 'var(--muted)' }}>
+      <span style={{ fontSize: 13, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
         {isStudent ? 'You' : 'Tutor AI'} · {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        {!isStudent && onSpeak && !msg.streaming && safeStr(msg.content).trim() && (
+          <button
+            type="button"
+            className="learn-tts-btn small"
+            onClick={() => onSpeak(msg)}
+            title="Read this aloud"
+            aria-label="Read this message aloud"
+          >
+            🔊
+          </button>
+        )}
       </span>
       <div
         className={`chat-bubble ${isStudent ? 'user' : 'assistant'}`}
@@ -448,6 +465,10 @@ export default function LearnPage() {
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMsg[]>([])
+  // Read-aloud: tutor messages are spoken automatically as they arrive.
+  const { supported: ttsSupported, speaking, speak, stop: stopSpeaking } = useSpeech()
+  const [autoRead, setAutoRead] = useState(true)
+  const spokenRef = useRef<Set<string>>(new Set())
   const [input, setInput] = useState('')
   const [pendingAnswer, setPendingAnswer] = useState(false)
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null)
@@ -671,6 +692,8 @@ export default function LearnPage() {
           content: '▶️ Welcome back! Continuing your previous session.',
           timestamp: Date.now(),
         }
+        // Don't replay the whole transcript aloud on resume — only new messages.
+        restored.forEach((m) => spokenRef.current.add(m.id))
         setMessages([resumeNotice, ...restored])
 
         // Restore the active question ref so the student can answer it immediately
@@ -753,6 +776,50 @@ export default function LearnPage() {
       await beginSession(true)
     }
   }
+
+  // ─── Read aloud ───────────────────────────────────────────────────────────
+
+  /** What the voice should say for a message (questions include their options). */
+  function speechTextFor(m: ChatMsg): string {
+    const body = safeStr(m.content)
+    if (m.type === 'PRACTICE_QUESTION' && m.options && Object.keys(m.options).length) {
+      const opts = Object.entries(m.options).map(([k, v]) => `${k}. ${safeStr(v)}`).join('. ')
+      return `${body}. Your options are: ${opts}`
+    }
+    return body
+  }
+
+  // Speak every new tutor message once. Messages already spoken (or spoken by the
+  // voice pipeline, which returns its own audio) are skipped, and a finished
+  // streaming lesson is read only once it's complete.
+  useEffect(() => {
+    if (!autoRead || phase !== 'session') return
+    const pending = messages.filter((m) =>
+      m.role === 'system' && !m.noTts && !m.streaming &&
+      safeStr(m.content).trim() && !spokenRef.current.has(m.id),
+    )
+    if (pending.length === 0) return
+    pending.forEach((m) => spokenRef.current.add(m.id))
+    const text = pending.map(speechTextFor).filter(Boolean).join('. ')
+    if (text) speak(text)
+  }, [messages, autoRead, phase])
+
+  function toggleAutoRead() {
+    setAutoRead((prev) => {
+      const next = !prev
+      try { window.localStorage.setItem('learn_auto_read', next ? '1' : '0') } catch { /* ignore */ }
+      if (!next) stopSpeaking()
+      return next
+    })
+  }
+
+  // Restore the student's saved preference.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('learn_auto_read')
+      if (saved != null) setAutoRead(saved === '1')
+    } catch { /* ignore */ }
+  }, [])
 
   function addSystemMsg(raw: any) {
     const content = typeof raw === 'string' ? raw
@@ -935,12 +1002,15 @@ export default function LearnPage() {
   }
 
   function addVoiceMsg(role: MsgRole, type: MsgType, content: string) {
-    setMessages((prev) => [...prev, { id: uid(), role, type, content, timestamp: Date.now() }])
+    // noTts: the voice pipeline streams its own spoken audio back — don't let the
+    // browser read the same reply a second time.
+    setMessages((prev) => [...prev, { id: uid(), role, type, content, noTts: true, timestamp: Date.now() }])
   }
 
   async function startVoiceRecording() {
     if (!user?.id) return
     if (voiceState !== 'idle') return
+    stopSpeaking()   // don't let read-aloud talk over the student's recording
     try {
       const micStream = await navigator.mediaDevices.getUserMedia({ audio: true })
       voiceMicStreamRef.current = micStream
@@ -1522,13 +1592,38 @@ export default function LearnPage() {
               <p className="teacher-eyebrow" style={{ margin: 0, fontSize: 14 }}>AI Tutor</p>
               <span className="status-dot online" title="Tutor ready" />
             </div>
-            {voiceStatus ? (
-              <span style={{ fontSize: 15, color: 'var(--accent)', fontStyle: 'italic', fontWeight: 600 }}>
-                🔄 {voiceStatus}
-              </span>
-            ) : (
-              <span style={{ fontSize: 15, color: 'var(--muted)' }}></span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {voiceStatus && (
+                <span style={{ fontSize: 15, color: 'var(--accent)', fontStyle: 'italic', fontWeight: 600 }}>
+                  🔄 {voiceStatus}
+                </span>
+              )}
+              {ttsSupported && (
+                <>
+                  {speaking && (
+                    <button
+                      type="button"
+                      className="learn-tts-btn"
+                      onClick={stopSpeaking}
+                      title="Stop reading"
+                      aria-label="Stop reading aloud"
+                    >
+                      ⏹
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={`learn-tts-btn${autoRead ? ' on' : ''}`}
+                    onClick={toggleAutoRead}
+                    aria-pressed={autoRead}
+                    title={autoRead ? 'Read aloud is on — click to mute' : 'Read aloud is off — click to unmute'}
+                    aria-label={autoRead ? 'Turn off read aloud' : 'Turn on read aloud'}
+                  >
+                    {autoRead ? '🔊' : '🔇'}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
         {/* Chat messages */}
@@ -1543,7 +1638,14 @@ export default function LearnPage() {
               </p>
             </div>
           )}
-          {chatMessages.map((msg) => <ChatBubble key={msg.id} msg={msg} onImageClick={setLightboxSrc} />)}
+          {chatMessages.map((msg) => (
+            <ChatBubble
+              key={msg.id}
+              msg={msg}
+              onImageClick={setLightboxSrc}
+              onSpeak={ttsSupported ? (m) => speak(speechTextFor(m)) : undefined}
+            />
+          ))}
 
             {/* Live LLM streaming from voice pipeline */}
             {voiceStreamText && (
