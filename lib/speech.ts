@@ -6,8 +6,11 @@ import { apiClient } from './api'
  *
  * Primary: the browser's built-in speechSynthesis — on-device, offline, instant,
  * free, and works over plain HTTP (unlike the mic, which needs HTTPS).
- * Fallback: POST /api/v1/voice/tts, used only when the browser reports no
- * English voices (typically Chrome/Firefox on Linux, which ship none).
+ * Server: POST to `endpoint`, used either as the automatic fallback when the
+ * browser reports no English voices (typically Chrome/Firefox on Linux, which
+ * ship none), or on demand via `preferServer` — self-learn offers that as a
+ * "tutor voice" opt-in so read-aloud can match the Azure voice its mic pipeline
+ * already speaks in. It costs an API call per message, hence opt-in.
  */
 
 const MD_NOISE = /[*_#`>|~]+/g
@@ -55,7 +58,17 @@ function chunkText(text: string, max = 180): string[] {
   return out.filter(Boolean)
 }
 
-export function useSpeech(rate = 1.05) {
+export type SpeechOptions = {
+  /** Speaking rate for the browser voice (the server voice sets its own). */
+  rate?: number
+  /** Server TTS route, used for the no-voices fallback and for `preferServer`. */
+  endpoint?: string
+  /** Speak through the server instead of the browser (costs an API call). */
+  preferServer?: boolean
+}
+
+export function useSpeech(opts: SpeechOptions = {}) {
+  const { rate = 1.05, endpoint = '/api/v1/voice/tts', preferServer = false } = opts
   const [supported, setSupported] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null)
@@ -63,8 +76,17 @@ export function useSpeech(rate = 1.05) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const tokenRef = useRef(0)
 
+  // Read inside callbacks without making `speak` change identity on every toggle.
+  const preferServerRef = useRef(preferServer)
+  useEffect(() => { preferServerRef.current = preferServer }, [preferServer])
+
   useEffect(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
+    if (typeof window === 'undefined') return
+    if (!('speechSynthesis' in window)) {
+      // No browser engine at all — read-aloud still works if we route to the server.
+      setSupported(preferServer)
+      return
+    }
     setSupported(true)
     const load = () => {
       voiceRef.current = pickVoice()
@@ -76,7 +98,7 @@ export function useSpeech(rate = 1.05) {
       window.speechSynthesis.removeEventListener('voiceschanged', load)
       try { window.speechSynthesis.cancel() } catch { /* ignore */ }
     }
-  }, [])
+  }, [preferServer])
 
   // Chrome pauses the queue on long runs — a periodic resume keeps it alive.
   useEffect(() => {
@@ -97,10 +119,10 @@ export function useSpeech(rate = 1.05) {
     setSpeaking(false)
   }, [])
 
-  /** Server-side fallback for clients with no installed voices. */
+  /** Speak through the server — the no-voices fallback, and the `preferServer` path. */
   const speakViaServer = useCallback(async (text: string, token: number) => {
     try {
-      const { data } = await apiClient.post('/api/v1/voice/tts', { text: text.slice(0, 2000) },
+      const { data } = await apiClient.post(endpoint, { text: text.slice(0, 2000) },
         { responseType: 'blob' })
       if (token !== tokenRef.current) return
       const url = URL.createObjectURL(data)
@@ -112,7 +134,7 @@ export function useSpeech(rate = 1.05) {
     } catch {
       setSpeaking(false)
     }
-  }, [])
+  }, [endpoint])
 
   const speak = useCallback((raw: string) => {
     const text = speakable(raw)
@@ -121,8 +143,9 @@ export function useSpeech(rate = 1.05) {
     const token = ++tokenRef.current
     setSpeaking(true)
 
-    if (!('speechSynthesis' in window) || !hasVoicesRef.current) {
-      // No on-device voices (e.g. Chrome on Linux) → ask the server to speak it.
+    if (preferServerRef.current || !('speechSynthesis' in window) || !hasVoicesRef.current) {
+      // Opted into the server voice, or no on-device voices (e.g. Chrome on
+      // Linux) → ask the server to speak it.
       void speakViaServer(text, token)
       return
     }

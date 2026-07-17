@@ -6382,3 +6382,40 @@ body:has(.selflearn-session-view) .home-footer{
 .learn-tts-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .learn-tts-btn.small{width:22px;height:22px;font-size:11px;border-radius:6px;opacity:.65}
 .learn-tts-btn.small:hover{opacity:1}
+
+/* ─────────────────────────────
+   Self-learn — read-aloud controls
+───────────────────────────── */
+.selflearn-lesson-header-actions{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;
+}
+/* Label + replay button on one line, button pinned right. */
+.selflearn-bubble-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin-bottom:4px;
+}
+.selflearn-bubble-head > p{margin:0}
+/* The bare global `select` rule paints these dark — theme it explicitly, the
+   same way .learn-filter select does. */
+.selflearn-voice-select{
+  min-height:32px;
+  padding:0 30px 0 10px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid var(--border) !important;
+  border-radius:8px !important;
+  font-size:12px !important;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726A61' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 9px center !important;
+}
+.selflearn-voice-select:hover:not(:disabled){border-color:var(--border-strong) !important}
+.selflearn-voice-select:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px rgba(232,90,51,.12) !important;
+}
+.selflearn-voice-select:disabled{opacity:.45;cursor:not-allowed}
+.selflearn-voice-select option{background:#FFF9F3;color:var(--text)}

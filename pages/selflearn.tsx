@@ -7,9 +7,11 @@ import {
 } from '../lib/api'
 import type { SlAssessmentQuestion, SlRoadmapConcept } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
+import { useSpeech } from '../lib/speech'
 
 type VoiceState = 'idle' | 'recording' | 'processing'
 type SlView = 'start' | 'assessment' | 'session'
+type VoiceSource = 'browser' | 'tutor'
 
 // One transcript entry as persisted by the backend (learning_messages).
 type LMsg = {
@@ -18,6 +20,7 @@ type LMsg = {
   type: 'TEACH' | 'MESSAGE' | 'CHECK' | 'ANSWER' | 'FEEDBACK'
   content: string
   metadata?: Record<string, any> | null
+  noTts?: boolean          // client-only: skip auto read-aloud (mic pipeline spoke it)
 }
 
 type PendingCheck = {
@@ -101,6 +104,17 @@ export default function SelfLearn() {
   const [roadmap, setRoadmap] = useState<{ concepts: SlRoadmapConcept[]; current_concept_id: number | null } | null>(null)
   const [skipping, setSkipping] = useState(false)
 
+  // Read-aloud: tutor messages are spoken as they arrive. The browser's own
+  // engine does it by default (free, offline); "tutor voice" routes through the
+  // server so it matches the voice the mic pipeline replies in.
+  const [autoRead, setAutoRead] = useState(true)
+  const [voiceSource, setVoiceSource] = useState<VoiceSource>('browser')
+  const { supported: ttsSupported, speaking, speak, stop: stopSpeaking } = useSpeech({
+    endpoint: '/api/v1/selflearn/voice/tts',
+    preferServer: voiceSource === 'tutor',
+  })
+  const spokenRef = useRef<Set<string>>(new Set())
+
   const [voiceState, setVoiceState] = useState<VoiceState>('idle')
   const [voiceStatus, setVoiceStatus] = useState('')
   const voiceWsRef = useRef<WebSocket | null>(null)
@@ -119,6 +133,10 @@ export default function SelfLearn() {
   useEffect(() => {
     slGetProviders().then((p) => { setProviders(p); setProvider(p?.teaching_default || '') }).catch(() => {})
     loadCourses()
+    try {
+      setAutoRead(window.localStorage.getItem('selflearn_auto_read') !== '0')
+      if (window.localStorage.getItem('selflearn_voice_source') === 'tutor') setVoiceSource('tutor')
+    } catch { /* storage unavailable — keep defaults */ }
   }, [])
 
   async function toggleExpand(c: Course) {
@@ -143,10 +161,64 @@ export default function SelfLearn() {
     if (sessionId) { openReport(); loadRoadmap() }
   }, [sessionId, messages.length])
 
+  // ── Read aloud ──────────────────────────────────────────────────────────────
+
+  /** What the voice says for a tutor message — mirrors the backend's
+   *  `_spoken_parts`, so typed turns sound like spoken ones. */
+  function speechTextFor(m: LMsg): string {
+    const body = (m.content || '').trim()
+    if (m.type === 'FEEDBACK') {
+      const correct = m.metadata?.is_correct
+      const prefix = correct === true ? 'Correct! ' : correct === false ? 'Not quite. ' : ''
+      return prefix + body
+    }
+    if (m.type === 'CHECK') {
+      const options = m.metadata?.options as Record<string, string> | undefined
+      const opts = options && Object.keys(options).length
+        ? ` Your options are: ${Object.entries(options).map(([k, v]) => `${k}. ${v}`).join('. ')}`
+        : ''
+      return `Quick check: ${body}${opts}`
+    }
+    return body
+  }
+
+  // Speak each new tutor message once. Messages the mic pipeline already spoke
+  // are skipped, as is restored history (marked spoken in enterSession).
+  useEffect(() => {
+    if (!autoRead || view !== 'session') return
+    const pending = messages.filter((m) =>
+      m.sender === 'TUTOR' && !m.noTts &&
+      (m.content || '').trim() && !spokenRef.current.has(String(m.id)),
+    )
+    if (pending.length === 0) return
+    pending.forEach((m) => spokenRef.current.add(String(m.id)))
+    const text = pending.map(speechTextFor).filter(Boolean).join('. ')
+    if (text) speak(text)
+  }, [messages, autoRead, view])
+
+  function toggleAutoRead() {
+    setAutoRead((prev) => {
+      const next = !prev
+      try { window.localStorage.setItem('selflearn_auto_read', next ? '1' : '0') } catch { /* ignore */ }
+      if (!next) stopSpeaking()
+      return next
+    })
+  }
+
+  function changeVoiceSource(next: VoiceSource) {
+    stopSpeaking()
+    setVoiceSource(next)
+    try { window.localStorage.setItem('selflearn_voice_source', next) } catch { /* ignore */ }
+  }
+
   function enterSession(res: any) {
     setSessionId(res.session_id); setSkill(res.skill); setView('session')
     setReport(null); setDraft('')
-    setMessages(Array.isArray(res.transcript) ? res.transcript : [])
+    const restored: LMsg[] = Array.isArray(res.transcript) ? res.transcript : []
+    // Don't replay the whole transcript on resume — only speak what arrives next.
+    stopSpeaking()
+    spokenRef.current = new Set(restored.map((m) => String(m.id)))
+    setMessages(restored)
     setPendingCheck(res.pending_check || null)
     setLevel(res.level || '')
     setConceptMastery(typeof res.mastery === 'number' ? res.mastery : null)
@@ -329,6 +401,7 @@ export default function SelfLearn() {
 
   async function startVoiceRecording() {
     if (!sessionId || voiceState !== 'idle' || done) return
+    stopSpeaking()   // don't talk over the student
     try {
       const micStream = await navigator.mediaDevices.getUserMedia({ audio: true })
       voiceMicStreamRef.current = micStream
@@ -364,8 +437,12 @@ export default function SelfLearn() {
               }])
               break
             case 'messages': {
-              // Same payload as slSendMessage — messages[0] is the student echo
-              const incoming: LMsg[] = Array.isArray(data.messages) ? data.messages.slice(1) : []
+              // Same payload as slSendMessage — messages[0] is the student echo.
+              // noTts: the pipeline streams its own spoken audio back for these,
+              // so read-aloud must not speak them a second time.
+              const incoming: LMsg[] = Array.isArray(data.messages)
+                ? data.messages.slice(1).map((m: LMsg) => ({ ...m, noTts: true }))
+                : []
               setMessages((p) => [...p, ...incoming])
               setPendingCheck(data.pending_check || null)
               if (typeof data.mastery === 'number') setConceptMastery(data.mastery)
@@ -674,6 +751,12 @@ export default function SelfLearn() {
 
   // ── SESSION VIEW ────────────────────────────────────────────────────────────
   const currentConceptIdx = roadmap?.concepts.find((c) => c.is_current)?.order_index ?? -1
+
+  /** Replay one message on demand — handy after muting, or to hear it again. */
+  const speakBtn = (m: LMsg) => ttsSupported ? (
+    <button type="button" className="learn-tts-btn small" onClick={() => speak(speechTextFor(m))}
+      title="Read this aloud" aria-label="Read this message aloud">🔊</button>
+  ) : null
   return (
     <div className="teacher-dashboard student-dash selflearn-session-view">
       <div className="teacher-layout selflearn-session-layout">
@@ -691,7 +774,38 @@ export default function SelfLearn() {
                   {level && <span className="history-result-pill success selflearn-level-pill">{level}</span>}
                 </h2>
               </div>
-              <button className="teacher-action selflearn-back-btn" onClick={() => { setView('start'); loadCourses() }}>← New topic</button>
+              <div className="selflearn-lesson-header-actions">
+                {ttsSupported && (
+                  <>
+                    {speaking && (
+                      <button type="button" className="learn-tts-btn" onClick={stopSpeaking}
+                        title="Stop reading" aria-label="Stop reading aloud">⏹</button>
+                    )}
+                    <button
+                      type="button"
+                      className={`learn-tts-btn${autoRead ? ' on' : ''}`}
+                      onClick={toggleAutoRead}
+                      aria-pressed={autoRead}
+                      title={autoRead ? 'Read aloud is on — click to mute' : 'Read aloud is off — click to unmute'}
+                      aria-label={autoRead ? 'Turn off read aloud' : 'Turn on read aloud'}
+                    >
+                      {autoRead ? '🔊' : '🔇'}
+                    </button>
+                    <select
+                      className="selflearn-voice-select"
+                      value={voiceSource}
+                      onChange={(e) => changeVoiceSource(e.target.value as VoiceSource)}
+                      disabled={!autoRead}
+                      title="Browser voice reads instantly and offline. Tutor voice matches the voice you hear when you speak, but calls the server for each message."
+                      aria-label="Read-aloud voice"
+                    >
+                      <option value="browser">Browser voice</option>
+                      <option value="tutor">Tutor voice</option>
+                    </select>
+                  </>
+                )}
+                <button className="teacher-action selflearn-back-btn" onClick={() => { setView('start'); loadCourses() }}>← New topic</button>
+              </div>
             </div>
 
             <div ref={scrollRef} className="learn-chat-messages selflearn-chat-window">
@@ -714,9 +828,12 @@ export default function SelfLearn() {
                   return (
                     <div key={m.id} className="selflearn-msg-row tutor">
                       <div className={`chat-bubble assistant selflearn-bubble selflearn-feedback ${correct ? 'correct' : 'incorrect'}`}>
-                        <strong className={correct ? 'selflearn-feedback-correct' : 'selflearn-feedback-incorrect'}>
-                          {correct ? '✓ Correct' : '✗ Not quite'}
-                        </strong>
+                        <div className="selflearn-bubble-head">
+                          <strong className={correct ? 'selflearn-feedback-correct' : 'selflearn-feedback-incorrect'}>
+                            {correct ? '✓ Correct' : '✗ Not quite'}
+                          </strong>
+                          {speakBtn(m)}
+                        </div>
                         {m.content && <p className="selflearn-feedback-text">{m.content}</p>}
                         {mastery != null && <MasteryBar pct={mastery * 100} label="Mastery" />}
                       </div>
@@ -728,7 +845,10 @@ export default function SelfLearn() {
                   const isActive = pendingCheck?.question_id === m.metadata?.question_id
                   return (
                     <div key={m.id} className="chat-bubble assistant selflearn-bubble selflearn-check">
-                      <p className="meta selflearn-detail-label">Quick check</p>
+                      <div className="selflearn-bubble-head">
+                        <p className="meta selflearn-detail-label">Quick check</p>
+                        {speakBtn(m)}
+                      </div>
                       <p className="selflearn-check-text">{m.content}</p>
                       {isActive && m.metadata?.qtype === 'mcq' && m.metadata?.options && (
                         <div className="selflearn-options">
@@ -747,7 +867,12 @@ export default function SelfLearn() {
                 const imageUrl = extractImageUrl(m.metadata)
                 return (
                   <div key={m.id} className="chat-bubble assistant selflearn-bubble">
-                    {m.metadata?.concept && <p className="meta selflearn-detail-label">Tutor · {m.metadata.concept}</p>}
+                    <div className="selflearn-bubble-head">
+                      {m.metadata?.concept
+                        ? <p className="meta selflearn-detail-label">Tutor · {m.metadata.concept}</p>
+                        : <span />}
+                      {speakBtn(m)}
+                    </div>
                     <p className="selflearn-teach-text">{m.content}</p>
                     {imageUrl && (
                       <div style={{ marginTop: 10 }}>
