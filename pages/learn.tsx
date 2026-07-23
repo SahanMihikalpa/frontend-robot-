@@ -8,6 +8,7 @@ import {
 } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
 import { useSpeech } from '../lib/speech'
+import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,17 @@ function extractImageUrl(meta: any): string | undefined {
 const DIFF_LABELS: Record<number, string> = { 1: 'Beginner', 2: 'Easy', 3: 'Medium', 4: 'Hard', 5: 'Expert' }
 
 function uid() { return Math.random().toString(36).slice(2) }
+
+/**
+ * A font size that follows the chat's A−/A+ text-size setting.
+ *
+ * The bubbles style their text with inline `fontSize`, which beats any
+ * stylesheet rule — so scaling has to be baked into the inline value itself
+ * rather than left to `.chat-bubble` inheritance.
+ */
+function fs(px: number): string {
+  return `calc(${px}px * var(--chat-font-scale, 1))`
+}
 
 /** Safely coerce any value to a plain string — never lets an object reach JSX */
 function safeStr(v: any): string {
@@ -285,7 +297,7 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: isStudent ? 'flex-end' : 'flex-start', gap: 4 }}>
-      <span style={{ fontSize: 13, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <span style={{ fontSize: fs(13), color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
         {isStudent ? 'You' : 'Tutor AI'} · {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         {!isStudent && onSpeak && !msg.streaming && safeStr(msg.content).trim() && (
           <button
@@ -313,24 +325,24 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
       >
         {msg.type === 'FEEDBACK' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 19 }}>{msg.isCorrect ? '✅' : '❌'}</span>
-            <strong style={{ color: msg.isCorrect ? 'var(--success)' : 'var(--danger)', fontSize: 16 }}>
+            <span style={{ fontSize: fs(19) }}>{msg.isCorrect ? '✅' : '❌'}</span>
+            <strong style={{ color: msg.isCorrect ? 'var(--success)' : 'var(--danger)', fontSize: fs(16) }}>
               {msg.isCorrect ? 'Correct!' : 'Not quite'}
             </strong>
           </div>
         )}
         {msg.type === 'HINT' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 17 }}>💡</span>
-            <strong style={{ fontSize: 15, color: 'var(--warning)' }}>Hint</strong>
+            <span style={{ fontSize: fs(17) }}>💡</span>
+            <strong style={{ fontSize: fs(15), color: 'var(--warning)' }}>Hint</strong>
           </div>
         )}
         {msg.type === 'LESSON' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-            <span style={{ fontSize: 16 }}>📘</span>
-            <strong style={{ fontSize: 13, color: 'var(--accent)' }}>Lesson</strong>
+            <span style={{ fontSize: fs(16) }}>📘</span>
+            <strong style={{ fontSize: fs(13), color: 'var(--accent)' }}>Lesson</strong>
             {msg.streaming && (
-              <span style={{ fontSize: 11, color: 'var(--muted)', fontStyle: 'italic' }}>
+              <span style={{ fontSize: fs(11), color: 'var(--muted)', fontStyle: 'italic' }}>
                 ✍️ writing…
               </span>
             )}
@@ -338,11 +350,16 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
         )}
 
         {msg.type === 'LESSON' && msg.streaming && !safeStr(msg.content) ? (
-          <p style={{ margin: 0, color: 'var(--muted)', fontStyle: 'italic', fontSize: 14 }}>
+          <p style={{ margin: 0, color: 'var(--muted)', fontStyle: 'italic', fontSize: fs(14) }}>
             Preparing your personalized lesson<span className="dot-ellipsis" />
           </p>
         ) : (
-          <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: 14 }}>
+          <p style={{
+            margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: fs(14),
+            // Justified tutor prose; student replies are usually one line, where
+            // justifying would stretch the gaps for no benefit.
+            textAlign: isStudent ? 'left' : 'justify',
+          }}>
             {msg.type === 'FEEDBACK'
               ? safeStr(msg.content).replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || safeStr(msg.content)
               : safeStr(msg.content)}
@@ -368,14 +385,14 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
                 border: '1px solid var(--border)', cursor: 'zoom-in',
               }}
             />
-            <span style={{ fontSize: 12, marginTop: 4, display: 'block', color: 'var(--muted)' }}>
+            <span style={{ fontSize: fs(12), marginTop: 4, display: 'block', color: 'var(--muted)' }}>
               🖼️ AI-generated visual — click to enlarge
             </span>
           </div>
         )}
 
         {!msg.imageUrl && msg.imageError && (
-          <p style={{ fontSize: 13, marginTop: 8, fontStyle: 'italic', color: 'var(--muted)', margin: 0 }}>
+          <p style={{ fontSize: fs(13), marginTop: 8, fontStyle: 'italic', color: 'var(--muted)', margin: 0 }}>
             🖼️ Couldn't generate a visual for this one.
           </p>
         )}
@@ -384,7 +401,7 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
             <MasteryBar pct={msg.masteryAfter * 100} label="Mastery" />
             {msg.masteryBefore != null && (
-              <p style={{ fontSize: 13, marginTop: 4, color: 'var(--muted)', margin: '4px 0 0' }}>
+              <p style={{ fontSize: fs(13), marginTop: 4, color: 'var(--muted)', margin: '4px 0 0' }}>
                 {msg.masteryBefore < msg.masteryAfter ? '↑' : '→'} {(msg.masteryBefore * 100).toFixed(0)}% → {(msg.masteryAfter * 100).toFixed(0)}%
               </p>
             )}
@@ -394,7 +411,7 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
         {msg.type === 'ANSWER' && msg.isCorrect != null && (
           <span
             style={{
-              marginTop: 6, display: 'inline-flex', fontSize: 13,
+              marginTop: 6, display: 'inline-flex', fontSize: fs(13),
               padding: '5px 14px', borderRadius: 999, fontWeight: 700,
               background: msg.isCorrect ? 'rgba(22,163,74,0.12)' : 'rgba(239,68,68,0.12)',
               color: msg.isCorrect ? 'var(--success)' : 'var(--danger)',
@@ -469,6 +486,7 @@ export default function LearnPage() {
   const { supported: ttsSupported, speaking, speak, stop: stopSpeaking } = useSpeech()
   const [autoRead, setAutoRead] = useState(true)
   const spokenRef = useRef<Set<string>>(new Set())
+  const fontScale = useChatFontScale('learn_chat_font_scale')
   const [input, setInput] = useState('')
   const [pendingAnswer, setPendingAnswer] = useState(false)
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null)
@@ -1585,7 +1603,7 @@ export default function LearnPage() {
 
       {/* ── RIGHT: Tutor chat panel — one card, one scrollbar ── */}
       <div className="learn-chat-col">
-        <div className="teacher-panel learn-chat-card">
+        <div className="teacher-panel learn-chat-card" style={{ ['--chat-font-scale' as any]: fontScale.scale }}>
           {/* Chat header */}
           <div className="learn-chat-card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1598,6 +1616,13 @@ export default function LearnPage() {
                   🔄 {voiceStatus}
                 </span>
               )}
+              <ChatFontScale
+                percent={fontScale.percent}
+                onIncrease={fontScale.increase}
+                onDecrease={fontScale.decrease}
+                canIncrease={fontScale.canIncrease}
+                canDecrease={fontScale.canDecrease}
+              />
               {ttsSupported && (
                 <>
                   {speaking && (
@@ -1650,13 +1675,13 @@ export default function LearnPage() {
             {/* Live LLM streaming from voice pipeline */}
             {voiceStreamText && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
-                <span style={{ fontSize: 13, color: 'var(--muted)' }}>Tutor AI · live</span>
+                <span style={{ fontSize: fs(13), color: 'var(--muted)' }}>Tutor AI · live</span>
                 <div style={{
                   background: 'var(--surface)', border: '1px solid var(--border)',
                   borderRadius: 14, borderBottomLeftRadius: 4,
                   padding: '14px 18px', maxWidth: '92%',
                 }}>
-                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: 16, color: 'var(--text)' }}>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: fs(16), color: 'var(--text)', textAlign: 'justify' }}>
                     {voiceStreamText}
                   </p>
                 </div>
@@ -1668,7 +1693,7 @@ export default function LearnPage() {
                 <div style={{
                   background: 'var(--surface)', border: '1px solid var(--border)',
                   borderRadius: 14, borderBottomLeftRadius: 4,
-                  padding: '14px 18px', color: 'var(--muted)', fontStyle: 'italic', fontSize: 15,
+                  padding: '14px 18px', color: 'var(--muted)', fontStyle: 'italic', fontSize: fs(15),
                 }}>
                   Thinking…
                 </div>

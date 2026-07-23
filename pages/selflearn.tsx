@@ -8,6 +8,7 @@ import {
 import type { SlAssessmentQuestion, SlRoadmapConcept } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
 import { useSpeech } from '../lib/speech'
+import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
 
 type VoiceState = 'idle' | 'recording' | 'processing'
 type SlView = 'start' | 'assessment' | 'session'
@@ -114,6 +115,8 @@ export default function SelfLearn() {
     preferServer: voiceSource === 'tutor',
   })
   const spokenRef = useRef<Set<string>>(new Set())
+
+  const fontScale = useChatFontScale('selflearn_chat_font_scale')
 
   const [voiceState, setVoiceState] = useState<VoiceState>('idle')
   const [voiceStatus, setVoiceStatus] = useState('')
@@ -765,7 +768,10 @@ export default function SelfLearn() {
               composer — a single bordered container instead of a separate hero,
               so there's one scrollbar and the input is always reachable without
               scrolling the page. */}
-          <section className="teacher-panel learn-chat-card selflearn-lesson-card">
+          <section
+            className="teacher-panel learn-chat-card selflearn-lesson-card"
+            style={{ ['--chat-font-scale' as any]: fontScale.scale }}
+          >
             <div className="learn-chat-card-header selflearn-lesson-header">
               <div className="selflearn-lesson-header-title">
                 <p className="teacher-eyebrow" style={{ margin: 0 }}>Self-Paced Lesson</p>
@@ -775,6 +781,13 @@ export default function SelfLearn() {
                 </h2>
               </div>
               <div className="selflearn-lesson-header-actions">
+                <ChatFontScale
+                  percent={fontScale.percent}
+                  onIncrease={fontScale.increase}
+                  onDecrease={fontScale.decrease}
+                  canIncrease={fontScale.canIncrease}
+                  canDecrease={fontScale.canDecrease}
+                />
                 {ttsSupported && (
                   <>
                     {speaking && (

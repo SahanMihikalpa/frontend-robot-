@@ -6419,3 +6419,44 @@ body:has(.selflearn-session-view) .home-footer{
 }
 .selflearn-voice-select:disabled{opacity:.45;cursor:not-allowed}
 .selflearn-voice-select option{background:#FFF9F3;color:var(--text)}
+
+/* ─────────────────────────────
+   Chat text size (A− / A+)
+   `--chat-font-scale` is set inline on .learn-chat-card by ChatFontScale, and
+   multiplies the chat's own text only — the rest of the page is untouched.
+───────────────────────────── */
+.chat-zoom{display:inline-flex;align-items:center;gap:4px}
+.chat-zoom-btn{font-weight:700;font-size:13px;gap:1px}
+.chat-zoom-btn .chat-zoom-sign{font-size:11px;line-height:1}
+.chat-zoom-btn:disabled{opacity:.35;cursor:not-allowed}
+.chat-zoom-btn:disabled:hover{border-color:var(--border);color:var(--muted)}
+.chat-zoom-readout{
+  min-width:34px;text-align:center;
+  font-size:11px;font-weight:600;color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+@media (max-width:720px){.chat-zoom-readout{display:none}}
+
+/* Learn — scaled text */
+.learn-chat-card .chat-bubble{font-size:calc(16px * var(--chat-font-scale,1))}
+.learn-chat-card .learn-chat-textarea{font-size:calc(16px * var(--chat-font-scale,1))}
+
+/* Self-learn — scaled text */
+.learn-chat-card .selflearn-teach-text,
+.learn-chat-card .selflearn-check-text,
+.learn-chat-card .selflearn-feedback-text{font-size:calc(16px * var(--chat-font-scale,1))}
+.learn-chat-card .selflearn-option-btn{font-size:calc(15px * var(--chat-font-scale,1)) !important}
+.learn-chat-card .selflearn-pending-hint{font-size:calc(13px * var(--chat-font-scale,1))}
+
+/* The controls need no overrides: the scaling rules above target only chat text
+   (.chat-bubble, .selflearn-*-text, the option buttons, the composer), and every
+   control already carries its own explicit px size, so none of them inherit. */
+
+/* ─────────────────────────────
+   Tutor message alignment
+   Justified body text, by preference. Only tutor prose — student replies are
+   short enough that justifying them would stretch a single line oddly.
+───────────────────────────── */
+.selflearn-teach-text,
+.selflearn-check-text,
+.selflearn-feedback-text{text-align:justify}
