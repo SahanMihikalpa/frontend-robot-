@@ -6451,3 +6451,12 @@ body:has(.selflearn-session-view) .home-footer{
 /* The controls need no overrides: the scaling rules above target only chat text
    (.chat-bubble, .selflearn-*-text, the option buttons, the composer), and every
    control already carries its own explicit px size, so none of them inherit. */
+
+/* ─────────────────────────────
+   Tutor message alignment
+   Justified body text, by preference. Only tutor prose — student replies are
+   short enough that justifying them would stretch a single line oddly.
+───────────────────────────── */
+.selflearn-teach-text,
+.selflearn-check-text,
+.selflearn-feedback-text{text-align:justify}

@@ -354,7 +354,12 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
             Preparing your personalized lesson<span className="dot-ellipsis" />
           </p>
         ) : (
-          <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: fs(14) }}>
+          <p style={{
+            margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: fs(14),
+            // Justified tutor prose; student replies are usually one line, where
+            // justifying would stretch the gaps for no benefit.
+            textAlign: isStudent ? 'left' : 'justify',
+          }}>
             {msg.type === 'FEEDBACK'
               ? safeStr(msg.content).replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || safeStr(msg.content)
               : safeStr(msg.content)}
@@ -1676,7 +1681,7 @@ export default function LearnPage() {
                   borderRadius: 14, borderBottomLeftRadius: 4,
                   padding: '14px 18px', maxWidth: '92%',
                 }}>
-                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: fs(16), color: 'var(--text)' }}>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: fs(16), color: 'var(--text)', textAlign: 'justify' }}>
                     {voiceStreamText}
                   </p>
                 </div>
