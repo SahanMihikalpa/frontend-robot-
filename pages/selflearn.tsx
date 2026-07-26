@@ -3,9 +3,10 @@ import {
   slStartSession, slSendMessage, slGetMastery, slGetProgress,
   slGetProviders, slResumeSession, slCreatePack,
   slStartAssessment, slCompleteAssessment, slGetRoadmap, slSkipToConcept,
+  slRevisitConcept, slPracticeQuestion, slPracticeAnswer,
   getAuthToken,
 } from '../lib/api'
-import type { SlAssessmentQuestion, SlRoadmapConcept } from '../lib/api'
+import type { SlAssessmentQuestion, SlRoadmapConcept, SlPracticeQuestion } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
 import { useSpeech } from '../lib/speech'
 import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
@@ -35,7 +36,7 @@ type PackDoc = { filename: string; status: string; chunk_count: number; warning?
 type Course = {
   session_id: string; topic: string; is_private: boolean; phase: string; status: string
   current_level: string; last_active_at?: string; overall_mastery: number
-  concepts_total: number; concepts_mastered: number; documents: PackDoc[]
+  concepts_total: number; concepts_mastered: number; concepts_skipped: number; documents: PackDoc[]
 }
 
 function uid() { return 'tmp-' + Math.random().toString(36).slice(2) }
@@ -101,9 +102,19 @@ export default function SelfLearn() {
   const [assessSkillName, setAssessSkillName] = useState('')
   const [assessSubmitting, setAssessSubmitting] = useState(false)
 
-  // Roadmap (session view) — concepts with skip-ahead
+  // Roadmap (session view) — concepts with skip-ahead / revisit
   const [roadmap, setRoadmap] = useState<{ concepts: SlRoadmapConcept[]; current_concept_id: number | null } | null>(null)
   const [skipping, setSkipping] = useState(false)
+
+  // Practice modal — answer questions for a skipped concept without a lesson
+  const [practiceConcept, setPracticeConcept] = useState<SlRoadmapConcept | null>(null)
+  const [practiceQ, setPracticeQ] = useState<SlPracticeQuestion | null>(null)
+  const [practiceBusy, setPracticeBusy] = useState(false)
+  const [practicePicked, setPracticePicked] = useState('')
+  const [practiceDraft, setPracticeDraft] = useState('')
+  const [practiceResult, setPracticeResult] =
+    useState<{ is_correct: boolean; feedback: string; mastery: number; mastered: boolean } | null>(null)
+  const [practiceError, setPracticeError] = useState('')
 
   // Read-aloud: tutor messages are spoken as they arrive. The browser's own
   // engine does it by default (free, offline); "tutor voice" routes through the
@@ -325,6 +336,59 @@ export default function SelfLearn() {
       if (res.level) setLevel(res.level)
       await loadRoadmap()
     } catch (e) { setError(errDetail(e)) } finally { setSkipping(false) }
+  }
+
+  // Return to a skipped concept and learn it normally (re-teach + checks).
+  async function revisitTo(conceptId: number) {
+    if (skipping || loading) return
+    setSkipping(true); setError('')
+    try {
+      const res = await slRevisitConcept({ session_id: sessionId, concept_id: conceptId })
+      const incoming: LMsg[] = Array.isArray(res.messages) ? res.messages : []
+      setMessages((p) => [...p, ...incoming])
+      setPendingCheck(res.pending_check || null)
+      if (typeof res.mastery === 'number') setConceptMastery(res.mastery)
+      if (res.level) setLevel(res.level)
+      setDone(false)          // re-opens the lesson on the revisited concept
+      await loadRoadmap()
+    } catch (e) { setError(errDetail(e)) } finally { setSkipping(false) }
+  }
+
+  // ── Practice a skipped concept (answer questions only, no teaching) ───────────
+  async function openPractice(c: SlRoadmapConcept) {
+    setPracticeConcept(c)
+    setPracticeQ(null); setPracticeResult(null); setPracticePicked(''); setPracticeDraft(''); setPracticeError('')
+    await loadPracticeQuestion(c.concept_id)
+  }
+
+  async function loadPracticeQuestion(conceptId: number) {
+    setPracticeBusy(true); setPracticeError('')
+    setPracticeResult(null); setPracticePicked(''); setPracticeDraft('')
+    try {
+      setPracticeQ(await slPracticeQuestion({ session_id: sessionId, concept_id: conceptId }))
+    } catch (e) { setPracticeError(errDetail(e)); setPracticeQ(null) }
+    finally { setPracticeBusy(false) }
+  }
+
+  async function submitPractice(answer: string) {
+    const val = answer.trim()
+    if (!practiceQ || practiceBusy || practiceResult || !val) return
+    setPracticePicked(answer)
+    setPracticeBusy(true); setPracticeError('')
+    try {
+      const res = await slPracticeAnswer({ session_id: sessionId, question_id: practiceQ.question_id, answer: val })
+      setPracticeResult(res)
+      if (practiceConcept) setPracticeConcept({ ...practiceConcept, mastery: res.mastery, skipped: !res.mastered })
+      if (res.completed) setDone(true)   // practising the last piece can finish the course
+      await loadRoadmap()     // mastery moved — refresh the sidebar
+    } catch (e) { setPracticeError(errDetail(e)) }
+    finally { setPracticeBusy(false) }
+  }
+
+  function closePractice() {
+    setPracticeConcept(null); setPracticeQ(null); setPracticeResult(null)
+    setPracticePicked(''); setPracticeDraft(''); setPracticeError('')
+    loadRoadmap()
   }
 
   async function resume(id: string) {
@@ -577,6 +641,9 @@ export default function SelfLearn() {
                         <p>
                           {c.phase === 'complete' ? 'Completed' : `In progress · ${c.current_level}`}
                           {' · '}{c.concepts_mastered}/{c.concepts_total} concepts mastered
+                          {c.concepts_skipped > 0 && (
+                            <> · <span className="selflearn-skipped-text">{c.concepts_skipped} skipped</span></>
+                          )}
                         </p>
 
                         <div className="selflearn-course-progress">
@@ -603,9 +670,9 @@ export default function SelfLearn() {
                             {rep ? (
                               <div className="selflearn-concept-list">
                                 {(rep.concepts || []).map((cc: any, i: number) => (
-                                  <div key={i} className="selflearn-concept-row">
+                                  <div key={i} className={`selflearn-concept-row ${cc.skipped ? 'skipped' : ''}`}>
                                     <span className="selflearn-concept-name">
-                                      {cc.mastered ? '✅' : '•'} {cc.concept} <span className="meta">({cc.level})</span>
+                                      {cc.mastered ? '✅' : cc.skipped ? '⏭️' : '•'} {cc.concept} <span className="meta">({cc.level})</span>
                                     </span>
                                     <div className="selflearn-concept-bar"><MasteryBar pct={cc.mastery * 100} /></div>
                                   </div>
@@ -1005,21 +1072,28 @@ export default function SelfLearn() {
           <div className="selflearn-progress-detail">
             <p className="meta selflearn-detail-label" style={{ margin: '0 0 4px' }}>Roadmap</p>
             <p className="meta" style={{ margin: '0 0 14px', fontSize: 11 }}>
-              Already know something? Jump ahead — earlier concepts are marked as known.
+              Already know something? Jump ahead — the ones you pass are set aside as
+              <span className="selflearn-skipped-text"> skipped</span> (not mastered).
+              Come back any time to <strong>Learn</strong> or <strong>Practice</strong> them.
             </p>
             {roadmap ? (
               <div className="selflearn-concept-list">
                 {roadmap.concepts.map((c) => {
-                  const canSkip = !done && !skipping && !c.is_current && !c.mastered && c.order_index > currentConceptIdx
+                  const canSkip = !done && !skipping && !c.is_current && !c.mastered && !c.skipped
+                    && c.order_index > currentConceptIdx
+                  const icon = c.mastered ? '✅' : c.is_current ? '📍' : c.skipped ? '⏭️' : '•'
                   return (
-                    <div key={c.concept_id} className={`selflearn-roadmap-row ${c.is_current ? 'current' : ''}`}>
+                    <div key={c.concept_id}
+                      className={`selflearn-roadmap-row ${c.is_current ? 'current' : ''} ${c.skipped ? 'skipped' : ''}`}>
                       <div className="selflearn-roadmap-top">
                         <span className="selflearn-concept-name">
-                          {c.mastered ? '✅' : c.is_current ? '📍' : '•'} {c.name}
+                          {icon} {c.name}
                           {c.level && <span className="meta"> ({c.level})</span>}
                         </span>
                         {c.is_current ? (
                           <span className="history-result-pill success selflearn-here-pill">here</span>
+                        ) : c.skipped ? (
+                          <span className="selflearn-skipped-pill">skipped</span>
                         ) : canSkip ? (
                           <button className="btn ghost small selflearn-skip-btn"
                             onClick={() => skipTo(c.concept_id)} disabled={skipping}>
@@ -1028,6 +1102,18 @@ export default function SelfLearn() {
                         ) : null}
                       </div>
                       <div className="selflearn-concept-bar"><MasteryBar pct={c.mastery * 100} /></div>
+                      {c.skipped && (
+                        <div className="selflearn-skipped-actions">
+                          <button className="btn ghost small" onClick={() => revisitTo(c.concept_id)}
+                            disabled={skipping || loading}>
+                            {skipping ? '…' : '↩ Learn'}
+                          </button>
+                          <button className="btn ghost small" onClick={() => openPractice(c)}
+                            disabled={skipping || loading}>
+                            ✎ Practice
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -1040,6 +1126,94 @@ export default function SelfLearn() {
       </div>
 
       {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc('')} />}
+
+      {practiceConcept && (
+        <div className="selflearn-practice-overlay" onClick={closePractice}>
+          <div className="selflearn-practice-card" onClick={(e) => e.stopPropagation()}>
+            <div className="selflearn-practice-head">
+              <div>
+                <p className="teacher-eyebrow" style={{ margin: 0 }}>Practice</p>
+                <h3 className="editorial-title" style={{ margin: '2px 0 0' }}>{practiceConcept.name}</h3>
+              </div>
+              <button className="btn ghost small" onClick={closePractice}>Close</button>
+            </div>
+            <p className="meta selflearn-practice-sub">
+              Answer questions to raise your mastery — no lesson needed. Reach 85% and it's no
+              longer skipped.
+            </p>
+            <MasteryBar pct={(practiceResult?.mastery ?? practiceConcept.mastery) * 100} label="Mastery" />
+
+            {practiceBusy && !practiceQ ? (
+              <p className="meta" style={{ marginTop: 14 }}>Loading a question…</p>
+            ) : practiceError && !practiceQ ? (
+              <div style={{ marginTop: 14 }}>
+                <p className="feedback error">{practiceError}</p>
+                <button className="btn secondary" onClick={() => loadPracticeQuestion(practiceConcept.concept_id)}>
+                  Try again
+                </button>
+              </div>
+            ) : practiceQ ? (
+              <div className="selflearn-practice-body">
+                <p className="selflearn-assess-question">{practiceQ.stem}</p>
+
+                {practiceQ.qtype === 'mcq' && practiceQ.options ? (
+                  <div className="selflearn-options">
+                    {Object.entries(practiceQ.options).map(([k, v]) => {
+                      let cls = 'btn secondary selflearn-option-btn'
+                      if (practiceResult && k === practicePicked) {
+                        cls += practiceResult.is_correct ? ' correct' : ' incorrect'
+                      }
+                      return (
+                        <button key={k} type="button" className={cls}
+                          onClick={() => submitPractice(k)}
+                          disabled={!!practiceResult || practiceBusy}>
+                          <strong className="selflearn-option-key">{k}.</strong> {v}
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="selflearn-composer-row">
+                    <textarea
+                      className="learn-chat-textarea"
+                      value={practiceDraft}
+                      onChange={(e) => setPracticeDraft(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitPractice(practiceDraft) } }}
+                      placeholder="Type your answer…"
+                      disabled={!!practiceResult || practiceBusy}
+                    />
+                    {!practiceResult && (
+                      <button className="btn" onClick={() => submitPractice(practiceDraft)}
+                        disabled={!practiceDraft.trim() || practiceBusy}>
+                        {practiceBusy ? '…' : 'Submit'}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {practiceError && <p className="feedback error" style={{ marginTop: 10 }}>{practiceError}</p>}
+
+                {practiceResult && (
+                  <div className={`selflearn-practice-result ${practiceResult.is_correct ? 'ok' : 'no'}`}>
+                    <strong>{practiceResult.is_correct ? '✓ Correct' : '✗ Not quite'}</strong>
+                    {practiceResult.feedback && <p>{practiceResult.feedback}</p>}
+                    {practiceResult.mastered && (
+                      <p className="selflearn-practice-mastered">🎉 Mastered — no longer skipped!</p>
+                    )}
+                    <div className="selflearn-practice-actions">
+                      <button className="btn" onClick={() => loadPracticeQuestion(practiceConcept.concept_id)}
+                        disabled={practiceBusy}>
+                        {practiceBusy ? '…' : 'Next question'}
+                      </button>
+                      <button className="btn ghost" onClick={closePractice}>Done</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

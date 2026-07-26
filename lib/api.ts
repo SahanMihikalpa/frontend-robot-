@@ -781,7 +781,7 @@ export async function slGetProgress() {
   return data as Array<{
     session_id: string; topic: string; is_private: boolean; phase: string; status: string
     current_level: string; last_active_at?: string; overall_mastery: number
-    concepts_total: number; concepts_mastered: number
+    concepts_total: number; concepts_mastered: number; concepts_skipped: number
     documents: Array<{ filename: string; status: string; chunk_count: number; warning?: string }>
   }>
 }
@@ -825,6 +825,7 @@ export async function slCompleteAssessment(payload: {
     dynamic_skill_id: number
     concepts_assessed: number
     concepts_known: number
+    concepts_head_start: number
     concepts_to_learn: number
   }
 }
@@ -838,6 +839,7 @@ export type SlRoadmapConcept = {
   order_index: number
   mastery: number
   mastered: boolean
+  skipped: boolean
   is_current: boolean
 }
 
@@ -847,14 +849,50 @@ export async function slGetRoadmap(session_id: string) {
     session_id: string
     concepts: SlRoadmapConcept[]
     current_concept_id: number | null
+    skipped_count: number
     completed: boolean
   }
 }
 
-// Jump ahead to a chosen concept (marks earlier concepts as known).
+// Jump ahead to a chosen concept — earlier concepts are set aside as SKIPPED (not
+// mastered); they stay revisitable via slRevisitConcept / slPractice*.
 export async function slSkipToConcept(payload: { session_id: string; concept_id: number }) {
   const { data } = await apiClient.post('/api/v1/selflearn/skip', payload)
   return data
+}
+
+// Return to a skipped concept and learn it normally (re-teach + checks).
+export async function slRevisitConcept(payload: { session_id: string; concept_id: number }) {
+  const { data } = await apiClient.post('/api/v1/selflearn/revisit', payload)
+  return data
+}
+
+export type SlPracticeQuestion = {
+  question_id: number
+  concept_id: number
+  concept_name: string
+  qtype: string
+  stem: string
+  options: Record<string, string> | null
+}
+
+// Practice a concept without teaching: fetch a question…
+export async function slPracticeQuestion(payload: { session_id: string; concept_id: number }) {
+  const { data } = await apiClient.post('/api/v1/selflearn/practice/question', payload)
+  return data as SlPracticeQuestion
+}
+
+// …then submit the answer → graded, mastery updated via BKT.
+export async function slPracticeAnswer(payload: { session_id: string; question_id: number; answer: string }) {
+  const { data } = await apiClient.post('/api/v1/selflearn/practice/answer', payload)
+  return data as {
+    is_correct: boolean
+    feedback: string
+    mastery: number
+    mastered: boolean
+    completed: boolean
+    concept_id: number
+  }
 }
 
 export default apiClient
