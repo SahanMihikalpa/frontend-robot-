@@ -5470,6 +5470,23 @@ body:has(.selflearn-session-view) .home-footer{
   margin-bottom:8px;
   font-size:14px;
 }
+/* One-click quick replies above the composer ("Continue", "Give an example", …) */
+.selflearn-quick-replies{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;
+}
+.selflearn-quick-chip{
+  font-size:calc(13px * var(--chat-font-scale,1));
+  padding:6px 14px;border-radius:999px;
+  background:var(--surface);color:var(--text);
+  border:1px solid var(--border);cursor:pointer;
+  white-space:nowrap;line-height:1.2;
+  transition:background .15s ease,border-color .15s ease,color .15s ease,transform .05s ease;
+}
+.selflearn-quick-chip:hover:not(:disabled){
+  background:rgba(232,90,51,.08);border-color:rgba(232,90,51,.4);color:var(--accent);
+}
+.selflearn-quick-chip:active:not(:disabled){transform:translateY(1px)}
+.selflearn-quick-chip:disabled{opacity:.5;cursor:default}
 .selflearn-composer-row{
   display:flex;
   gap:10px;

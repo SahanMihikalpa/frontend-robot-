@@ -41,6 +41,17 @@ type Course = {
 
 function uid() { return 'tmp-' + Math.random().toString(36).slice(2) }
 
+// One-click replies so the student can advance the lesson (or nudge the tutor) without
+// typing "go on" / "continue" every time. Only shown when NO check is pending — while a
+// check is pending, anything sent is graded as the answer, so these would count as wrong.
+const QUICK_REPLIES: Array<{ label: string; message: string }> = [
+  { label: 'Continue', message: 'Please continue.' },
+  { label: 'Give an example', message: 'Can you give me an example?' },
+  { label: 'Explain more simply', message: 'Can you explain that more simply?' },
+  { label: 'Quiz me', message: 'Quiz me on this to check my understanding.' },
+  { label: 'Next concept →', message: "I understand this — let's move on to the next concept." },
+]
+
 /** Build a displayable data: URL from a base64 image payload in message metadata. */
 function extractImageUrl(meta: any): string | undefined {
   const b64 = meta?.image_b64
@@ -1006,6 +1017,22 @@ export default function SelfLearn() {
                       ? '🎙️ Recording… click ⏹ when done'
                       : `⏳ ${voiceStatus || 'Processing your voice…'}`}
                   </p>
+                )}
+                {!pendingCheck && voiceState === 'idle' && (
+                  <div className="selflearn-quick-replies">
+                    {QUICK_REPLIES.map((qr) => (
+                      <button
+                        key={qr.label}
+                        type="button"
+                        className="selflearn-quick-chip"
+                        onClick={() => send(qr.message)}
+                        disabled={loading}
+                        title={qr.message}
+                      >
+                        {qr.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
                 <div className="selflearn-composer-row">
                   <textarea
