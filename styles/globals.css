@@ -6249,6 +6249,45 @@ body:has(.selflearn-session-view) .home-footer{
 .selflearn-skip-btn{flex:none;font-size:11px;padding:3px 10px;white-space:nowrap}
 .selflearn-here-pill{flex:none;font-size:10px;padding:2px 8px}
 
+/* Skipped concepts — set aside, NOT mastered. Shown red so they stand out as unfinished. */
+.selflearn-roadmap-row.skipped{
+  background:var(--danger-dim);border-radius:8px;padding:8px 10px;margin:0 -10px 2px;
+  border-bottom:1px solid transparent;border-left:3px solid var(--danger);
+}
+.selflearn-roadmap-row.skipped .selflearn-concept-name{color:var(--danger)}
+.selflearn-skipped-pill{
+  flex:none;font-size:10px;padding:2px 8px;border-radius:999px;white-space:nowrap;
+  color:var(--danger);background:var(--danger-dim);border:1px solid rgba(239,68,68,0.28);
+  text-transform:uppercase;letter-spacing:.04em;font-weight:600;
+}
+.selflearn-skipped-actions{display:flex;gap:8px;margin-top:8px}
+.selflearn-skipped-actions .btn{flex:1;font-size:12px;padding:5px 10px}
+.selflearn-skipped-text{color:var(--danger);font-weight:600}
+.selflearn-concept-row.skipped .selflearn-concept-name{color:var(--danger)}
+
+/* Practice modal — answer questions for a skipped concept without a lesson */
+.selflearn-practice-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.6);
+  display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;
+}
+.selflearn-practice-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,0.28);
+}
+.selflearn-practice-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.selflearn-practice-sub{margin:0}
+.selflearn-practice-body{display:flex;flex-direction:column;gap:14px;margin-top:4px}
+.selflearn-practice-result{
+  border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;
+  border:1px solid var(--border);
+}
+.selflearn-practice-result.ok{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.28)}
+.selflearn-practice-result.no{background:var(--danger-dim);border-color:rgba(239,68,68,0.28)}
+.selflearn-practice-result p{margin:0}
+.selflearn-practice-mastered{color:var(--success);font-weight:600}
+.selflearn-practice-actions{display:flex;gap:10px;margin-top:4px}
+
 /* ─────────────────────────────
    Password field — show/hide eye toggle
 ───────────────────────────── */
