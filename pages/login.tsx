@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { getCurrentUser, loginUser } from '../lib/api'
@@ -24,6 +24,15 @@ export default function Login() {
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
   const toast = useToast()
+
+  // Explain an automatic sign-out (SessionWatcher redirects here with ?reason=idle).
+  const idleNotified = useRef(false)
+  useEffect(() => {
+    if (router.query.reason === 'idle' && !idleNotified.current) {
+      idleNotified.current = true
+      toast.info?.({ title: 'Signed out', message: 'You were signed out after 1 hour of inactivity.' })
+    }
+  }, [router.query.reason, toast])
 
   function onUsername(v: string) {
     setUsername(v)

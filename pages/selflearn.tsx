@@ -10,6 +10,8 @@ import type { SlAssessmentQuestion, SlRoadmapConcept, SlPracticeQuestion } from 
 import ImageLightbox from '../components/ImageLightbox'
 import { useSpeech } from '../lib/speech'
 import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
+import { useStudyBreak } from '../components/StudyBreak/useStudyBreak'
+import StudyBreakModal from '../components/StudyBreak/StudyBreakModal'
 
 type VoiceState = 'idle' | 'recording' | 'processing'
 type SlView = 'start' | 'assessment' | 'session'
@@ -40,6 +42,17 @@ type Course = {
 }
 
 function uid() { return 'tmp-' + Math.random().toString(36).slice(2) }
+
+// One-click replies so the student can advance the lesson (or nudge the tutor) without
+// typing "go on" / "continue" every time. Only shown when NO check is pending — while a
+// check is pending, anything sent is graded as the answer, so these would count as wrong.
+const QUICK_REPLIES: Array<{ label: string; message: string }> = [
+  { label: 'Continue', message: 'Please continue.' },
+  { label: 'Give an example', message: 'Can you give me an example?' },
+  { label: 'Explain more simply', message: 'Can you explain that more simply?' },
+  { label: 'Quiz me', message: 'Quiz me on this to check my understanding.' },
+  { label: 'Next concept →', message: "I understand this — let's move on to the next concept." },
+]
 
 /** Build a displayable data: URL from a base64 image payload in message metadata. */
 function extractImageUrl(meta: any): string | undefined {
@@ -115,6 +128,10 @@ export default function SelfLearn() {
   const [practiceResult, setPracticeResult] =
     useState<{ is_correct: boolean; feedback: string; mastery: number; mastered: boolean } | null>(null)
   const [practiceError, setPracticeError] = useState('')
+
+  // Study-break reminder — accrues while actively in a lesson; pops an unskippable
+  // break every 30 min (shared with the Learn page).
+  const { breakDue, resetBreak } = useStudyBreak(view === 'session' && !done)
 
   // Read-aloud: tutor messages are spoken as they arrive. The browser's own
   // engine does it by default (free, offline); "tutor voice" routes through the
@@ -1007,6 +1024,22 @@ export default function SelfLearn() {
                       : `⏳ ${voiceStatus || 'Processing your voice…'}`}
                   </p>
                 )}
+                {!pendingCheck && voiceState === 'idle' && (
+                  <div className="selflearn-quick-replies">
+                    {QUICK_REPLIES.map((qr) => (
+                      <button
+                        key={qr.label}
+                        type="button"
+                        className="selflearn-quick-chip"
+                        onClick={() => send(qr.message)}
+                        disabled={loading}
+                        title={qr.message}
+                      >
+                        {qr.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="selflearn-composer-row">
                   <textarea
                     className="learn-chat-textarea"
@@ -1124,6 +1157,8 @@ export default function SelfLearn() {
           </div>
         </aside>
       </div>
+
+      {breakDue && <StudyBreakModal onResume={resetBreak} />}
 
       {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc('')} />}
 

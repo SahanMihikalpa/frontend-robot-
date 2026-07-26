@@ -11,6 +11,12 @@ COPY . .
 ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
+# Optional — enables YouTube keyword search in the study-break "Rest video".
+# NEXT_PUBLIC_* is inlined into the client bundle at build time, so it must be set
+# here (a build arg), not at runtime. Empty = search disabled (paste-a-link still works).
+ARG NEXT_PUBLIC_YOUTUBE_API_KEY=
+ENV NEXT_PUBLIC_YOUTUBE_API_KEY=$NEXT_PUBLIC_YOUTUBE_API_KEY
+
 # Ensure public dir exists (Next.js requires it)
 RUN mkdir -p public
 
