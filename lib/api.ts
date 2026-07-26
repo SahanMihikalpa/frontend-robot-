@@ -110,6 +110,19 @@ export async function getCurrentUser() {
   return data
 }
 
+// Extend the session — issues a fresh token. Called on activity so an active
+// study session never hits the token's expiry (sliding session).
+export async function refreshSession() {
+  const { data } = await apiClient.post('/api/v1/auth/refresh')
+  if (data?.access_token) setAuthToken(data.access_token)
+  return data
+}
+
+// Best-effort server logout (JWT is stateless); the caller then clears the token.
+export async function logoutRequest() {
+  try { await apiClient.post('/api/v1/auth/logout') } catch { /* token may already be gone */ }
+}
+
 export async function listSkills() {
   const { data } = await apiClient.get('/api/v1/skills/')
   return data

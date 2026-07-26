@@ -52,6 +52,8 @@ export function clearAuthSession() {
   }
   window.localStorage.removeItem(AUTH_TOKEN_KEY)
   window.localStorage.removeItem(AUTH_USER_KEY)
+  // Reset the cross-page study-break timer so a new sign-in starts fresh.
+  window.localStorage.removeItem('study_break_elapsed_s')
 }
 
 export function getRoleHome(role?: string | null) {

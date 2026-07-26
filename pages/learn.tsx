@@ -9,6 +9,8 @@ import {
 import ImageLightbox from '../components/ImageLightbox'
 import { useSpeech } from '../lib/speech'
 import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
+import { useStudyBreak } from '../components/StudyBreak/useStudyBreak'
+import StudyBreakModal from '../components/StudyBreak/StudyBreakModal'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -497,6 +499,10 @@ export default function LearnPage() {
 
   const [elapsed, setElapsed] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Study-break reminder — accrues while in an active lesson; pops an unskippable
+  // break every 30 min (shared with the Learn Anything page).
+  const { breakDue, resetBreak } = useStudyBreak(phase === 'session' && !sessionEnded)
 
   const [engagementScore, setEngagementScore] = useState<number | null>(null)
   const [cameraOn, setCameraOn] = useState(false)
@@ -1764,6 +1770,8 @@ export default function LearnPage() {
       <video ref={videoRef} playsInline muted style={{ display: 'none' }} />
 
       {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc('')} />}
+
+      {breakDue && <StudyBreakModal onResume={resetBreak} />}
     </div>
   )
 }

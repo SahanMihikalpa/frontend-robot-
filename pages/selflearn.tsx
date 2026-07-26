@@ -10,6 +10,8 @@ import type { SlAssessmentQuestion, SlRoadmapConcept, SlPracticeQuestion } from 
 import ImageLightbox from '../components/ImageLightbox'
 import { useSpeech } from '../lib/speech'
 import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
+import { useStudyBreak } from '../components/StudyBreak/useStudyBreak'
+import StudyBreakModal from '../components/StudyBreak/StudyBreakModal'
 
 type VoiceState = 'idle' | 'recording' | 'processing'
 type SlView = 'start' | 'assessment' | 'session'
@@ -126,6 +128,10 @@ export default function SelfLearn() {
   const [practiceResult, setPracticeResult] =
     useState<{ is_correct: boolean; feedback: string; mastery: number; mastered: boolean } | null>(null)
   const [practiceError, setPracticeError] = useState('')
+
+  // Study-break reminder — accrues while actively in a lesson; pops an unskippable
+  // break every 30 min (shared with the Learn page).
+  const { breakDue, resetBreak } = useStudyBreak(view === 'session' && !done)
 
   // Read-aloud: tutor messages are spoken as they arrive. The browser's own
   // engine does it by default (free, offline); "tutor voice" routes through the
@@ -1151,6 +1157,8 @@ export default function SelfLearn() {
           </div>
         </aside>
       </div>
+
+      {breakDue && <StudyBreakModal onResume={resetBreak} />}
 
       {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc('')} />}
 

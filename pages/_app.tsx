@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { SWRConfig } from 'swr'
 import axios from 'axios'
 import Layout from '../components/Layout'
+import SessionWatcher from '../components/SessionWatcher'
 import { ToastProvider } from '../components/ToastProvider'
 import { getCurrentUser } from '../lib/api'
 import {
@@ -97,6 +98,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <SWRConfig value={{ fetcher: (url: string) => axios.get(url).then(r => r.data) }}>
       <ToastProvider>
+        <SessionWatcher />
         <Layout>
           <Component {...pageProps} />
         </Layout>
