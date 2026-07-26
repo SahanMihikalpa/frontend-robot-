@@ -43,6 +43,16 @@ type Course = {
 
 function uid() { return 'tmp-' + Math.random().toString(36).slice(2) }
 
+/** Seconds → "m:ss" (or "h:mm:ss" past an hour) for the session timer. */
+function fmtTime(sec: number): string {
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  const mm = String(m).padStart(2, '0')
+  const ss = String(s).padStart(2, '0')
+  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`
+}
+
 // One-click replies so the student can advance the lesson (or nudge the tutor) without
 // typing "go on" / "continue" every time. Only shown when NO check is pending — while a
 // check is pending, anything sent is graded as the answer, so these would count as wrong.
@@ -93,6 +103,7 @@ export default function SelfLearn() {
   const [error, setError] = useState('')
 
   const [sessionId, setSessionId] = useState('')
+  const [sessionSeconds, setSessionSeconds] = useState(0)   // time spent this sitting
   const [skill, setSkill] = useState<any>(null)
   const [level, setLevel] = useState('')
   const [conceptMastery, setConceptMastery] = useState<number | null>(null)
@@ -132,6 +143,16 @@ export default function SelfLearn() {
   // Study-break reminder — accrues while actively in a lesson; pops an unskippable
   // break every 30 min (shared with the Learn page).
   const { breakDue, resetBreak } = useStudyBreak(view === 'session' && !done)
+
+  // Per-sitting study timer for the session view. Counts only while the lesson is
+  // open, the tab is visible, and no break modal is up — so it reflects real time on task.
+  useEffect(() => {
+    if (view !== 'session' || done) return
+    const id = window.setInterval(() => {
+      if (document.visibilityState === 'visible' && !breakDue) setSessionSeconds((s) => s + 1)
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [view, done, breakDue])
 
   // Read-aloud: tutor messages are spoken as they arrive. The browser's own
   // engine does it by default (free, offline); "tutor voice" routes through the
@@ -244,7 +265,7 @@ export default function SelfLearn() {
 
   function enterSession(res: any) {
     setSessionId(res.session_id); setSkill(res.skill); setView('session')
-    setReport(null); setDraft('')
+    setReport(null); setDraft(''); setSessionSeconds(0)
     const restored: LMsg[] = Array.isArray(res.transcript) ? res.transcript : []
     // Don't replay the whole transcript on resume — only speak what arrives next.
     stopSpeaking()
@@ -862,6 +883,7 @@ export default function SelfLearn() {
                 <h2 className="editorial-title">
                   {skill?.canonical_name || 'Learning'}
                   {level && <span className="history-result-pill success selflearn-level-pill">{level}</span>}
+                  <span className="selflearn-time-pill" title="Time spent this session">⏱ {fmtTime(sessionSeconds)}</span>
                 </h2>
               </div>
               <div className="selflearn-lesson-header-actions">
@@ -1100,6 +1122,11 @@ export default function SelfLearn() {
             ) : (
               <p className="meta" style={{ margin: 0 }}>Not enough signal yet — keep going.</p>
             )}
+          </div>
+
+          <div className="selflearn-time-row">
+            <span className="meta">Time this session</span>
+            <strong>⏱ {fmtTime(sessionSeconds)}</strong>
           </div>
 
           <div className="selflearn-progress-detail">
