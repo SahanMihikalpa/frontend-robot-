@@ -15,7 +15,7 @@ import StudyBreakModal from '../components/StudyBreak/StudyBreakModal'
 
 type VoiceState = 'idle' | 'recording' | 'processing'
 type SlView = 'start' | 'assessment' | 'session'
-type VoiceSource = 'browser' | 'tutor'
+type VoiceSource = 'browser' | 'tutor' | 'gemini'
 
 // One transcript entry as persisted by the backend (learning_messages).
 type LMsg = {
@@ -155,13 +155,15 @@ export default function SelfLearn() {
   }, [view, done, breakDue])
 
   // Read-aloud: tutor messages are spoken as they arrive. The browser's own
-  // engine does it by default (free, offline); "tutor voice" routes through the
-  // server so it matches the voice the mic pipeline replies in.
+  // engine does it by default (free, offline); "tutor voice" and "Gemini voice"
+  // route through the server (an API call per message) — the former matches the
+  // voice the mic pipeline replies in, the latter uses Gemini TTS.
   const [autoRead, setAutoRead] = useState(true)
   const [voiceSource, setVoiceSource] = useState<VoiceSource>('browser')
   const { supported: ttsSupported, speaking, speak, stop: stopSpeaking } = useSpeech({
     endpoint: '/api/v1/selflearn/voice/tts',
-    preferServer: voiceSource === 'tutor',
+    preferServer: voiceSource === 'tutor' || voiceSource === 'gemini',
+    serverProvider: voiceSource === 'gemini' ? 'gemini' : undefined,
   })
   const spokenRef = useRef<Set<string>>(new Set())
 
@@ -187,7 +189,8 @@ export default function SelfLearn() {
     loadCourses()
     try {
       setAutoRead(window.localStorage.getItem('selflearn_auto_read') !== '0')
-      if (window.localStorage.getItem('selflearn_voice_source') === 'tutor') setVoiceSource('tutor')
+      const savedVoice = window.localStorage.getItem('selflearn_voice_source')
+      if (savedVoice === 'tutor' || savedVoice === 'gemini') setVoiceSource(savedVoice)
     } catch { /* storage unavailable — keep defaults */ }
   }, [])
 
@@ -915,11 +918,12 @@ export default function SelfLearn() {
                       value={voiceSource}
                       onChange={(e) => changeVoiceSource(e.target.value as VoiceSource)}
                       disabled={!autoRead}
-                      title="Browser voice reads instantly and offline. Tutor voice matches the voice you hear when you speak, but calls the server for each message."
+                      title="Browser voice reads instantly and offline. Tutor voice matches the voice you hear when you speak. Gemini voice uses Google's Gemini TTS. Tutor and Gemini call the server for each message."
                       aria-label="Read-aloud voice"
                     >
                       <option value="browser">Browser voice</option>
                       <option value="tutor">Tutor voice</option>
+                      <option value="gemini">Gemini voice</option>
                     </select>
                   </>
                 )}
