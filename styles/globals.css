@@ -4946,6 +4946,26 @@ body:has(.selflearn-session-view) .home-footer{
   vertical-align:middle;
   font-size:14px;
 }
+/* Session timer — small glanceable chip next to the topic + level */
+.selflearn-time-pill{
+  margin-left:10px;
+  vertical-align:middle;
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+  color:var(--muted);
+  white-space:nowrap;
+}
+/* Labeled "Time this session" row in the progress sidebar */
+.selflearn-time-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:10px 0 4px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+}
+.selflearn-time-row strong{font-variant-numeric:tabular-nums;font-size:15px}
 /* Accent-tinted back button, matching the Exit button used in the
    practice session — its own class since inline styles can't :hover. */
 .selflearn-back-btn{

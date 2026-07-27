@@ -65,10 +65,12 @@ export type SpeechOptions = {
   endpoint?: string
   /** Speak through the server instead of the browser (costs an API call). */
   preferServer?: boolean
+  /** TTS provider hint sent to the server endpoint, e.g. 'gemini'. */
+  serverProvider?: string
 }
 
 export function useSpeech(opts: SpeechOptions = {}) {
-  const { rate = 1.05, endpoint = '/api/v1/voice/tts', preferServer = false } = opts
+  const { rate = 1.05, endpoint = '/api/v1/voice/tts', preferServer = false, serverProvider } = opts
   const [supported, setSupported] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null)
@@ -79,6 +81,8 @@ export function useSpeech(opts: SpeechOptions = {}) {
   // Read inside callbacks without making `speak` change identity on every toggle.
   const preferServerRef = useRef(preferServer)
   useEffect(() => { preferServerRef.current = preferServer }, [preferServer])
+  const serverProviderRef = useRef(serverProvider)
+  useEffect(() => { serverProviderRef.current = serverProvider }, [serverProvider])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -122,7 +126,9 @@ export function useSpeech(opts: SpeechOptions = {}) {
   /** Speak through the server — the no-voices fallback, and the `preferServer` path. */
   const speakViaServer = useCallback(async (text: string, token: number) => {
     try {
-      const { data } = await apiClient.post(endpoint, { text: text.slice(0, 2000) },
+      const { data } = await apiClient.post(
+        endpoint,
+        { text: text.slice(0, 2000), provider: serverProviderRef.current },
         { responseType: 'blob' })
       if (token !== tokenRef.current) return
       const url = URL.createObjectURL(data)

@@ -15,7 +15,7 @@ import StudyBreakModal from '../components/StudyBreak/StudyBreakModal'
 
 type VoiceState = 'idle' | 'recording' | 'processing'
 type SlView = 'start' | 'assessment' | 'session'
-type VoiceSource = 'browser' | 'tutor'
+type VoiceSource = 'browser' | 'tutor' | 'gemini'
 
 // One transcript entry as persisted by the backend (learning_messages).
 type LMsg = {
@@ -42,6 +42,16 @@ type Course = {
 }
 
 function uid() { return 'tmp-' + Math.random().toString(36).slice(2) }
+
+/** Seconds → "m:ss" (or "h:mm:ss" past an hour) for the session timer. */
+function fmtTime(sec: number): string {
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  const mm = String(m).padStart(2, '0')
+  const ss = String(s).padStart(2, '0')
+  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`
+}
 
 // One-click replies so the student can advance the lesson (or nudge the tutor) without
 // typing "go on" / "continue" every time. Only shown when NO check is pending — while a
@@ -93,6 +103,7 @@ export default function SelfLearn() {
   const [error, setError] = useState('')
 
   const [sessionId, setSessionId] = useState('')
+  const [sessionSeconds, setSessionSeconds] = useState(0)   // time spent this sitting
   const [skill, setSkill] = useState<any>(null)
   const [level, setLevel] = useState('')
   const [conceptMastery, setConceptMastery] = useState<number | null>(null)
@@ -133,14 +144,26 @@ export default function SelfLearn() {
   // break every 30 min (shared with the Learn page).
   const { breakDue, resetBreak } = useStudyBreak(view === 'session' && !done)
 
+  // Per-sitting study timer for the session view. Counts only while the lesson is
+  // open, the tab is visible, and no break modal is up — so it reflects real time on task.
+  useEffect(() => {
+    if (view !== 'session' || done) return
+    const id = window.setInterval(() => {
+      if (document.visibilityState === 'visible' && !breakDue) setSessionSeconds((s) => s + 1)
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [view, done, breakDue])
+
   // Read-aloud: tutor messages are spoken as they arrive. The browser's own
-  // engine does it by default (free, offline); "tutor voice" routes through the
-  // server so it matches the voice the mic pipeline replies in.
+  // engine does it by default (free, offline); "tutor voice" and "Gemini voice"
+  // route through the server (an API call per message) — the former matches the
+  // voice the mic pipeline replies in, the latter uses Gemini TTS.
   const [autoRead, setAutoRead] = useState(true)
   const [voiceSource, setVoiceSource] = useState<VoiceSource>('browser')
   const { supported: ttsSupported, speaking, speak, stop: stopSpeaking } = useSpeech({
     endpoint: '/api/v1/selflearn/voice/tts',
-    preferServer: voiceSource === 'tutor',
+    preferServer: voiceSource === 'tutor' || voiceSource === 'gemini',
+    serverProvider: voiceSource === 'gemini' ? 'gemini' : undefined,
   })
   const spokenRef = useRef<Set<string>>(new Set())
 
@@ -166,7 +189,8 @@ export default function SelfLearn() {
     loadCourses()
     try {
       setAutoRead(window.localStorage.getItem('selflearn_auto_read') !== '0')
-      if (window.localStorage.getItem('selflearn_voice_source') === 'tutor') setVoiceSource('tutor')
+      const savedVoice = window.localStorage.getItem('selflearn_voice_source')
+      if (savedVoice === 'tutor' || savedVoice === 'gemini') setVoiceSource(savedVoice)
     } catch { /* storage unavailable — keep defaults */ }
   }, [])
 
@@ -244,7 +268,7 @@ export default function SelfLearn() {
 
   function enterSession(res: any) {
     setSessionId(res.session_id); setSkill(res.skill); setView('session')
-    setReport(null); setDraft('')
+    setReport(null); setDraft(''); setSessionSeconds(0)
     const restored: LMsg[] = Array.isArray(res.transcript) ? res.transcript : []
     // Don't replay the whole transcript on resume — only speak what arrives next.
     stopSpeaking()
@@ -862,6 +886,7 @@ export default function SelfLearn() {
                 <h2 className="editorial-title">
                   {skill?.canonical_name || 'Learning'}
                   {level && <span className="history-result-pill success selflearn-level-pill">{level}</span>}
+                  <span className="selflearn-time-pill" title="Time spent this session">⏱ {fmtTime(sessionSeconds)}</span>
                 </h2>
               </div>
               <div className="selflearn-lesson-header-actions">
@@ -893,11 +918,12 @@ export default function SelfLearn() {
                       value={voiceSource}
                       onChange={(e) => changeVoiceSource(e.target.value as VoiceSource)}
                       disabled={!autoRead}
-                      title="Browser voice reads instantly and offline. Tutor voice matches the voice you hear when you speak, but calls the server for each message."
+                      title="Browser voice reads instantly and offline. Tutor voice matches the voice you hear when you speak. Gemini voice uses Google's Gemini TTS. Tutor and Gemini call the server for each message."
                       aria-label="Read-aloud voice"
                     >
                       <option value="browser">Browser voice</option>
                       <option value="tutor">Tutor voice</option>
+                      <option value="gemini">Gemini voice</option>
                     </select>
                   </>
                 )}
@@ -1100,6 +1126,11 @@ export default function SelfLearn() {
             ) : (
               <p className="meta" style={{ margin: 0 }}>Not enough signal yet — keep going.</p>
             )}
+          </div>
+
+          <div className="selflearn-time-row">
+            <span className="meta">Time this session</span>
+            <strong>⏱ {fmtTime(sessionSeconds)}</strong>
           </div>
 
           <div className="selflearn-progress-detail">
