@@ -3610,7 +3610,7 @@ body:has(.selflearn-session-view) .home-footer{
 }
 .home-hero-stats{
   display:flex;
-  gap:40px;
+  gap:72px;
   margin-top:60px;
   flex-wrap:wrap;
 }

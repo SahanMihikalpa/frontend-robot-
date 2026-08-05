@@ -87,15 +87,6 @@ export default function Home() {
                 Knowledge Tracking
               </div>
             </div>
-
-            <div>
-              <div className="editorial-title" style={{ fontSize: 36 }}>
-                DKT
-              </div>
-              <div style={{ color: 'var(--muted)' }}>
-                Deep Learning Models
-              </div>
-            </div>
           </div>
         </div>
         </div>
