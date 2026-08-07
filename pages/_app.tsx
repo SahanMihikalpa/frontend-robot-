@@ -1,4 +1,6 @@
 import '../styles/globals.css'
+// Typesetting for the formulas in tutor messages (see components/TutorMarkdown).
+import 'katex/dist/katex.min.css'
 import type { AppProps } from 'next/app'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
