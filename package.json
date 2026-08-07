@@ -10,10 +10,15 @@
   "dependencies": {
     "@fontsource/kodchasan": "^5.2.8",
     "axios": "1.4.0",
+    "katex": "^0.16.47",
     "next": "13.5.11",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-markdown": "^9.1.0",
     "recharts": "2.12.7",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "swr": "2.2.0"
   },
   "devDependencies": {

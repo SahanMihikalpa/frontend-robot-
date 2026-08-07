@@ -8,6 +8,7 @@ import {
 } from '../lib/api'
 import type { SlAssessmentQuestion, SlRoadmapConcept, SlPracticeQuestion } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
+import TutorMarkdown from '../components/TutorMarkdown'
 import { useSpeech } from '../lib/speech'
 import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
 import { useStudyBreak } from '../components/StudyBreak/useStudyBreak'
@@ -957,7 +958,7 @@ export default function SelfLearn() {
                           </strong>
                           {speakBtn(m)}
                         </div>
-                        {m.content && <p className="selflearn-feedback-text">{m.content}</p>}
+                        {m.content && <TutorMarkdown text={m.content} className="selflearn-feedback-text" />}
                         {mastery != null && <MasteryBar pct={mastery * 100} label="Mastery" />}
                       </div>
                     </div>
@@ -972,7 +973,7 @@ export default function SelfLearn() {
                         <p className="meta selflearn-detail-label">Quick check</p>
                         {speakBtn(m)}
                       </div>
-                      <p className="selflearn-check-text">{m.content}</p>
+                      <TutorMarkdown text={m.content} className="selflearn-check-text" />
                       {isActive && m.metadata?.qtype === 'mcq' && m.metadata?.options && (
                         <div className="selflearn-options">
                           {Object.entries(m.metadata.options as Record<string, string>).map(([k, v]) => (
@@ -996,7 +997,7 @@ export default function SelfLearn() {
                         : <span />}
                       {speakBtn(m)}
                     </div>
-                    <p className="selflearn-teach-text">{m.content}</p>
+                    <TutorMarkdown text={m.content} className="selflearn-teach-text" />
                     {imageUrl && (
                       <div style={{ marginTop: 10 }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}

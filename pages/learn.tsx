@@ -7,6 +7,7 @@ import {
   streamLesson,
 } from '../lib/api'
 import ImageLightbox from '../components/ImageLightbox'
+import TutorMarkdown from '../components/TutorMarkdown'
 import { useSpeech } from '../lib/speech'
 import ChatFontScale, { useChatFontScale } from '../components/ChatFontScale'
 import { useStudyBreak } from '../components/StudyBreak/useStudyBreak'
@@ -297,6 +298,18 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
     }
   }
 
+  // FEEDBACK repeats the ✅/❌ verdict that the header above already shows.
+  const body = msg.type === 'FEEDBACK'
+    ? safeStr(msg.content).replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || safeStr(msg.content)
+    : safeStr(msg.content)
+
+  const bodyStyle: React.CSSProperties = {
+    margin: 0, lineHeight: 1.6, fontSize: fs(14),
+    // Justified tutor prose; student replies are usually one line, where
+    // justifying would stretch the gaps for no benefit.
+    textAlign: isStudent ? 'left' : 'justify',
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: isStudent ? 'flex-end' : 'flex-start', gap: 4 }}>
       <span style={{ fontSize: fs(13), color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -355,24 +368,19 @@ function ChatBubble({ msg, onImageClick, onSpeak }: {
           <p style={{ margin: 0, color: 'var(--muted)', fontStyle: 'italic', fontSize: fs(14) }}>
             Preparing your personalized lesson<span className="dot-ellipsis" />
           </p>
+        ) : isStudent ? (
+          // The student's own words stay verbatim — rendering them as Markdown
+          // would let a stray "#" or "*" reformat what they actually typed.
+          <p style={{ ...bodyStyle, whiteSpace: 'pre-wrap' }}>{body}</p>
         ) : (
-          <p style={{
-            margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6, fontSize: fs(14),
-            // Justified tutor prose; student replies are usually one line, where
-            // justifying would stretch the gaps for no benefit.
-            textAlign: isStudent ? 'left' : 'justify',
-          }}>
-            {msg.type === 'FEEDBACK'
-              ? safeStr(msg.content).replace(/^[✅❌]\s*(Correct!|Not quite\.?)\s*/i, '').trim() || safeStr(msg.content)
-              : safeStr(msg.content)}
-            {msg.type === 'LESSON' && msg.streaming && (
-              <span style={{
-                display: 'inline-block', width: 7, height: 14, marginLeft: 2,
-                background: 'var(--accent)', verticalAlign: 'text-bottom',
-                animation: 'blink 1s step-start infinite',
-              }} />
-            )}
-          </p>
+          // The typing caret rides the end of the last rendered line via CSS
+          // (.md-streaming). A sibling element would sit on a line of its own,
+          // because every Markdown block renders block-level.
+          <TutorMarkdown
+            text={body}
+            className={msg.type === 'LESSON' && msg.streaming ? 'md-streaming' : undefined}
+            style={bodyStyle}
+          />
         )}
 
         {msg.imageUrl && (
