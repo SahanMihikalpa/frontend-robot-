@@ -449,6 +449,7 @@ export default function LearnPage() {
   // Skill-picker filters (frontend only)
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all')
+  const [skillQuery, setSkillQuery] = useState('')
 
   const skillCategories = useMemo(() => {
     const cats = new Set(skills.map((s: any) => s.category).filter(Boolean) as string[])
@@ -456,12 +457,27 @@ export default function LearnPage() {
   }, [skills])
 
   const visibleSkills = useMemo(() => {
+    const q = skillQuery.trim().toLowerCase()
     return skills.filter((s: any) => {
       if (categoryFilter !== 'all' && s.category !== categoryFilter) return false
       if (difficultyFilter !== 'all' && String(s.difficulty_level ?? '') !== difficultyFilter) return false
+      // Search spans description and category too — students look for "cross
+      // validation" long before they know it lives under "Model Evaluation".
+      if (q && !`${s.name || ''} ${s.description || ''} ${s.category || ''}`.toLowerCase().includes(q)) return false
       return true
     })
-  }, [skills, categoryFilter, difficultyFilter])
+  }, [skills, categoryFilter, difficultyFilter, skillQuery])
+
+  const filtersActive = categoryFilter !== 'all' || difficultyFilter !== 'all' || skillQuery.trim() !== ''
+
+  function clearSkillFilters() {
+    setCategoryFilter('all'); setDifficultyFilter('all'); setSkillQuery('')
+  }
+
+  const selectedSkillObj = useMemo(
+    () => skills.find((s: any) => s.id === selectedSkill) || null,
+    [skills, selectedSkill],
+  )
 
   // A skill hidden by the filters can't stay selected — otherwise the Start /
   // Continue button would still act on a skill the student can no longer see.
@@ -1281,9 +1297,17 @@ export default function LearnPage() {
 
   // ─── Skill picker ─────────────────────────────────────────────────────────
 
+  // Shared by the Step 2 panel and the mobile launch bar, which are the same
+  // action rendered at whichever breakpoint can reach it.
+  const startLabel =
+    loading ? 'Loading…' :
+    statusLoading ? 'Checking…' :
+    skillStatus?.has_active_session ? '▶ Continue Session' :
+    'Start Session'
+
   if (!sessionId && !sessionEnded) {
     return (
-      <div className="teacher-dashboard student-dash learn-picker-page">
+      <div className={`teacher-dashboard student-dash learn-picker-page${selectedSkillObj ? ' has-launch-bar' : ''}`}>
         <div className="teacher-layout">
           <section className="teacher-main">
             <section className="teacher-hero">
@@ -1313,9 +1337,22 @@ export default function LearnPage() {
                   <p className="teacher-eyebrow">Step 1</p>
                   <h3 className="editorial-title" style={{ margin: 0 }}>Choose a topic</h3>
                 </div>
-                {skills.length > 0 &&
-                  (skillCategories.length > 0 || skills.some((s: any) => s.difficulty_level)) && (
+                {skills.length > 0 && (
                   <div className="learn-filter-row">
+                    <div className="learn-filter learn-filter-search">
+                      <label htmlFor="learn-skill-search">Search</label>
+                      <div className="learn-search-wrap">
+                        <span className="learn-search-icon" aria-hidden="true">🔍</span>
+                        <input
+                          id="learn-skill-search"
+                          type="search"
+                          value={skillQuery}
+                          onChange={(e) => setSkillQuery(e.target.value)}
+                          placeholder="Search topics…"
+                          autoComplete="off"
+                        />
+                      </div>
+                    </div>
                     {skillCategories.length > 0 && (
                       <div className="learn-filter">
                         <label htmlFor="learn-category-filter">Category</label>
@@ -1348,16 +1385,21 @@ export default function LearnPage() {
                 )}
               </div>
 
+              {skills.length > 0 && filtersActive && (
+                <div className="learn-result-row">
+                  <span>Showing <strong>{visibleSkills.length}</strong> of {skills.length} topics</span>
+                  <button type="button" className="skills-chip" onClick={clearSkillFilters}>
+                    Clear filters
+                  </button>
+                </div>
+              )}
+
               {skills.length === 0 ? (
                 <p style={{ color: 'var(--muted)', margin: 0 }}>Loading skills…</p>
               ) : visibleSkills.length === 0 ? (
                 <div className="learn-skill-empty">
-                  <p>No skills match these filters.</p>
-                  <button
-                    type="button"
-                    className="skills-chip"
-                    onClick={() => { setCategoryFilter('all'); setDifficultyFilter('all') }}
-                  >
+                  <p>No topics match your search or filters.</p>
+                  <button type="button" className="skills-chip" onClick={clearSkillFilters}>
                     Clear filters
                   </button>
                 </div>
@@ -1400,34 +1442,13 @@ export default function LearnPage() {
                 </div>
               )}
 
-              {/* Skill status info */}
-              {selectedSkill && skillStatus && !statusLoading && (
-                <div style={{
-                  marginTop: 16, padding: '14px 18px', borderRadius: 8,
-                  background: 'var(--bg)', border: '1px solid var(--border)',
-                }}>
-                  {skillStatus.has_active_session ? (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
-                      ▶️ <strong>Active session</strong> — {skillStatus.message_count} messages saved.
-                      {skillStatus.mastery != null && ` Mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
-                    </p>
-                  ) : skillStatus.assessment_done ? (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
-                      ✅ Assessment done.
-                      {skillStatus.mastery != null && ` Current mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
-                    </p>
-                  ) : (
-                    <p style={{ margin: 0, color: 'var(--text)', fontSize: 16 }}>
-                      📋 New skill — initial assessment will run first (up to 10 questions).
-                    </p>
-                  )}
-                </div>
-              )}
-              {statusLoading && (
-                <p style={{ color: 'var(--muted)', margin: '12px 0 0', fontSize: 15 }}>Checking session…</p>
-              )}
             </section>
 
+            {/* Step 2 sticks to the viewport as the topic grid scrolls past, so
+                the primary action is reachable no matter how many modules exist.
+                Everything needed to decide — what's selected, what happens on
+                click — now lives in this one panel instead of being spread
+                across the bottom of Step 1. */}
             <section className="teacher-panel learn-step-start">
               <div className="teacher-panel-header">
                 <div>
@@ -1437,22 +1458,63 @@ export default function LearnPage() {
               </div>
 
               <div className="learn-step-start-body">
+                {selectedSkillObj ? (
+                  <div className="learn-launch-pick">
+                    <p className="learn-launch-label">Selected topic</p>
+                    <p className="learn-launch-name">{selectedSkillObj.name}</p>
+                    {(selectedSkillObj.difficulty_level != null || selectedSkillObj.category) && (
+                      <div className="learn-skill-card-badges">
+                        {selectedSkillObj.difficulty_level != null && (
+                          <span className="badge neutral" style={{ fontSize: 12 }}>
+                            {DIFF_LABELS[selectedSkillObj.difficulty_level] || `Level ${selectedSkillObj.difficulty_level}`}
+                          </span>
+                        )}
+                        {selectedSkillObj.category && (
+                          <span className="badge neutral" style={{ fontSize: 12 }}>{selectedSkillObj.category}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="learn-launch-empty">
+                    <span className="learn-launch-empty-icon" aria-hidden="true">📚</span>
+                    <p>Choose a topic in Step 1 — it will appear here, ready to start.</p>
+                  </div>
+                )}
+
+                {selectedSkill && skillStatus && !statusLoading && (
+                  <div className="learn-launch-status">
+                    {skillStatus.has_active_session ? (
+                      <p>
+                        ▶️ <strong>Active session</strong> — {skillStatus.message_count} messages saved.
+                        {skillStatus.mastery != null && ` Mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
+                      </p>
+                    ) : skillStatus.assessment_done ? (
+                      <p>
+                        ✅ Assessment done.
+                        {skillStatus.mastery != null && ` Current mastery: ${(skillStatus.mastery * 100).toFixed(0)}%`}
+                      </p>
+                    ) : (
+                      <p>📋 New skill — initial assessment will run first (up to 10 questions).</p>
+                    )}
+                  </div>
+                )}
+                {statusLoading && (
+                  <p className="learn-launch-checking">Checking session…</p>
+                )}
+
                 <button
                   type="button"
-                  className="teacher-action primary"
+                  className="teacher-action primary learn-launch-btn"
                   disabled={!selectedSkill || loading || statusLoading}
                   onClick={handleStartOrContinue}
-                  style={{
-                    minHeight: 'unset', padding: '15px 34px', fontSize: 17,
-                    ...(skillStatus?.has_active_session ? { background: '#7c3aed', borderColor: '#7c3aed' } : {}),
-                  }}
+                  style={skillStatus?.has_active_session
+                    ? { background: '#7c3aed', borderColor: '#7c3aed' }
+                    : undefined}
                 >
-                  {loading ? 'Loading…' :
-                   statusLoading ? 'Checking…' :
-                   skillStatus?.has_active_session ? '▶ Continue Session' :
-                   'Start Session'}
+                  {startLabel}
                 </button>
-                <p style={{ color: 'var(--muted)', fontSize: 16, margin: 0 }}>
+                <p className="learn-launch-note">
                   👁 Camera engagement tracking will start automatically
                 </p>
               </div>
@@ -1491,6 +1553,30 @@ export default function LearnPage() {
             </div>
           </aside>
         </div>
+
+        {/* Below 1181px the two steps stack, so the sticky Step 2 rail is no
+            longer beside the grid. This bar takes over: it docks to the bottom
+            of the viewport the moment a topic is picked, so the action stays
+            one tap away however far down the list the student has scrolled. */}
+        {selectedSkillObj && (
+          <div className="learn-launch-bar">
+            <div className="learn-launch-bar-info">
+              <span className="learn-launch-bar-label">Selected topic</span>
+              <strong className="learn-launch-bar-name">{selectedSkillObj.name}</strong>
+            </div>
+            <button
+              type="button"
+              className="teacher-action primary learn-launch-btn"
+              disabled={loading || statusLoading}
+              onClick={handleStartOrContinue}
+              style={skillStatus?.has_active_session
+                ? { background: '#7c3aed', borderColor: '#7c3aed' }
+                : undefined}
+            >
+              {startLabel}
+            </button>
+          </div>
+        )}
 
         <video ref={videoRef} playsInline muted style={{ display: 'none' }} />
       </div>

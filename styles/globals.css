@@ -47,7 +47,9 @@ button,input,textarea,select{font-family:inherit}
 html{
   /* Safety net: nothing in the layout should ever need horizontal
      scroll — a stray long word/URL in dynamic content (skill names,
-     chat replies, etc.) shouldn't be able to widen the whole page. */
+     chat replies, etc.) shouldn't be able to widen the whole page.
+     The root's overflow propagates to the viewport, so setting it here
+     alone clips the whole page. */
   overflow-x:hidden;
 }
 body{
@@ -57,7 +59,11 @@ body{
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
-  overflow-x:hidden;
+  /* Deliberately NOT repeating overflow-x:hidden here. Because the root
+     above is already non-visible, body's overflow is no longer propagated
+     to the viewport — it would instead make <body> its own scroll
+     container, and every `position:sticky` descendant would resolve to
+     that box, which never scrolls. That silently killed sticky page-wide. */
 }
 
 .app-shell{
@@ -6070,8 +6076,8 @@ body:has(.selflearn-session-view) .home-footer{
 }
 
 /* Learn page: Step 1 + Step 2 share one row inside the main column.
-   The row grows to fill the main column so both panels match the
-   session-guide sidebar height. */
+   Step 1 sets the row height; Step 2 opts out of the stretch (align-self:start)
+   so it can stick to the viewport instead of growing to match the grid. */
 .learn-step-row{
   display:grid;
   grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);
@@ -6090,13 +6096,29 @@ body:has(.selflearn-session-view) .home-footer{
 .student-dash .learn-skill-empty p{font-size:15px}
 .student-dash .learn-filter label{font-size:12px}
 .student-dash .learn-filter select{font-size:15px}
-/* Step 2: centre the start controls in the available height */
-.learn-step-start{display:flex;flex-direction:column}
-.learn-step-start .learn-step-start-body{
-  margin-block:auto;
+/* Step 2 — the launch panel.
+
+   It used to stretch to the row's full height with the button centred inside
+   (margin-block:auto), which parked the primary action halfway down a list of
+   unknown length: with 20 modules the student scrolled ~1000px to reach it.
+   Now the panel hugs its content and sticks to the viewport at the same offset
+   as the session-guide sidebar, so Start / Continue is on screen at every
+   scroll position regardless of how many topics exist. */
+.learn-step-start{
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
+  align-self:start;      /* sticky can't work on a stretched grid item */
+  position:sticky;
+  top:112px;
+  /* On a short viewport the panel itself scrolls rather than having its button
+     clipped below the fold — the one thing this whole change exists to prevent. */
+  max-height:calc(100vh - 132px);
+  overflow-y:auto;
+}
+.learn-step-start .learn-step-start-body{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
   gap:16px;
 }
 
@@ -6730,4 +6752,136 @@ body:has(.selflearn-session-view) .home-footer{
   width:7px;height:1em;margin-left:3px;
   background:var(--accent);vertical-align:text-bottom;
   animation:blink 1s step-start infinite;
+}
+
+/* ─────────────────────────────
+   Learn picker — topic search, result count, launch panel & launch bar
+
+   All of this serves one goal: with a long module list, the student must never
+   have to hunt for the primary action, and should be able to cut the list down
+   rather than scroll it.
+───────────────────────────── */
+
+/* Search sits with the filters and gets the widest track — it's the fastest
+   way through a long list, so it reads first. */
+.learn-filter-search{max-width:280px;flex:1.4}
+.learn-search-wrap{position:relative;display:flex}
+.learn-search-icon{
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:13px;line-height:1;pointer-events:none;opacity:.65;
+}
+.learn-filter-search input{
+  width:100%;min-height:44px;
+  padding:10px 14px 10px 36px;
+  color:var(--text);
+  background:#FFFDF9;
+  border:1px solid var(--border-strong);
+  border-radius:8px;
+  font-family:inherit;font-size:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.learn-filter-search input::placeholder{color:var(--muted);opacity:.75}
+.learn-filter-search input:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(232,90,51,.12);
+}
+.learn-picker-header .learn-filter-search{min-width:190px;max-width:250px}
+.learn-picker-header .learn-filter-search input{min-height:40px;padding-top:8px;padding-bottom:8px}
+.learn-picker-page .learn-filter-search input{font-size:16px}
+
+/* Only shown while a filter or search is narrowing the list. */
+.learn-result-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;margin-bottom:14px;
+  font-size:15px;color:var(--muted);
+}
+.learn-result-row strong{color:var(--text)}
+
+/* The selection, echoed inside the pinned panel — once the grid has scrolled
+   away, this is the student's only confirmation of what they picked. */
+.learn-launch-pick{
+  display:flex;flex-direction:column;gap:8px;
+  padding:14px 16px;border-radius:12px;
+  background:rgba(232,90,51,.05);
+  border:1px solid rgba(232,90,51,.22);
+}
+.learn-launch-label{
+  margin:0;font-size:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--accent);
+}
+.learn-launch-name{
+  margin:0;font-size:19px;font-weight:700;line-height:1.3;color:var(--text);
+  overflow-wrap:break-word;word-break:break-word;
+}
+
+.learn-launch-empty{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:26px 18px;text-align:center;
+  border:1px dashed var(--border-strong);border-radius:12px;
+}
+.learn-launch-empty-icon{font-size:28px;line-height:1}
+.learn-launch-empty p{margin:0;color:var(--muted);font-size:15px;line-height:1.55}
+
+.learn-launch-status{
+  padding:13px 16px;border-radius:10px;
+  background:var(--bg);border:1px solid var(--border);
+}
+.learn-launch-status p{margin:0;color:var(--text);font-size:15px;line-height:1.55}
+.learn-launch-checking{margin:0;color:var(--muted);font-size:15px}
+.learn-launch-note{margin:0;color:var(--muted);font-size:15px;line-height:1.5}
+
+.learn-picker-page .learn-launch-btn{
+  min-height:unset;
+  padding:15px 22px;
+  font-size:17px;
+  justify-content:center;
+  text-align:center;
+}
+
+/* Docked launch bar — the stacked-layout counterpart to the sticky panel.
+   Hidden wherever Step 2 still sits beside the grid. */
+.learn-launch-bar{display:none}
+
+@media(max-width:1180px){
+  /* Stacked, Step 2 follows the whole grid — sticking it would pin the panel
+     only after the student had already scrolled past every card. */
+  .learn-step-start{position:static;max-height:none;overflow:visible}
+
+  .learn-launch-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:90;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    box-shadow:0 -8px 28px -14px rgba(27,23,18,.3);
+    animation:learn-launch-bar-in .22s ease-out;
+  }
+  .learn-launch-bar-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .learn-launch-bar-label{
+    font-size:11px;font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);
+  }
+  .learn-launch-bar-name{
+    font-size:16px;color:var(--text);line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .learn-picker-page .learn-launch-bar .learn-launch-btn{flex:none;padding:13px 24px;font-size:16px}
+
+  /* Keep the bar from covering the last row of cards. */
+  .learn-picker-page.has-launch-bar{padding-bottom:104px}
+}
+
+@keyframes learn-launch-bar-in{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .learn-launch-bar{animation:none}
+}
+
+@media(max-width:560px){
+  .learn-launch-bar{padding-left:16px;padding-right:16px;gap:12px}
+  .learn-picker-page .learn-launch-bar .learn-launch-btn{padding:13px 18px;font-size:15px}
 }
