@@ -136,6 +136,7 @@ export interface ClassPatterns {
   action_distribution?: Record<string, number>;
   remediation_triggers?: Record<string, number>;
   override_rate?: number;
+  window?: string; // echoed back so the UI can state the period it charted
 }
 
 // ── API calls ─────────────────────────────────────────────────────────────────
@@ -224,8 +225,29 @@ export async function getStudentDecisionSummary(
   return r.data;
 }
 
-export async function getClassPatterns(): Promise<ClassPatterns> {
-  const r = await apiClient.get("/api/v1/explanations/class/patterns");
+// Period covered by the AI-decision panels. Every request on that page sends the
+// same value, so the charts and the student lists can never describe different
+// periods while sitting next to each other.
+export type DecisionWindow = "24h" | "7d" | "30d" | "all";
+
+export const DECISION_WINDOWS: { value: DecisionWindow; label: string }[] = [
+  { value: "24h", label: "Last 24 hours" },
+  { value: "7d", label: "Last 7 days" },
+  { value: "30d", label: "Last 30 days" },
+  { value: "all", label: "All time" },
+];
+
+/** Lower-case phrase for sentences, e.g. "in the last 7 days". */
+export function windowPhrase(w: DecisionWindow): string {
+  return w === "all" ? "all time" : (DECISION_WINDOWS.find((o) => o.value === w)?.label ?? w).toLowerCase();
+}
+
+export async function getClassPatterns(
+  window: DecisionWindow = "all",
+): Promise<ClassPatterns> {
+  const r = await apiClient.get("/api/v1/explanations/class/patterns", {
+    params: { window },
+  });
   return r.data;
 }
 
@@ -239,10 +261,37 @@ export interface FlaggedStudent {
   avg_mastery: number;
 }
 
-// Students whose last AI decision was remediation_strategy=="flag_teacher"
-// in the last 24h — the concrete "who" behind the class-wide flag_teacher count.
-export async function getFlaggedStudents(): Promise<FlaggedStudent[]> {
-  const r = await apiClient.get("/api/v1/analytics/flagged-students");
+// Students flagged with remediation_strategy=="flag_teacher" within the window —
+// the concrete "who" behind the class-wide flag_teacher count.
+export async function getFlaggedStudents(
+  window: DecisionWindow = "24h",
+): Promise<FlaggedStudent[]> {
+  const r = await apiClient.get("/api/v1/analytics/flagged-students", {
+    params: { window },
+  });
+  return r.data;
+}
+
+export interface DecisionStudent {
+  user_id: number;
+  username: string;
+  full_name: string | null;
+  last_at: string; // ISO datetime
+  count: number;
+  reasons: string[];
+  avg_mastery: number;
+}
+
+// The students behind one bar of the decision charts — `kind` selects which
+// column the value matches, so one endpoint serves both charts.
+export async function getDecisionStudents(
+  kind: "action" | "strategy",
+  value: string,
+  window: DecisionWindow = "all",
+): Promise<DecisionStudent[]> {
+  const r = await apiClient.get("/api/v1/analytics/decision-students", {
+    params: { kind, value, window },
+  });
   return r.data;
 }
 
