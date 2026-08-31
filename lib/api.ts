@@ -166,6 +166,29 @@ export async function getSkillGraph() {
   return data
 }
 
+export interface SkillPrerequisiteEdge {
+  id: number
+  skill_id: number
+  prerequisite_id: number
+  prerequisite_name: string
+}
+
+export async function listSkillPrerequisites(skillId: number): Promise<SkillPrerequisiteEdge[]> {
+  const { data } = await apiClient.get(`/api/v1/skills/${skillId}/prerequisites`)
+  return data
+}
+
+export async function addSkillPrerequisite(skillId: number, prerequisiteId: number): Promise<SkillPrerequisiteEdge> {
+  const { data } = await apiClient.post(`/api/v1/skills/${skillId}/prerequisites`, { prerequisite_id: prerequisiteId })
+  return data
+}
+
+// The second path segment is the *prerequisite skill's own id* (matches
+// SkillPrerequisite.prerequisite_id on the backend), not a join-row id.
+export async function removeSkillPrerequisite(skillId: number, prerequisiteId: number): Promise<void> {
+  await apiClient.delete(`/api/v1/skills/${skillId}/prerequisites/${prerequisiteId}`)
+}
+
 export async function listQuestions(params?: { skill_id?: number; skip?: number; limit?: number }) {
   const { data } = await apiClient.get('/api/v1/questions/', { params })
   return data
