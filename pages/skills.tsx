@@ -90,7 +90,6 @@ export default function SkillsPage() {
   const [bktFitting, setBktFitting] = useState(false)
   const [bktError, setBktError] = useState('')
 
-  const [showGraph, setShowGraph] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
 
@@ -353,13 +352,9 @@ export default function SkillsPage() {
             <h3 className="editorial-title">Search & category</h3>
           </div>
           <div className="questions-hero-actions">
-            <button
-              type="button"
-              className="skills-action secondary"
-              onClick={() => setShowGraph((v) => !v)}
-            >
-              {showGraph ? 'Hide graph' : 'Dependency graph'}
-            </button>
+            <Link href="/skills/graph" className="skills-action secondary">
+              Dependency graph
+            </Link>
             {canEdit && (
               <button type="button" className="skills-action secondary" onClick={() => setShowImport(true)}>
                 Import CSV
@@ -403,47 +398,6 @@ export default function SkillsPage() {
 
         {error && <p className="feedback error">{error}</p>}
       </section>
-
-      {/* ── Dependency Graph ── */}
-      {showGraph && (
-        <section className="teacher-panel">
-          <div className="teacher-panel-header">
-            <div>
-              <p className="teacher-eyebrow">Dependencies</p>
-              <h3 className="editorial-title">Prerequisite graph</h3>
-            </div>
-            <span className="skills-count-pill subtle">{graphNodes.length} nodes</span>
-          </div>
-          {graphNodes.length === 0 ? (
-            <div className="empty-state"><p className="meta">No prerequisites defined yet.</p></div>
-          ) : (
-            <div className="skills-graph-list">
-              {graphNodes.map((node) => (
-                <div key={node.id} className="skills-graph-item">
-                  <div className="skills-graph-topline">
-                    <strong>{node.name}</strong>
-                    <DiffBadge level={node.difficulty_level} />
-                    {node.category && <span className="badge neutral" style={{ fontSize: 14 }}>{node.category}</span>}
-                  </div>
-                  {node.prerequisites.length > 0 ? (
-                    <p className="meta" style={{ marginTop: 4 }}>
-                      Prerequisites:{' '}
-                      {node.prerequisites.map((pid, i) => (
-                        <span key={pid}>
-                          {i > 0 && ', '}
-                          <strong>{nameMap[pid] || `#${pid}`}</strong>
-                        </span>
-                      ))}
-                    </p>
-                  ) : (
-                    <p className="meta" style={{ marginTop: 4 }}>No prerequisites — entry-level skill</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
 
       {/* ── Skills table ── */}
       <section className="teacher-panel">

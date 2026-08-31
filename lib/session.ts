@@ -90,6 +90,8 @@ export function canAccessPath(pathname: string, role?: string | null) {
       '/hardware',
       '/voice',
       '/questions',
+      '/skills/graph',
+      '/teacher/explainability',
     ].includes(pathname)
   }
 
