@@ -34,7 +34,10 @@ import {
 } from "../../lib/teacher-api";
 import InfoBox from "../../components/InfoBox";
 
-type BarDatum = { name: string; value: string; count: number };
+// `raw` is the backend enum ("advance", "flag_teacher"); `name` is its label.
+// Deliberately not called `value` — recharts puts its own `value` (the bar's
+// numeric height) on the click payload, and the two silently collide.
+type BarDatum = { name: string; raw: string; count: number };
 type Drill = { kind: "action" | "strategy"; value: string; label: string };
 
 /** Tooltip styled from the theme — recharts' default is a white box with dark
@@ -90,10 +93,31 @@ export default function TeacherExplainability() {
     [period],
   );
 
+  const closeDrill = useCallback(() => {
+    setDrill(null);
+    setDrillRows([]);
+  }, []);
+
   useEffect(() => {
     if (drill) openDrill(drill);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period]);
+
+  // Escape closes the modal, and the page behind it must not scroll while it is
+  // open — otherwise the wheel scrolls the charts under the overlay.
+  useEffect(() => {
+    if (!drill) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeDrill();
+    };
+    window.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [drill, closeDrill]);
 
   // GET /explanations/class/patterns returns a different shape once any
   // decisions exist ({total, action_distribution, remediation_triggers,
@@ -101,12 +125,12 @@ export default function TeacherExplainability() {
   // on data.total before touching the chart-only fields.
   const actionData: BarDatum[] = data?.action_distribution
     ? Object.entries(data.action_distribution)
-        .map(([value, count]) => ({ name: teachingActionLabel(value), value, count }))
+        .map(([raw, count]) => ({ name: teachingActionLabel(raw), raw, count }))
         .sort((a, b) => b.count - a.count)
     : [];
   const remediationData: BarDatum[] = data?.remediation_triggers
     ? Object.entries(data.remediation_triggers)
-        .map(([value, count]) => ({ name: remediationStrategyLabel(value), value, count }))
+        .map(([raw, count]) => ({ name: remediationStrategyLabel(raw), raw, count }))
         .sort((a, b) => b.count - a.count)
     : [];
   const topRemediation = remediationData.length > 0 ? remediationData[0].name : "—";
@@ -143,16 +167,19 @@ export default function TeacherExplainability() {
             dataKey="count"
             radius={[0, 4, 4, 0]}
             cursor="pointer"
-            onClick={(d: any) =>
-              openDrill({ kind, value: d.value, label: d.name })
-            }
+            // The original datum lives on `payload` — the top-level fields are
+            // recharts' own geometry (x, y, width, value=bar height).
+            onClick={(d: any) => {
+              const row: BarDatum | undefined = d?.payload;
+              if (row?.raw) openDrill({ kind, value: row.raw, label: row.name });
+            }}
           >
             {rows.map((r) => (
               <Cell
-                key={r.value}
+                key={r.raw}
                 fill={color}
                 fillOpacity={
-                  drill && drill.kind === kind && drill.value !== r.value ? 0.35 : 1
+                  drill && drill.kind === kind && drill.value !== r.raw ? 0.35 : 1
                 }
               />
             ))}
@@ -307,65 +334,6 @@ export default function TeacherExplainability() {
                 </div>
               </section>
 
-              {drill && (
-                <section className="teacher-panel decision-drill-panel">
-                  <div className="teacher-panel-header">
-                    <div>
-                      <p className="teacher-eyebrow">Students behind the bar</p>
-                      <h3 className="editorial-title">{drill.label}</h3>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn ghost small"
-                      onClick={() => {
-                        setDrill(null);
-                        setDrillRows([]);
-                      }}
-                    >
-                      Close
-                    </button>
-                  </div>
-
-                  {drillLoading ? (
-                    <p className="meta">Loading students…</p>
-                  ) : drillRows.length === 0 ? (
-                    <div className="empty-state">
-                      <p>No students matched in {phrase}.</p>
-                    </div>
-                  ) : (
-                    <div className="flagged-student-list">
-                      {drillRows.map((s) => {
-                        const status = avgScoreToStatus(s.avg_mastery);
-                        return (
-                          <Link
-                            key={s.user_id}
-                            href={`/teacher/students/${s.user_id}`}
-                            className="flagged-student-card"
-                          >
-                            <div className="flagged-student-top">
-                              <strong>{s.full_name || s.username}</strong>
-                              <span style={{ color: statusColor(status) }}>
-                                {Math.round(s.avg_mastery * 100)}% mastery
-                              </span>
-                            </div>
-                            <p className="meta">
-                              {s.count}×  · last {new Date(s.last_at).toLocaleString()}
-                            </p>
-                            {s.reasons.length > 0 && (
-                              <ul className="flagged-student-reasons">
-                                {s.reasons.map((r, i) => (
-                                  <li key={i}>{r}</li>
-                                ))}
-                              </ul>
-                            )}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
-              )}
-
               {actionData.length > 0 && (
                 <section className="teacher-panel">
                   <div className="teacher-panel-header">
@@ -402,6 +370,89 @@ export default function TeacherExplainability() {
             </>
           )}
         </>
+      )}
+
+      {drill && (
+        <div
+          className="modal-overlay decision-drill-overlay"
+          onClick={closeDrill}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Students behind ${drill.label}`}
+        >
+          {/* Stop clicks inside the card from reaching the backdrop handler. */}
+          <div
+            className="decision-drill-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="decision-drill-head">
+              <div>
+                <p className="teacher-eyebrow" style={{ margin: 0 }}>
+                  Students behind this bar
+                </p>
+                <h3 className="editorial-title" style={{ margin: "4px 0 0" }}>
+                  {drill.label}
+                </h3>
+                <p className="meta" style={{ margin: "4px 0 0" }}>
+                  {phrase}
+                  {drillRows.length > 0 &&
+                    ` · ${drillRows.length} student${drillRows.length === 1 ? "" : "s"}`}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="decision-drill-close"
+                onClick={closeDrill}
+                aria-label="Close"
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="decision-drill-body">
+              {drillLoading ? (
+                <p className="meta">Loading students…</p>
+              ) : drillRows.length === 0 ? (
+                <div className="empty-state">
+                  <p>No students matched in {phrase}.</p>
+                  <p className="meta">Try a longer period.</p>
+                </div>
+              ) : (
+                <div className="flagged-student-list">
+                  {drillRows.map((s) => {
+                    const status = avgScoreToStatus(s.avg_mastery);
+                    return (
+                      <Link
+                        key={s.user_id}
+                        href={`/teacher/students/${s.user_id}`}
+                        className="flagged-student-card"
+                      >
+                        <div className="flagged-student-top">
+                          <strong>{s.full_name || s.username}</strong>
+                          <span style={{ color: statusColor(status) }}>
+                            {Math.round(s.avg_mastery * 100)}% mastery
+                          </span>
+                        </div>
+                        <p className="meta">
+                          {s.count} decision{s.count === 1 ? "" : "s"} · last{" "}
+                          {new Date(s.last_at).toLocaleString()}
+                        </p>
+                        {s.reasons.length > 0 && (
+                          <ul className="flagged-student-reasons">
+                            {s.reasons.map((r, i) => (
+                              <li key={i}>{r}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
