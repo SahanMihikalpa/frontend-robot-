@@ -7085,10 +7085,48 @@ body:has(.selflearn-session-view) .home-footer{
 }
 .decision-window-select option{background:#FFF9F3;color:var(--text)}
 
-/* Drill-down sits directly above the charts — accent edge ties it to the bar. */
-.decision-drill-panel{
-  border-left:3px solid var(--accent);
-  border-radius:0 12px 12px 0;
+/* Drill-down is a modal: clicking a bar near the foot of a long page must not
+   send the teacher scrolling back up to find the answer. */
+.decision-drill-overlay{
+  align-items:flex-start;
+  overflow-y:auto;
+  padding:6vh 20px 20px;
+}
+.decision-drill-modal{
+  width:100%;max-width:620px;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:14px;
+  box-shadow:0 18px 48px rgba(0,0,0,.28);
+  display:flex;flex-direction:column;
+  max-height:86vh;
+  animation:decisionDrillIn .16s ease-out;
+}
+@keyframes decisionDrillIn{
+  from{opacity:0;transform:translateY(-8px)}
+  to{opacity:1;transform:none}
+}
+.decision-drill-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  padding:20px 22px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.decision-drill-close{
+  flex-shrink:0;
+  width:32px;height:32px;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:15px;line-height:1;
+  color:var(--muted);background:var(--bg);
+  border:1px solid var(--border);border-radius:8px;
+  cursor:pointer;transition:border-color .15s ease,color .15s ease;
+}
+.decision-drill-close:hover{border-color:var(--danger);color:var(--danger)}
+.decision-drill-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Only the list scrolls, so the heading and close button stay reachable. */
+.decision-drill-body{
+  padding:16px 22px 22px;
+  overflow-y:auto;
 }
 
 .chart-tooltip{
