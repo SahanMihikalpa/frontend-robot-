@@ -7015,3 +7015,39 @@ body:has(.selflearn-session-view) .home-footer{
 @media(max-width:960px){
   .skill-graph-layout{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Flagged-students list (pages/teacher/explainability.tsx) */
+.flagged-student-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.flagged-student-card{
+  display:block;
+  padding:14px 16px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  text-decoration:none;
+  color:inherit;
+  transition:border-color .2s ease, transform .2s ease;
+}
+.flagged-student-card:hover{
+  border-color:var(--accent);
+  transform:translateY(-1px);
+}
+.flagged-student-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  font-size:15px;
+  font-weight:700;
+}
+.flagged-student-reasons{
+  margin:8px 0 0;
+  padding-left:18px;
+  color:var(--text-secondary);
+  font-size:13px;
+  line-height:1.6;
+}
