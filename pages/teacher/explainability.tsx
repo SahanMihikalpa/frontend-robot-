@@ -1,46 +1,65 @@
 /**
  * /teacher/explainability — Class-wide XAI: why the AI made the decisions it made.
  */
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
-} from 'recharts'
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 import {
-  getClassPatterns, ClassPatterns, getFlaggedStudents, FlaggedStudent,
-  avgScoreToStatus, statusColor, teachingActionLabel, remediationStrategyLabel,
-} from '../../lib/teacher-api'
-import InfoBox from '../../components/InfoBox'
+  getClassPatterns,
+  ClassPatterns,
+  getFlaggedStudents,
+  FlaggedStudent,
+  avgScoreToStatus,
+  statusColor,
+  teachingActionLabel,
+  remediationStrategyLabel,
+} from "../../lib/teacher-api";
+import InfoBox from "../../components/InfoBox";
 
 export default function TeacherExplainability() {
-  const [data, setData] = useState<ClassPatterns | null>(null)
-  const [flagged, setFlagged] = useState<FlaggedStudent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [data, setData] = useState<ClassPatterns | null>(null);
+  const [flagged, setFlagged] = useState<FlaggedStudent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     Promise.all([getClassPatterns(), getFlaggedStudents()])
       .then(([patterns, flags]) => {
-        setData(patterns)
-        setFlagged(flags)
+        setData(patterns);
+        setFlagged(flags);
       })
-      .catch(() => setError('Failed to load AI decision patterns'))
-      .finally(() => setLoading(false))
-  }, [])
+      .catch(() => setError("Failed to load AI decision patterns"))
+      .finally(() => setLoading(false));
+  }, []);
 
   // GET /explanations/class/patterns returns a different shape once any
   // decisions exist ({total, action_distribution, remediation_triggers,
   // override_rate}) vs. the empty case ({total: 0, patterns: []}) — guard
   // on data.total before touching the chart-only fields.
   const actionData = data?.action_distribution
-    ? Object.entries(data.action_distribution).map(([name, count]) => ({ name: teachingActionLabel(name), count }))
-    : []
+    ? Object.entries(data.action_distribution).map(([name, count]) => ({
+        name: teachingActionLabel(name),
+        count,
+      }))
+    : [];
   const remediationData = data?.remediation_triggers
-    ? Object.entries(data.remediation_triggers).map(([name, count]) => ({ name: remediationStrategyLabel(name), count }))
-    : []
-  const topRemediation = remediationData.length > 0
-    ? [...remediationData].sort((a, b) => b.count - a.count)[0].name
-    : '—'
+    ? Object.entries(data.remediation_triggers).map(([name, count]) => ({
+        name: remediationStrategyLabel(name),
+        count,
+      }))
+    : [];
+  const topRemediation =
+    remediationData.length > 0
+      ? [...remediationData].sort((a, b) => b.count - a.count)[0].name
+      : "—";
 
   return (
     <div className="teacher-explainability-page student-dash">
@@ -49,8 +68,9 @@ export default function TeacherExplainability() {
           <p className="teacher-eyebrow">AI Transparency</p>
           <h2 className="editorial-title">AI Decisions</h2>
           <p>
-            See why the tutoring AI made the choices it made across your whole class — which teaching
-            actions it uses most, and what triggers remediation.
+            See why the tutoring AI made the choices it made across your whole
+            class — which teaching actions it uses most, and what triggers
+            remediation.
           </p>
         </div>
         <div className="teacher-hero-note">
@@ -62,21 +82,27 @@ export default function TeacherExplainability() {
 
       <InfoBox title="What is this page?" accent="var(--accent)" defaultOpen>
         <p>
-          Every time the AI tutor decides to hint, explain, remediate, or encourage a student, it logs the
-          decision along with its reasons. This page aggregates those decisions across your whole class —
-          open a student&apos;s own page (Explainability tab) to see their individual decision timeline.
+          Every time the AI tutor decides to hint, explain, remediate, or
+          encourage a student, it logs the decision along with its reasons. This
+          page aggregates those decisions across your whole class — open a
+          student&apos;s own page (Explainability tab) to see their individual
+          decision timeline.
         </p>
         <p style={{ margin: 0 }}>
-          <strong>Action</strong> is what the tutor did. <strong>Remediation trigger</strong> is the
-          strategy used when a student needed extra help. <strong>Override rate</strong> is how often a
-          safety override (like a frustration check) changed the AI&apos;s first choice.
+          <strong>Action</strong> is what the tutor did.{" "}
+          <strong>Remediation trigger</strong> is the strategy used when a
+          student needed extra help. <strong>Override rate</strong> is how often
+          a safety override (like a frustration check) changed the AI&apos;s
+          first choice.
         </p>
       </InfoBox>
 
       {error && <p className="feedback error">{error}</p>}
 
       {loading ? (
-        <div className="empty-state"><p className="meta">Loading…</p></div>
+        <div className="empty-state">
+          <p className="meta">Loading…</p>
+        </div>
       ) : (
         <>
           <section className="teacher-panel">
@@ -85,31 +111,44 @@ export default function TeacherExplainability() {
                 <p className="teacher-eyebrow">Needs Attention</p>
                 <h3 className="editorial-title">Students flagged for review</h3>
               </div>
-              <span className="skills-count-pill subtle">{flagged.length} in last 24h</span>
+              <span className="skills-count-pill subtle">
+                {flagged.length} in last 24h
+              </span>
             </div>
 
             {flagged.length === 0 ? (
-              <div className="empty-state"><p>No students currently flagged for attention.</p></div>
+              <div className="empty-state">
+                <p>No students currently flagged for attention.</p>
+              </div>
             ) : (
               <div className="flagged-student-list">
                 {flagged.map((f) => {
-                  const status = avgScoreToStatus(f.avg_mastery)
+                  const status = avgScoreToStatus(f.avg_mastery);
                   return (
-                    <Link key={f.user_id} href={`/teacher/students/${f.user_id}`} className="flagged-student-card">
+                    <Link
+                      key={f.user_id}
+                      href={`/teacher/students/${f.user_id}`}
+                      className="flagged-student-card"
+                    >
                       <div className="flagged-student-top">
                         <strong>{f.full_name || f.username}</strong>
-                        <span style={{ color: statusColor(status) }}>{Math.round(f.avg_mastery * 100)}% mastery</span>
+                        <span style={{ color: statusColor(status) }}>
+                          {Math.round(f.avg_mastery * 100)}% mastery
+                        </span>
                       </div>
                       <p className="meta">
-                        {teachingActionLabel(f.teaching_action)} · {new Date(f.flagged_at).toLocaleString()}
+                        {teachingActionLabel(f.teaching_action)} ·{" "}
+                        {new Date(f.flagged_at).toLocaleString()}
                       </p>
                       {f.reasons.length > 0 && (
                         <ul className="flagged-student-reasons">
-                          {f.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                          {f.reasons.map((r, i) => (
+                            <li key={i}>{r}</li>
+                          ))}
                         </ul>
                       )}
                     </Link>
-                  )
+                  );
                 })}
               </div>
             )}
@@ -118,7 +157,9 @@ export default function TeacherExplainability() {
           {!data || data.total === 0 ? (
             <div className="empty-state">
               <p>No AI decisions have been recorded yet.</p>
-              <p className="meta">Decisions appear here once students start using the tutor.</p>
+              <p className="meta">
+                Decisions appear here once students start using the tutor.
+              </p>
             </div>
           ) : (
             <>
@@ -130,7 +171,9 @@ export default function TeacherExplainability() {
                 </div>
                 <div className="teacher-kpi-card">
                   <p>Override rate</p>
-                  <strong>{Math.round((data.override_rate ?? 0) * 100)}%</strong>
+                  <strong>
+                    {Math.round((data.override_rate ?? 0) * 100)}%
+                  </strong>
                   <small>decisions changed by a safety override</small>
                 </div>
                 <div className="teacher-kpi-card">
@@ -149,12 +192,26 @@ export default function TeacherExplainability() {
                     </div>
                   </div>
                   <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={actionData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <BarChart
+                      data={actionData}
+                      margin={{ top: 8, right: 16, bottom: 0, left: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--border)"
+                      />
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={40} />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 12 }}
+                        width={40}
+                      />
                       <Tooltip />
-                      <Bar dataKey="count" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="count"
+                        fill="var(--accent)"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </section>
@@ -169,12 +226,26 @@ export default function TeacherExplainability() {
                     </div>
                   </div>
                   <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={remediationData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <BarChart
+                      data={remediationData}
+                      margin={{ top: 8, right: 16, bottom: 0, left: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--border)"
+                      />
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={40} />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 12 }}
+                        width={40}
+                      />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#f472b6" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="count"
+                        fill="#f472b6"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </section>
@@ -184,5 +255,5 @@ export default function TeacherExplainability() {
         </>
       )}
     </div>
-  )
+  );
 }
