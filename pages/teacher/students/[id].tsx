@@ -1,6 +1,6 @@
 /**
- * /teacher/students/[id] — Per-student deep-dive (4 tabs)
- * Tabs: Mastery | Performance | Engagement | Personalization
+ * /teacher/students/[id] — Per-student deep-dive (5 tabs)
+ * Tabs: Mastery | Performance | Engagement | Personalization | Explainability
  */
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -16,13 +16,21 @@ import {
   getStudentInteractionTrends,
   getStudentEngagementTimeline,
   getStudentFusionWeights,
+  getStudentDecisions,
+  getStudentDecisionSummary,
   MasteryHistorySkill,
   InteractionTrends,
   EngagementTimeline,
   FusionWeights,
+  DecisionItem,
+  DecisionListResponse,
+  DecisionSummary,
   statusColor,
   statusLabel,
   scoreColor,
+  confidenceColor,
+  teachingActionLabel,
+  remediationStrategyLabel,
 } from '../../../lib/teacher-api'
 
 // ── Colour palette for multi-line mastery chart ────────────────────────────
@@ -160,7 +168,7 @@ const STATUS_GUIDE = [
 export default function StudentDetail() {
   const router  = useRouter()
   const userId  = Number(router.query.id)
-  const [tab, setTab] = useState<'mastery' | 'performance' | 'engagement' | 'personalization'>('mastery')
+  const [tab, setTab] = useState<'mastery' | 'performance' | 'engagement' | 'personalization' | 'explainability'>('mastery')
 
   // Data states
   const [profile,     setProfile]     = useState<any>(null)
@@ -170,6 +178,12 @@ export default function StudentDetail() {
   const [fusion,      setFusion]      = useState<FusionWeights | null>(null)
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState('')
+
+  // Explainability tab — lazily loaded only once that tab is opened
+  const [decisions,        setDecisions]        = useState<DecisionListResponse | null>(null)
+  const [decisionSummary,  setDecisionSummary]  = useState<DecisionSummary | null>(null)
+  const [decisionsLoading, setDecisionsLoading] = useState(false)
+  const [decisionsError,   setDecisionsError]   = useState('')
 
   // Mastery chart: which skills to show
   const [visibleSkills, setVisibleSkills] = useState<Set<number>>(new Set())
@@ -195,6 +209,40 @@ export default function StudentDetail() {
       .catch(() => setError('Failed to load student data'))
       .finally(() => setLoading(false))
   }, [userId])
+
+  // Explainability tab data is fetched only once that tab is actually opened —
+  // unlike the five calls above, which feed the always-visible hero/KPI row.
+  function loadDecisionsInitial() {
+    if (!userId) return
+    setDecisionsLoading(true)
+    setDecisionsError('')
+    Promise.all([
+      getStudentDecisions(userId, { limit: 50, skip: 0 }),
+      getStudentDecisionSummary(userId),
+    ])
+      .then(([dec, sum]) => {
+        setDecisions(dec)
+        setDecisionSummary(sum)
+      })
+      .catch(() => setDecisionsError('Failed to load AI decisions'))
+      .finally(() => setDecisionsLoading(false))
+  }
+
+  function loadMoreDecisions() {
+    if (!userId || !decisions) return
+    setDecisionsLoading(true)
+    getStudentDecisions(userId, { limit: 50, skip: decisions.decisions.length })
+      .then((more) => setDecisions((prev) =>
+        prev ? { decisions: [...prev.decisions, ...more.decisions], total: more.total } : more))
+      .catch(() => setDecisionsError('Failed to load more decisions'))
+      .finally(() => setDecisionsLoading(false))
+  }
+
+  useEffect(() => {
+    if (tab === 'explainability' && decisions === null) {
+      loadDecisionsInitial()
+    }
+  }, [tab, userId])
 
   if (loading) {
     return (
@@ -303,7 +351,7 @@ export default function StudentDetail() {
 
       {/* ── Tab strip ── */}
       <div className="student-tabs" role="tablist">
-        {(['mastery', 'performance', 'engagement', 'personalization'] as const).map(t => (
+        {(['mastery', 'performance', 'engagement', 'personalization', 'explainability'] as const).map(t => (
           <button key={t} type="button" onClick={() => setTab(t)}
             role="tab"
             aria-selected={tab === t}
@@ -873,6 +921,133 @@ export default function StudentDetail() {
             statistically sound. Encourage the student to attempt more questions in those skills so the AI can
             learn their individual patterns and provide better-tailored practice.
           </ActionTip>
+
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+           TAB: EXPLAINABILITY (XAI)
+         ══════════════════════════════════════════════════════ */}
+      {tab === 'explainability' && (
+        <div className="stack">
+
+          <InfoBox title="What does this tab show?" accent="#a78bfa">
+            <p style={{ margin: '0 0 8px' }}>
+              This is the AI's <strong>decision-by-decision audit trail</strong> for this student — every
+              time the tutor chose to hint, explain, remediate, or encourage, the system logged exactly why.
+            </p>
+            <p style={{ margin: 0 }}>
+              This is different from the <strong>Personalization</strong> tab, which explains the BKT/DKT
+              methodology in general. Here, each row is one specific decision, with the reasons and signals
+              that led to it.
+            </p>
+          </InfoBox>
+
+          {decisionsError && <p className="feedback error">{decisionsError}</p>}
+
+          {decisionSummary && decisionSummary.total_decisions > 0 && (
+            <div className="teacher-kpi-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
+              <KPI label="Total decisions">{decisionSummary.total_decisions}</KPI>
+              <KPI label="Most common action">
+                {decisionSummary.most_common_action ? teachingActionLabel(decisionSummary.most_common_action) : '—'}
+              </KPI>
+              <KPI label="High confidence">{Math.round(decisionSummary.high_confidence_pct * 100)}%</KPI>
+              <KPI label="Override rate">{Math.round(decisionSummary.override_rate * 100)}%</KPI>
+            </div>
+          )}
+
+          {decisionSummary && Object.keys(decisionSummary.action_distribution).length > 0 && (
+            <div className="student-chart-card">
+              <p className="meta" style={{ fontSize: 12, marginBottom: 10 }}>How often each teaching action was used.</p>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart
+                  data={Object.entries(decisionSummary.action_distribution).map(([name, count]) => ({ name: teachingActionLabel(name), count }))}
+                  margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={30} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#a78bfa" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          <SectionTitle>Decision timeline</SectionTitle>
+
+          {decisionsLoading && !decisions ? (
+            <p className="meta">Loading…</p>
+          ) : !decisions || decisions.decisions.length === 0 ? (
+            <p className="meta">No AI decisions recorded yet for this student.</p>
+          ) : (
+            <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {decisions.decisions.map((d: DecisionItem) => (
+                  <div key={d.id} className="student-chart-card" style={{ padding: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      <div>
+                        <strong>{teachingActionLabel(d.teaching_action)}</strong>
+                        {d.remediation_strategy !== 'none' && (
+                          <span className="meta" style={{ marginLeft: 8 }}>· {remediationStrategyLabel(d.remediation_strategy)}</span>
+                        )}
+                        {d.skill_name && <span className="meta" style={{ marginLeft: 8 }}>· {d.skill_name}</span>}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{
+                          background: `${confidenceColor(d.confidence)}22`, color: confidenceColor(d.confidence),
+                          padding: '2px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600,
+                        }}>
+                          {d.confidence}
+                        </span>
+                        <span className="meta" style={{ fontSize: 12 }}>{new Date(d.timestamp).toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    {d.reasons.length > 0 && (
+                      <ul style={{ margin: '10px 0 0', paddingLeft: 18 }}>
+                        {d.reasons.map((r, i) => (
+                          <li key={i} className="meta" style={{ color: 'var(--text-secondary)' }}>{r}</li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {Object.keys(d.signals || {}).length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', marginTop: 10 }}>
+                        {Object.entries(d.signals).map(([k, v]) => (
+                          <span key={k} className="meta" style={{ fontSize: 12 }}>
+                            <strong style={{ color: 'var(--text)' }}>{k}:</strong> {String(v)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {d.overrides_applied.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                        {d.overrides_applied.map((o, i) => (
+                          <span key={i} className="badge danger" style={{ fontSize: 11 }}>{o}</span>
+                        ))}
+                      </div>
+                    )}
+
+                    {d.teacher_feedback && (
+                      <p className="meta" style={{ marginTop: 10, fontStyle: 'italic' }}>Reviewed: {d.teacher_feedback}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {decisions.decisions.length < decisions.total && (
+                <button
+                  type="button"
+                  className="skills-action secondary"
+                  disabled={decisionsLoading}
+                  onClick={loadMoreDecisions}
+                >
+                  {decisionsLoading ? 'Loading…' : `Load more (${decisions.decisions.length} of ${decisions.total})`}
+                </button>
+              )}
+            </>
+          )}
 
         </div>
       )}

@@ -2,7 +2,7 @@
  * Teacher Analytics API — client functions
  * All calls require a teacher/admin auth token.
  */
-import { apiClient } from './api'
+import { apiClient, JsonObject } from './api'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -86,6 +86,46 @@ export interface FusionWeights {
   }[]
 }
 
+// ── XAI / explainability types ──────────────────────────────────────────────
+
+export interface DecisionItem {
+  id: number
+  timestamp: string          // ISO datetime string
+  skill_id: number | null
+  skill_name: string | null
+  teaching_action: string
+  remediation_strategy: string   // backend defaults to the literal string "none"
+  confidence: string              // "HIGH" | "MEDIUM" | "LOW"
+  reasons: string[]
+  signals: JsonObject
+  overrides_applied: string[]
+  teacher_feedback: string | null
+  teacher_override_to: string | null
+}
+
+export interface DecisionListResponse {
+  decisions: DecisionItem[]
+  total: number
+}
+
+export interface DecisionSummary {
+  total_decisions: number
+  most_common_action: string | null
+  high_confidence_pct: number
+  override_rate: number
+  action_distribution: Record<string, number>
+}
+
+// GET /explanations/class/patterns has two genuinely different response
+// shapes depending on whether any decisions exist yet — model that honestly
+// rather than pretending the chart-only fields are always present.
+export interface ClassPatterns {
+  total: number
+  action_distribution?: Record<string, number>
+  remediation_triggers?: Record<string, number>
+  override_rate?: number
+}
+
 // ── API calls ─────────────────────────────────────────────────────────────────
 
 export async function getStudentsDetailed(): Promise<StudentDetailed[]> {
@@ -124,6 +164,45 @@ export async function getStudentAnalytics(userId: number) {
   return r.data
 }
 
+// ── XAI / explainability calls ──────────────────────────────────────────────
+// Note: POST /explanations/{id}/feedback (teacher agree/disagree/override) is
+// intentionally not wrapped here yet — out of scope for the current pass.
+
+export async function getStudentDecisions(
+  userId: number,
+  params?: { limit?: number; skip?: number; action?: string; session_id?: string },
+): Promise<DecisionListResponse> {
+  const r = await apiClient.get(`/api/v1/explanations/student/${userId}`, { params })
+  return r.data
+}
+
+export async function getStudentDecisionSummary(userId: number): Promise<DecisionSummary> {
+  const r = await apiClient.get(`/api/v1/explanations/student/${userId}/summary`)
+  return r.data
+}
+
+export async function getClassPatterns(): Promise<ClassPatterns> {
+  const r = await apiClient.get('/api/v1/explanations/class/patterns')
+  return r.data
+}
+
+export interface FlaggedStudent {
+  user_id: number
+  username: string
+  full_name: string | null
+  flagged_at: string     // ISO datetime
+  teaching_action: string
+  reasons: string[]
+  avg_mastery: number
+}
+
+// Students whose last AI decision was remediation_strategy=="flag_teacher"
+// in the last 24h — the concrete "who" behind the class-wide flag_teacher count.
+export async function getFlaggedStudents(): Promise<FlaggedStudent[]> {
+  const r = await apiClient.get('/api/v1/analytics/flagged-students')
+  return r.data
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function statusColor(status: string): string {
@@ -151,4 +230,52 @@ export function scoreColor(score: number | null): string {
   if (score >= 0.7)  return '#4ade80'
   if (score >= 0.4)  return '#fbbf24'
   return '#f87171'
+}
+
+// Same thresholds as heatmap.tsx's ACTION_GUIDE / cellBg, so a skill graph
+// node's color always agrees with the heatmap's for the same skill.
+export function avgScoreToStatus(score: number | null | undefined): 'mastered' | 'near_mastery' | 'learning' | 'struggling' | 'not_started' {
+  if (score == null) return 'not_started'
+  if (score >= 0.95) return 'mastered'
+  if (score >= 0.85) return 'near_mastery'
+  if (score >= 0.30) return 'learning'
+  return 'struggling'
+}
+
+// Human-readable labels for the raw backend enum values (app/ml/agents/base_agent.py
+// TeachingAction, app/services/remediation_service.py RemediationStrategy) — used
+// everywhere these show up (charts, decision timeline, flagged-students list) so a
+// teacher never sees a raw snake_case identifier like "flag_teacher" or "same_hint".
+const TEACHING_ACTION_LABELS: Record<string, string> = {
+  explain: 'Explain',
+  hint: 'Hint',
+  remediate: 'Remediate',
+  advance: 'Advance',
+  encourage: 'Encourage',
+  practice: 'Practice',
+}
+
+export function teachingActionLabel(action: string): string {
+  return TEACHING_ACTION_LABELS[action] || action
+}
+
+const REMEDIATION_STRATEGY_LABELS: Record<string, string> = {
+  same_hint: 'Same hint again',
+  analogy_example: 'Analogy + example',
+  decompose: 'Broken into steps',
+  flag_teacher: 'Flagged for teacher',
+  none: 'None',
+}
+
+export function remediationStrategyLabel(strategy: string): string {
+  return REMEDIATION_STRATEGY_LABELS[strategy] || strategy
+}
+
+export function confidenceColor(confidence: string): string {
+  switch (confidence) {
+    case 'HIGH':   return '#4ade80'
+    case 'MEDIUM': return '#fbbf24'
+    case 'LOW':    return '#f87171'
+    default:       return '#94a3b8'
+  }
 }
