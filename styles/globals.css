@@ -7051,3 +7051,57 @@ body:has(.selflearn-session-view) .home-footer{
   font-size:13px;
   line-height:1.6;
 }
+
+/* ─────────────────────────────
+   AI Decisions — window selector, drill-down, chart tooltip
+───────────────────────────── */
+.decision-window-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:0 0 18px;
+}
+.decision-window-bar label{
+  font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);
+}
+/* The bare global `select` rule paints these dark — theme explicitly. */
+.decision-window-select{
+  min-height:38px;
+  padding:8px 36px 8px 12px !important;
+  color:var(--text) !important;
+  background:#FFFDF9 !important;
+  border:1px solid var(--border-strong) !important;
+  border-radius:8px !important;
+  font-size:14px !important;
+  cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726A61' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 11px center !important;
+}
+.decision-window-select:hover{border-color:var(--accent) !important}
+.decision-window-select:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px rgba(232,90,51,.12) !important;
+}
+.decision-window-select option{background:#FFF9F3;color:var(--text)}
+
+/* Drill-down sits directly above the charts — accent edge ties it to the bar. */
+.decision-drill-panel{
+  border-left:3px solid var(--accent);
+  border-radius:0 12px 12px 0;
+}
+
+.chart-tooltip{
+  display:flex;flex-direction:column;gap:2px;
+  padding:9px 12px;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:8px;
+  box-shadow:0 4px 14px rgba(0,0,0,.10);
+  font-size:13px;color:var(--text);
+}
+.chart-tooltip strong{font-size:14px}
+.chart-tooltip-hint{font-size:11px;color:var(--muted);font-style:italic}
+
+/* Recharts renders bars as SVG; the cursor prop alone doesn't cover the label. */
+.recharts-bar-rectangle{cursor:pointer}
