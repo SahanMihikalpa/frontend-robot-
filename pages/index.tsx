@@ -47,7 +47,7 @@ export default function Home() {
           </h1>
 
           <p className="home-hero-desc">
-            Adaptive learning driven by BKT & DKT, with AI tutoring,
+            Adaptive learning driven by Bayesian Knowledge Tracing with AI tutoring,
             visual engagement sensing, and real-time analytics.
           </p>
 
