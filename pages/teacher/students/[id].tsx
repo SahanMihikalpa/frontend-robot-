@@ -477,7 +477,7 @@ export default function StudentDetail() {
             "mastery",
             "performance",
             "engagement",
-            "personalization",
+            //"personalization",
             "explainability",
           ] as const
         ).map((t) => (
@@ -1326,9 +1326,9 @@ export default function StudentDetail() {
       {/* ══════════════════════════════════════════════════════
            TAB: PERSONALIZATION
          ══════════════════════════════════════════════════════ */}
-      {tab === "personalization" && (
+      {/* {tab === "personalization" && (
         <div className="stack">
-          {/* Main explanation — always open */}
+          
           <InfoBox
             title="How does the personalization system work?"
             accent="#f472b6"
@@ -1474,7 +1474,7 @@ export default function StudentDetail() {
             </div>
           </InfoBox>
 
-          {/* Chart */}
+
           <SectionTitle>BKT vs DKT Blend per Skill</SectionTitle>
 
           {(fusion?.skills ?? []).length === 0 ? (
@@ -1532,7 +1532,7 @@ export default function StudentDetail() {
             </div>
           )}
 
-          {/* Fusion detail table */}
+
           <SectionTitle>Mastery Estimates per Skill</SectionTitle>
 
           <div className="table-wrap">
@@ -1636,7 +1636,7 @@ export default function StudentDetail() {
             individual patterns and provide better-tailored practice.
           </ActionTip>
         </div>
-      )}
+      )} */}
 
       {/* ══════════════════════════════════════════════════════
            TAB: EXPLAINABILITY (XAI)

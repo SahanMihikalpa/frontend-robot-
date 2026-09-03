@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { getMyInteractions, getStudentInteractions, listStudentsAnalytics, listSkills } from '../lib/api'
+import { getMyInteractions, getStudentInteractions, listStudentsAnalytics, listSkills, listQuestions } from '../lib/api'
 import { getStoredUser } from '../lib/session'
 
 export default function HistoryPage() {
@@ -10,6 +10,7 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<any[]>([])
   const [students, setStudents] = useState<any[]>([])
   const [skillNames, setSkillNames] = useState<Record<string, string>>({})
+  const [questionTexts, setQuestionTexts] = useState<Record<string, string>>({})
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
   const [activeSkill, setActiveSkill] = useState<string>('all')
   const [loading, setLoading] = useState(false)
@@ -20,6 +21,17 @@ export default function HistoryPage() {
     if (item.skill_name) return String(item.skill_name)
     if (item.skill_id != null) return skillNames[String(item.skill_id)] || `Skill ${item.skill_id}`
     return '-'
+  }
+
+  // Interactions only carry question_id, not the question's own text (see
+  // InteractionResponse in schemas.py — question_text lives on Question, not
+  // StudentInteraction) — resolve it from the question bank, same pattern as
+  // skillLabel above. Without this a card title is just "Question 43", which
+  // says nothing about what the student was actually asked.
+  function questionLabel(item: any): string {
+    if (item.question_text) return String(item.question_text)
+    if (item.question_id != null) return questionTexts[String(item.question_id)] || `Question ${item.question_id}`
+    return 'Question'
   }
 
   async function loadInteractions(studentId?: number) {
@@ -57,6 +69,16 @@ export default function HistoryPage() {
         list.forEach((s: any) => { if (s?.id != null && s?.name) map[String(s.id)] = s.name })
         setSkillNames(map)
       } catch { /* names fall back to "Skill <id>" */ }
+      try {
+        // limit well above the question bank's likely size so history doesn't
+        // silently lose text for older questions once the bank grows past the
+        // API's default page size.
+        const qs = await listQuestions({ limit: 1000 })
+        const list: any[] = Array.isArray(qs) ? qs : qs?.items || []
+        const map: Record<string, string> = {}
+        list.forEach((q: any) => { if (q?.id != null && q?.question_text) map[String(q.id)] = q.question_text })
+        setQuestionTexts(map)
+      } catch { /* text falls back to "Question <id>" */ }
       await loadInteractions()
     }
     init()
@@ -196,7 +218,7 @@ export default function HistoryPage() {
                 {filtered.map((item: any, idx: number) => (
                   <article key={item.id || idx} className="history-card">
                     <div className="history-card-main">
-                      <h4>{item.question_text || `Question ${item.question_id}`}</h4>
+                      <h4>{questionLabel(item)}</h4>
                       <span className={`history-result-pill ${item.is_correct ? 'success' : 'danger'}`}>
                         {item.is_correct ? 'Correct' : 'Wrong'}
                       </span>

@@ -14,7 +14,6 @@ type Question = {
   question_text: string
   question_type: string
   skill_id: number
-  skill_name?: string
   options?: Record<string, string>
   correct_answer?: string
   difficulty?: number
@@ -78,6 +77,20 @@ export default function QuestionsPage() {
     document.body.style.overflow = anyModalOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [showForm, deleteTarget])
+
+  // QuestionResponse never carries a skill name (only skill_id — see
+  // schemas.QuestionBase) — the create/edit dropdown shows names because it
+  // renders <option value={s.id}>{s.name}</option>, but that name never
+  // travels back from the API. Resolve it here from the skills already
+  // fetched for that same dropdown, keyed by id (dropdown values arrive as
+  // strings from <select>, DB ids as numbers, so key on the string form).
+  const skillNameById = useMemo(() => {
+    const map = new Map<string, string>()
+    skills.forEach((s) => map.set(String(s.id), s.name))
+    return map
+  }, [skills])
+
+  const skillName = (id: number) => skillNameById.get(String(id)) || `Skill #${id}`
 
   const filtered = useMemo(() => {
     if (selectedSkill === 'all') return questions
@@ -302,7 +315,7 @@ export default function QuestionsPage() {
                 </div>
 
                 <p className="question-meta">
-                  Skill: {q.skill_name || q.skill_id}
+                  Skill: {skillName(q.skill_id)}
                   {q.difficulty != null && ` | Difficulty ${q.difficulty}`}
                   {q.correct_answer && ` | Answer: ${q.correct_answer}`}
                 </p>
