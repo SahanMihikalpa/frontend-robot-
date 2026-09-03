@@ -201,7 +201,17 @@ export default function AnalyticsPage() {
 
                   {pct != null && (
                     <div className="teacher-progress" style={{ marginTop: 12 }}>
-                      <span style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${scoreColor(score)}, ${scoreColor(score)}aa)` }} />
+                      {/* scoreColor() returns a var(--x) reference, not a hex string — you
+                          cannot append an alpha suffix ("...aa") directly onto a var()
+                          the way you can onto a literal hex color. That produced an
+                          invalid computed value, which for background-image resolves to
+                          "none": the bar rendered with no fill at all, at any score.
+                          color-mix() is the valid way to fade a var() color toward
+                          transparent — same pattern already used in skills.tsx/heatmap.tsx. */}
+                      <span style={{
+                        width: `${pct}%`,
+                        background: `linear-gradient(90deg, ${scoreColor(score)}, color-mix(in srgb, ${scoreColor(score)} 65%, transparent))`,
+                      }} />
                     </div>
                   )}
 
